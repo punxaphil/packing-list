@@ -4,11 +4,11 @@ import PackingList from './components/PackingList.tsx';
 import Members from './components/Members.tsx';
 
 import { Provider } from './components/Provider.tsx';
-import React from 'react';
+import { useState } from 'react';
 import NavButton from './components/NavButton.tsx';
 
 export default function App() {
-  const [page, setPage] = React.useState('Home');
+  const [page, setPage] = useState('Home');
 
   return (
     <Provider>
@@ -24,4 +24,3 @@ export default function App() {
     </Provider>
   );
 }
-

@@ -9,11 +9,11 @@ export default function Members() {
   const [newName, setNewName] = useState<string>('');
 
   function handleAdd() {
-    setNewName('');
     dispatch({
       type: ActionType.Added,
       name: newName,
     });
+    setNewName('');
   }
 
   function handleOnChange(event: ChangeEvent<HTMLInputElement>) {
