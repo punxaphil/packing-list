@@ -1,14 +1,14 @@
 import { ImCross } from '@react-icons/all-files/im/ImCross';
 
-import { Item } from '../types/Item.tsx';
-import { useItemsDispatch, useMembers } from '../services/contexts.ts';
-import { ActionType } from '../types/Action.tsx';
-import { getName } from '../services/utils.ts';
+import { Item } from '../../types/Item.tsx';
+import { useItemsDispatch, useMembers } from '../../services/contexts.ts';
+import { ActionType } from '../../types/Action.tsx';
+import { getName } from '../../services/utils.ts';
 import { FaPen } from '@react-icons/all-files/fa/FaPen';
 import { MemberItemRow } from './MemberItemRow.tsx';
-import { Checkbox } from './Checkbox.tsx';
-import { MultiCheckbox } from './MultiCheckbox.tsx';
-import { Span } from './Span.tsx';
+import { Checkbox } from '../shared/Checkbox.tsx';
+import { MultiCheckbox } from '../shared/MultiCheckbox.tsx';
+import { Span } from '../shared/Span.tsx';
 
 function ItemRow({
   item,
@@ -45,7 +45,7 @@ function ItemRow({
     (item.members?.length === 1
       ? ` (${getName(members, item.members[0].id)})`
       : '');
-      
+
   return (
     <div>
       <div className="is-flex is-align-items-center">

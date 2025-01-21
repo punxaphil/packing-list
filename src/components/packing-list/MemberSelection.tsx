@@ -1,5 +1,5 @@
-import { Member } from '../types/Member.tsx';
-import { Checkbox } from './Checkbox.tsx';
+import { Member } from '../../types/Member.tsx';
+import { Checkbox } from '../shared/Checkbox.tsx';
 
 export function MemberSelection({
   member: { id, name },
@@ -22,7 +22,7 @@ export function MemberSelection({
   return (
     <label className="checkbox is-flex is-align-items-center">
       <Checkbox checked={checked} onClick={onChange} />
-      <span className='ml-1'>{name}</span>
+      <span className="ml-1">{name}</span>
     </label>
   );
 }

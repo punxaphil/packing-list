@@ -1,11 +1,11 @@
 import 'bulma/css/bulma.min.css';
 
-import PackingList from './components/PackingList.tsx';
-import Members from './components/Members.tsx';
+import PackingList from './components/packing-list/PackingList.tsx';
+import Members from './components/member/Members.tsx';
 
 import { Provider } from './components/Provider.tsx';
 import { useState } from 'react';
-import NavButton from './components/NavButton.tsx';
+import NavButton from './components/shared/NavButton.tsx';
 
 export default function App() {
   const [page, setPage] = useState('Home');
