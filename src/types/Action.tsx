@@ -1,10 +1,11 @@
+import { Category } from './Category.tsx';
 import { Item } from './Item.tsx';
 import { Member } from './Member.tsx';
 
 export enum ActionType {
   Changed = 'changed',
   Added = 'added',
-  Deleted = 'deleted'
+  Deleted = 'deleted',
 }
 
 export interface ItemAction {
@@ -18,5 +19,12 @@ export interface MemberAction {
   type: ActionType;
   name?: string;
   member?: Member;
+  newName?: string;
+}
+
+export interface CategoryAction {
+  type: ActionType;
+  name?: string;
+  category?: Category;
   newName?: string;
 }
