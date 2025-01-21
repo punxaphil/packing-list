@@ -10,7 +10,13 @@ import { Checkbox } from './Checkbox.tsx';
 import { MultiCheckbox } from './MultiCheckbox.tsx';
 import { Span } from './Span.tsx';
 
-function ItemRow({ item, onEdit }: { item: Item, onEdit: (item: Item) => void }) {
+function ItemRow({
+  item,
+  onEdit,
+}: {
+  item: Item;
+  onEdit: (item: Item) => void;
+}) {
   const dispatch = useItemsDispatch();
   const members = useMembers();
 
@@ -18,7 +24,6 @@ function ItemRow({ item, onEdit }: { item: Item, onEdit: (item: Item) => void })
     item.checked = !item.checked;
     dispatchChange(item);
   }
-
 
   function dispatchChange(item: Item) {
     dispatch({
@@ -34,25 +39,34 @@ function ItemRow({ item, onEdit }: { item: Item, onEdit: (item: Item) => void })
     });
   }
 
-
   const multipleMembers = !!(item.members && item.members.length > 1);
+  const itemNameWithMember =
+    item.name +
+    (item.members?.length === 1
+      ? ` (${getName(members, item.members[0].id)})`
+      : '');
+      
   return (
     <div>
-      <span className="mx-1">
-        {multipleMembers ? <MultiCheckbox item={item} /> :
-          <Checkbox checked={item.checked} onClick={toggleItem} />}
-      </span>
-      <Span strike={item.checked}>{item.name}</Span>
-      {multipleMembers || item.members?.map(m => <span key={m.id}> ({getName(members, m.id)})</span>)}
-      <span className="is-size-7">
+      <div className="is-flex is-align-items-center">
+        {multipleMembers ? (
+          <MultiCheckbox item={item} />
+        ) : (
+          <Checkbox checked={item.checked} onClick={toggleItem} />
+        )}
 
-        <ImCross onClick={onRemove} className="mx-1" />
-        <FaPen onClick={() => onEdit(item)} />
-      </span>
-      {multipleMembers && item.members?.map(m => <MemberItemRow memberItem={m} item={item} key={m.id} />)}
+        <Span className="ml-1" strike={item.checked}>
+          {itemNameWithMember}
+        </Span>
+        <ImCross onClick={onRemove} className="is-size-7 mx-1" />
+        <FaPen onClick={() => onEdit(item)} className="is-size-7 mx-1" />
+      </div>
+      {multipleMembers &&
+        item.members?.map((m) => (
+          <MemberItemRow memberItem={m} item={item} key={m.id} />
+        ))}
     </div>
   );
-
 }
 
 export default ItemRow;
