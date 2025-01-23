@@ -1,9 +1,14 @@
-import { useItemsDispatch, useMembers } from '../../services/contexts.ts';
+import {
+  useCategories,
+  useItemsDispatch,
+  useMembers,
+} from '../../services/contexts.ts';
 import React, { useState } from 'react';
 import { ActionType } from '../../types/Action.tsx';
 import { Item } from '../../types/Item.tsx';
 import { memberIds } from '../../services/utils.ts';
 import { MemberSelection } from './MemberSelection.tsx';
+import Select from '../shared/Select.tsx';
 
 export function AddOrEditItem({
   item,
@@ -19,6 +24,7 @@ export function AddOrEditItem({
     memberIds(item) ?? []
   );
   const saveAction = item ? handleUpdateItem : handleAdd;
+  const categories = useCategories();
 
   function handleAdd() {
     setName('');
@@ -83,6 +89,16 @@ export function AddOrEditItem({
             />
           ))}
         </div>
+      </div>
+      <div className="mb-5">
+        <div className="mt-2 mb-1 is-size-5">Category</div>
+        <Select
+          onChange={handleOnChange}
+          options={categories.map((category) => ({
+            value: category.id,
+            text: category.name,
+          }))}
+        />
       </div>
       <button onClick={saveAction} className="button is-light is-success">
         {item ? 'Update' : 'Add'}
