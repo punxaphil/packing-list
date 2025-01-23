@@ -1,11 +1,17 @@
-import { useReducer } from 'react';
+import React, { useReducer } from 'react';
 import { ItemContext, ItemDispatchContext, MemberContext, MemberDispatchContext } from '../services/contexts.ts';
-import { initialItems, itemsReducer } from '../services/ItemsReducer.ts';
-import { initialMembers, membersReducer } from '../services/MembersReducer.ts';
+import { itemsReducer } from '../services/ItemsReducer.ts';
+import { membersReducer } from '../services/MembersReducer.ts';
+import { Member } from '../types/Member.tsx';
+import { Item } from '../types/Item.tsx';
 
-export function Provider({ children }: { children: React.ReactNode }) {
-  const [items, dispatchItems] = useReducer(itemsReducer, initialItems());
-  const [members, dispatchMembers] = useReducer(membersReducer, initialMembers());
+export function Provider({ children, initialMembers, initialItems }: {
+  children: React.ReactNode,
+  initialMembers: Member[],
+  initialItems: Item[]
+}) {
+  const [items, dispatchItems] = useReducer(itemsReducer, initialItems);
+  const [members, dispatchMembers] = useReducer(membersReducer, initialMembers);
 
   return (
     <ItemContext.Provider value={items}>

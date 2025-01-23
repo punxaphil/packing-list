@@ -1,7 +1,6 @@
 import { Item } from '../types/Item.tsx';
 import { ActionType, ItemAction } from '../types/Action.tsx';
-
-const STORAGE_KEY = 'items';
+import { saveItems } from './api.ts';
 
 export function itemsReducer(items: Item[], action: ItemAction) {
   let updatedItems = items;
@@ -15,6 +14,7 @@ export function itemsReducer(items: Item[], action: ItemAction) {
   } else {
     throw Error(`Unknown action type: ${JSON.stringify(action)}`);
   }
+  updatedItems.sort((a: Item, b: Item) => a.checked ? 1 : b.checked ? -1 : a.name.localeCompare(b.name));
   saveItems(updatedItems);
   return updatedItems;
 }
@@ -42,12 +42,3 @@ function changeItem(items: Item[], itemToChange?: Item) {
   });
 }
 
-function saveItems(items: Item[]) {
-  items.sort((a: Item, b: Item) => a.checked ? 1 : b.checked ? -1 : a.name.localeCompare(b.name));
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
-}
-
-export function initialItems(): Item[] {
-  const localItems = localStorage.getItem(STORAGE_KEY);
-  return localItems ? JSON.parse(localItems) as Item[] : [];
-}
