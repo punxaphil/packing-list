@@ -1,14 +1,14 @@
 {
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/server/dist/"
+    }
+  ],
   "builds": [
     {
       "src": "server/dist/index.js",
       "use": "@vercel/node"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "server/dist/index.js"
     }
   ],
   "outputDirectory": ".",
