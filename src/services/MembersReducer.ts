@@ -1,7 +1,6 @@
 import { ActionType, MemberAction } from '../types/Action.tsx';
 import { Member } from '../types/Member.tsx';
-
-const STORAGE_KEY = 'members';
+import { saveMembers } from './api.ts';
 
 export function membersReducer(members: Member[], action: MemberAction) {
   let updatedMembers = members;
@@ -17,6 +16,7 @@ export function membersReducer(members: Member[], action: MemberAction) {
   } else {
     throw Error(`Unknown action type: ${JSON.stringify(action)}`);
   }
+  updatedMembers.sort((a: Member, b: Member) => a.name.localeCompare(b.name));
   saveMembers(updatedMembers);
   return updatedMembers;
 }
@@ -47,12 +47,3 @@ function changeMember(members: Member[], member?: Member, newName?: string) {
   });
 }
 
-function saveMembers(members: Member[]) {
-  members.sort((a: Member, b: Member) => a.name.localeCompare(b.name));
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(members));
-}
-
-export function initialMembers(): Member[] {
-  const localMembers = localStorage.getItem(STORAGE_KEY);
-  return localMembers ? JSON.parse(localMembers) as Member[] : [];
-}
