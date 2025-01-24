@@ -1,15 +1,8 @@
 {
-  "version": 2,
-  "builds": [
+  "rewrites": [
     {
-      "src": "server/dist/index.js",
-      "use": "@vercel/node"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "server/dist/index.js"
+      "source": "/(.*)",
+      "destination": "/server/dist/"
     }
   ],
   "buildCommand": "npm install --prefix server && npm run build --prefix server"
