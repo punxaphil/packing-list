@@ -93,7 +93,6 @@ export function AddOrEditItem({
       <div className="mb-5">
         <div className="mt-2 mb-1 is-size-5">Category</div>
         <Select
-          onChange={handleOnChange}
           options={categories.map((category) => ({
             value: category.id,
             text: category.name,
