@@ -2,14 +2,14 @@
   "version": 2,
   "builds": [
     {
-      "src": "server/index.js",
+      "src": "server/dist/index.js",
       "use": "@vercel/node"
     }
   ],
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "server/index.js"
+      "dest": "server/dist/index.js"
     }
   ],
   "buildCommand": "npm install --prefix server && npm run build --prefix server"
