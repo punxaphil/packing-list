@@ -3,20 +3,11 @@ import { db } from './firebase';
 import { Member } from '../types/Member.tsx';
 import { Item } from '../types/Item.tsx';
 import { Category } from '../types/Category.tsx';
+import { FirebaseValue } from '../types/firebaseValue.ts';
 
 const MEMBERS_KEY = 'members';
 const ITEMS_KEY = 'items';
 const CATEGORIES_KEY = 'categories';
-
-interface FbValue<K> {
-  docs: {
-    data: () => { value: K[] }
-  }[];
-}
-
-function getValue<K>(res: FbValue<K>): K[] {
-  return res.docs[0] ? res.docs[0].data().value : [];
-}
 
 export function loadData(
   setInitialMembers: (m: Member[]) => void,
@@ -25,16 +16,20 @@ export function loadData(
   setLoading: (l: boolean) => void,
 ) {
   getDocs(collection(db, MEMBERS_KEY))
-    .then(res => getValue(res as unknown as FbValue<Member>))
+    .then(res => getValue(res as unknown as FirebaseValue<Member>))
     .then(data => setInitialMembers(data))
     .then(() => getDocs(collection(db, ITEMS_KEY)))
-    .then(res => getValue(res as unknown as FbValue<Item>))
+    .then(res => getValue(res as unknown as FirebaseValue<Item>))
     .then(data => setInitialItems(data))
     .then(() => getDocs(collection(db, CATEGORIES_KEY)))
-    .then(res => getValue(res as unknown as FbValue<Category>))
+    .then(res => getValue(res as unknown as FirebaseValue<Category>))
     .then(data => setInitialCategories(data))
     .then(() => setLoading(false))
     .catch(e => console.error(e));
+}
+
+function getValue<K>(res: FirebaseValue<K>): K[] {
+  return res.docs[0] ? res.docs[0].data().value : [];
 }
 
 function saveData(key: string, value: Item[] | Member[]) {

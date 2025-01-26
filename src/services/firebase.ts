@@ -2,6 +2,7 @@ import { getFirestore } from 'firebase/firestore';
 import { initializeApp } from 'firebase/app';
 
 const firebaseConfig = {
+  // This is the public key (used client side in browser), so it's safe to be here
   apiKey: 'AIzaSyBB37kGiEQ2NBhHf9voJ6ugGRkUIyaOYAE',
   authDomain: 'packing-list-448814.firebaseapp.com',
   projectId: 'packing-list-448814',
