@@ -12,6 +12,7 @@ import { loadData } from './services/api.ts';
 import { Category } from './types/Category.tsx';
 import Categories from './components/category/Categories.tsx';
 import { Box, Flex, Theme } from '@radix-ui/themes';
+import { Auth } from './components/auth/Auth.tsx';
 
 export default function App() {
   const [page, setPage] = useState('Home');
@@ -30,7 +31,9 @@ export default function App() {
         <Provider initialMembers={initialMembers} initialItems={initialItems} initialCategories={initialCategories}>
           <Theme accentColor="teal">
             <Box>
-              <h1>Packing List</h1>
+              <div className="is-flex is-align-items-center is-justify-content-space-between">
+                <h1>Packing List</h1> <Auth />
+              </div>
               <Flex gap="3" mb="3">
                 <NavButton name={'Home'} page={page} setPage={setPage}></NavButton>
                 <NavButton name={'Members'} page={page} setPage={setPage}></NavButton>
