@@ -2,6 +2,7 @@ import { ChangeEvent, useState, KeyboardEvent } from 'react';
 import { useCategories, useCategoriesDispatch } from '../../services/contexts';
 import { ActionType } from '../../types/Action';
 import CategoryRow from './CategoryRow';
+import { Box, Button, Card, Flex, TextField } from '@radix-ui/themes';
 
 export default function Categories() {
   const categories = useCategories();
@@ -28,22 +29,22 @@ export default function Categories() {
   }
 
   return (
-    <div className="card p-3">
-      {categories.map((item, index) => (
-        <CategoryRow category={item} key={index} />
-      ))}
-      <div className="mt-4 is-flex">
-        <input
-          type="text"
-          value={newName}
-          onChange={handleOnChange}
-          onKeyDown={handleEnter}
-          className="input"
-        ></input>
-        <button onClick={handleAdd} className="button is-light is-success mx-2">
-          Add category
-        </button>
-      </div>
-    </div>
+    <Box mt="5" maxWidth="400px">
+      <Card>
+        {categories.map((item, index) => (
+          <CategoryRow category={item} key={index} />
+        ))}
+        <Flex mt="2" gap="3" align="center">
+          <TextField.Root
+            size="2"
+            placeholder="Enter a category..."
+            value={newName}
+            onChange={handleOnChange}
+            onKeyDown={handleEnter}
+          />
+          <Button onClick={handleAdd}>Add category</Button>
+        </Flex>
+      </Card>
+    </Box>
   );
 }

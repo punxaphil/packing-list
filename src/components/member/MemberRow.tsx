@@ -1,8 +1,9 @@
-import { ImCross } from '@react-icons/all-files/im/ImCross';
 import { ChangeEvent } from 'react';
 import { useMembersDispatch } from '../../services/contexts.ts';
 import { ActionType } from '../../types/Action.tsx';
 import { Member } from '../../types/Member.tsx';
+import { Flex, IconButton, TextField } from '@radix-ui/themes';
+import { TrashIcon } from '@radix-ui/react-icons';
 
 export default function MemberRow({ member }: { member: Member }) {
   const dispatch = useMembersDispatch();
@@ -23,14 +24,11 @@ export default function MemberRow({ member }: { member: Member }) {
   }
 
   return (
-    <div className="is-flex my-1">
-      <input
-        type="text"
-        value={member.name}
-        onChange={handleOnChange}
-        className="input"
-      ></input>
-      <ImCross onClick={onRemove} className="is-small mx-1" />
-    </div>
+    <Flex mt="2" gap="3" align="center">
+      <TextField.Root size="2" placeholder="Enter a name…" value={member.name} onChange={handleOnChange} />
+      <IconButton radius="full" onClick={onRemove} variant="ghost">
+        <TrashIcon />
+      </IconButton>
+    </Flex>
   );
 }

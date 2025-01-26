@@ -1,28 +1,17 @@
-import {
-  useCategories,
-  useItemsDispatch,
-  useMembers,
-} from '../../services/contexts.ts';
+import { useCategories, useItemsDispatch, useMembers } from '../../services/contexts.ts';
 import React, { useState } from 'react';
 import { ActionType } from '../../types/Action.tsx';
 import { Item } from '../../types/Item.tsx';
 import { memberIds } from '../../services/utils.ts';
 import { MemberSelection } from './MemberSelection.tsx';
 import Select from '../shared/Select.tsx';
+import { Box, Button, TextField } from '@radix-ui/themes';
 
-export function AddOrEditItem({
-  item,
-  cancel,
-}: {
-  item?: Item;
-  cancel: () => void;
-}) {
+export function AddOrEditItem({ item, cancel }: { item?: Item; cancel: () => void }) {
   const members = useMembers();
   const dispatch = useItemsDispatch();
   const [name, setName] = useState<string>(item?.name ?? '');
-  const [selectedMembers, setSelectedMembers] = useState<number[]>(
-    memberIds(item) ?? []
-  );
+  const [selectedMembers, setSelectedMembers] = useState<number[]>(memberIds(item) ?? []);
   const [category, setCategory] = useState<number>(item?.categoryId ?? 0);
   const saveAction = item ? handleUpdateItem : handleAdd;
   const categories = useCategories();
@@ -40,9 +29,7 @@ export function AddOrEditItem({
     if (!item) {
       return;
     }
-    let members =
-      item.members?.filter((m) => !!selectedMembers.find((t) => t === m.id)) ??
-      [];
+    let members = item.members?.filter((m) => !!selectedMembers.find((t) => t === m.id)) ?? [];
     members = [
       ...members,
       ...selectedMembers
@@ -69,15 +56,11 @@ export function AddOrEditItem({
   }
 
   return (
-    <div className="box m-5">
+    <Box mt="5">
       <div className="is-size-4 mt-3">{item ? 'Edit' : 'Add'} item</div>
-      <input
-        className={'input'}
-        type="text"
-        value={name}
-        onChange={handleOnChange}
-        onKeyDown={handleEnter}
-      ></input>
+      <Box maxWidth="300px">
+        <TextField.Root size="2" value={name} onChange={handleOnChange} onKeyDown={handleEnter} />
+      </Box>
       <div className="mb-2">
         <div className="mt-2 mb-1 is-size-5">Assign?</div>
         <div className="checkboxes">
@@ -102,14 +85,14 @@ export function AddOrEditItem({
           }))}
         />
       </div>
-      <button onClick={saveAction} className="button is-light is-success">
+      <Button onClick={saveAction} mt="3">
         {item ? 'Update' : 'Add'}
-      </button>
+      </Button>
       {item && (
-        <button onClick={cancel} className="button is-light is-danger mx-2">
+        <Button onClick={cancel} color="crimson" ml="3">
           Cancel
-        </button>
+        </Button>
       )}
-    </div>
+    </Box>
   );
 }

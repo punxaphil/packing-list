@@ -1,8 +1,9 @@
-import { FaTrash } from '@react-icons/all-files/fa/FaTrash';
 import { ChangeEvent } from 'react';
 import { useCategoriesDispatch } from '../../services/contexts.ts';
 import { ActionType } from '../../types/Action.tsx';
 import { Category } from '../../types/Category.tsx';
+import { Flex, IconButton, TextField } from '@radix-ui/themes';
+import { TrashIcon } from '@radix-ui/react-icons';
 
 export default function CategoryRow({ category }: { category: Category }) {
   const dispatch = useCategoriesDispatch();
@@ -23,16 +24,11 @@ export default function CategoryRow({ category }: { category: Category }) {
   }
 
   return (
-    <div className="is-flex my-1">
-      <input
-        type="text"
-        value={category.name}
-        onChange={handleOnChange}
-        className="input"
-      ></input>
-      <button onClick={onRemove} className="button is-ghost has-text-current">
-        <FaTrash className="is-small mx-1" />
-      </button>
-    </div>
+    <Flex mt="2" gap="3" align="center">
+      <TextField.Root size="2" placeholder="Enter a category…" value={category.name} onChange={handleOnChange} />
+      <IconButton radius="full" onClick={onRemove} variant="ghost">
+        <TrashIcon />
+      </IconButton>
+    </Flex>
   );
 }

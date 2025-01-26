@@ -2,6 +2,7 @@ import { ChangeEvent, KeyboardEvent, useState } from 'react';
 import MemberRow from './MemberRow.tsx';
 import { useMembers, useMembersDispatch } from '../../services/contexts.ts';
 import { ActionType } from '../../types/Action.tsx';
+import { Box, Button, Card, Flex, TextField } from '@radix-ui/themes';
 
 export default function Members() {
   const members = useMembers();
@@ -27,22 +28,22 @@ export default function Members() {
   }
 
   return (
-    <div className="card p-3">
-      {members.map((item, index) => (
-        <MemberRow member={item} key={index} />
-      ))}
-      <div className="mt-4 is-flex">
-        <input
-          type="text"
-          value={newName}
-          onChange={handleOnChange}
-          onKeyDown={handleEnter}
-          className="input"
-        ></input>
-        <button onClick={handleAdd} className="button is-light is-success mx-2">
-          Add member
-        </button>
-      </div>
-    </div>
+    <Box mt="5" maxWidth="400px">
+      <Card>
+        {members.map((item, index) => (
+          <MemberRow member={item} key={index} />
+        ))}
+        <Flex mt="2" gap="3" align="center">
+          <TextField.Root
+            size="2"
+            placeholder="Enter a name..."
+            value={newName}
+            onChange={handleOnChange}
+            onKeyDown={handleEnter}
+          />
+          <Button onClick={handleAdd}>Add member</Button>
+        </Flex>
+      </Card>
+    </Box>
   );
 }
