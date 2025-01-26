@@ -1,38 +1,29 @@
-import {
-  useCategories,
-  useItemsDispatch,
-  useMembers,
-} from '../../services/contexts.ts';
+import { useCategories, useItemsDispatch, useMembers } from '../../services/contexts.ts';
 import React, { useState } from 'react';
 import { ActionType } from '../../types/Action.tsx';
 import { Item } from '../../types/Item.tsx';
 import { memberIds } from '../../services/utils.ts';
-import { MemberSelection } from './MemberSelection.tsx';
-import Select from '../shared/Select.tsx';
+import PLSelect from '../shared/PLSelect.tsx';
+import { Box, Button, Flex, Heading, Text, TextField } from '@radix-ui/themes';
+import PLCheckboxGroup from '../shared/PLCheckboxGroup.tsx';
 
-export function AddOrEditItem({
-  item,
-  cancel,
-}: {
-  item?: Item;
-  cancel: () => void;
-}) {
+export function AddOrEditItem({ item, cancel }: { item?: Item; cancel: () => void }) {
   const members = useMembers();
   const dispatch = useItemsDispatch();
   const [name, setName] = useState<string>(item?.name ?? '');
-  const [selectedMembers, setSelectedMembers] = useState<number[]>(
-    memberIds(item) ?? []
-  );
-  const [category, setCategory] = useState<number>(item?.categoryId ?? 0);
+  const [selectedMembers, setSelectedMembers] = useState<string[]>(memberIds(item) ?? []);
+  const [category, setCategory] = useState<string>(item?.category ?? '');
   const saveAction = item ? handleUpdateItem : handleAdd;
   const categories = useCategories();
 
   function handleAdd() {
     setName('');
+    setCategory('');
     dispatch({
       type: ActionType.Added,
       name: name,
       memberIds: selectedMembers,
+      category: category,
     });
   }
 
@@ -40,9 +31,7 @@ export function AddOrEditItem({
     if (!item) {
       return;
     }
-    let members =
-      item.members?.filter((m) => !!selectedMembers.find((t) => t === m.id)) ??
-      [];
+    let members = item.members?.filter((m) => !!selectedMembers.find((t) => t === m.id)) ?? [];
     members = [
       ...members,
       ...selectedMembers
@@ -54,7 +43,7 @@ export function AddOrEditItem({
     ];
     dispatch({
       type: ActionType.Changed,
-      item: { ...item, name, members },
+      item: { ...item, name, members, category },
     });
   }
 
@@ -69,47 +58,53 @@ export function AddOrEditItem({
   }
 
   return (
-    <div className="box m-5">
-      <div className="is-size-4 mt-3">{item ? 'Edit' : 'Add'} item</div>
-      <input
-        className={'input'}
-        type="text"
-        value={name}
-        onChange={handleOnChange}
-        onKeyDown={handleEnter}
-      ></input>
-      <div className="mb-2">
-        <div className="mt-2 mb-1 is-size-5">Assign?</div>
-        <div className="checkboxes">
-          {members.map((member, index) => (
-            <MemberSelection
-              key={index}
-              member={member}
-              selectedMembers={selectedMembers}
-              setSelectedMembers={setSelectedMembers}
-            />
-          ))}
-        </div>
-      </div>
-      <div className="mb-5">
-        <div className="mt-2 mb-1 is-size-5">Category</div>
-        <Select
+    <Box>
+      <Heading as="h2">{item ? 'Edit' : 'Add new'} item</Heading>
+      <Box maxWidth="300px">
+        <TextField.Root
+          size="2"
+          placeholder="Enter a item name..."
+          value={name}
+          onChange={handleOnChange}
+          onKeyDown={handleEnter}
+        />
+      </Box>
+      <Box mt="2">
+        <Text size="3" weight="bold">
+          Assign
+        </Text>
+        <PLCheckboxGroup
+          setSelection={setSelectedMembers}
+          selected={selectedMembers}
+          options={members.map((member) => ({
+            value: member.id,
+            text: member.name,
+          }))}
+        ></PLCheckboxGroup>
+      </Box>
+      <Box mt="2">
+        <Text size="3" weight="bold">
+          Category
+        </Text>
+        <PLSelect
           setSelection={setCategory}
-          value={category}
+          selected={category}
+          placeholder="Select a category"
           options={categories.map((category) => ({
             value: category.id,
             text: category.name,
           }))}
         />
-      </div>
-      <button onClick={saveAction} className="button is-light is-success">
-        {item ? 'Update' : 'Add'}
-      </button>
-      {item && (
-        <button onClick={cancel} className="button is-light is-danger mx-2">
-          Cancel
-        </button>
-      )}
-    </div>
+      </Box>
+
+      <Flex gap="3" align="center" mt="5">
+        <Button onClick={saveAction}>{item ? 'Update' : 'Add'}</Button>
+        {item && (
+          <Button onClick={cancel} color="crimson">
+            Cancel
+          </Button>
+        )}
+      </Flex>
+    </Box>
   );
 }

@@ -5,6 +5,5 @@ export interface Item {
   name: string;
   checked: boolean;
   members?: MemberItem[];
-  categoryId: number;
+  category?: string;
 }
-

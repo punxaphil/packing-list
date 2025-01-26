@@ -1,13 +1,17 @@
-export default function NavButton({ name, page, setPage }: {
-  name: string,
-  page: string,
-  setPage: (name: string) => void
+import { Button } from '@radix-ui/themes';
+
+export default function NavButton({
+  name,
+  page,
+  setPage,
+}: {
+  name: string;
+  page: string;
+  setPage: (name: string) => void;
 }) {
-
   return (
-    <button onClick={() => setPage(name)} className={`button ${page === name ? 'is-info' : 'is-light'}`}>{name}
-    </button>
+    <Button onClick={() => setPage(name)} variant={page === name ? undefined : 'soft'}>
+      {name}
+    </Button>
   );
-
 }
-

@@ -1,4 +1,4 @@
 export class MemberItem {
-  id!: number;
+  id!: string;
   checked!: boolean;
 }
