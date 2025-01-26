@@ -1,4 +1,4 @@
-import { addDoc, collection, getDocs } from 'firebase/firestore';
+import { addDoc, collection, doc, getDocs, updateDoc } from 'firebase/firestore';
 import { db } from './firebase';
 import { Member } from '../types/Member.tsx';
 import { Item } from '../types/Item.tsx';
@@ -38,7 +38,15 @@ export function loadData(
 }
 
 function saveData(key: string, value: Item[] | Member[]) {
-  addDoc(collection(db, key), { value })
+  getDocs(collection(db, key))
+    .then(res => {
+      const id = res.docs[0]?.id;
+      if (id) {
+        return updateDoc(doc(db, key, id), { value });
+      } else {
+        addDoc(collection(db, key), { value }).catch(e => console.error(e));
+      }
+    })
     .catch((err) => console.log('save, Unable to post -', err));
 }
 
