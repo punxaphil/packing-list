@@ -8,16 +8,30 @@ const MEMBERS_KEY = 'members';
 const ITEMS_KEY = 'items';
 const CATEGORIES_KEY = 'categories';
 
+interface FbValue<K> {
+  docs: {
+    data: () => { value: K[] }
+  }[];
+}
 
-export function loadData(setInitialMembers: React.Dispatch<React.SetStateAction<Member[]>>, setInitialItems: React.Dispatch<React.SetStateAction<Item[]>>, setInitialCategories: (value: (((prevState: Category[]) => Category[]) | Category[])) => void, setLoading: React.Dispatch<React.SetStateAction<boolean>>) {
+function getValue<K>(res: FbValue<K>): K[] {
+  return res.docs[0] ? res.docs[0].data().value : [];
+}
+
+export function loadData(
+  setInitialMembers: (m: Member[]) => void,
+  setInitialItems: (i: Item[]) => void,
+  setInitialCategories: (c: Category[]) => void,
+  setLoading: (l: boolean) => void,
+) {
   getDocs(collection(db, MEMBERS_KEY))
-    .then(res => res.docs[0] ? res.docs[0].data().value as Member[] : [])
+    .then(res => getValue(res as unknown as FbValue<Member>))
     .then(data => setInitialMembers(data))
     .then(() => getDocs(collection(db, ITEMS_KEY)))
-    .then(res => res.docs[0] ? res.docs[0].data().value as Item[] : [])
+    .then(res => getValue(res as unknown as FbValue<Item>))
     .then(data => setInitialItems(data))
     .then(() => getDocs(collection(db, CATEGORIES_KEY)))
-    .then(res => res.docs[0] ? res.docs[0].data().value as Category[] : [])
+    .then(res => getValue(res as unknown as FbValue<Category>))
     .then(data => setInitialCategories(data))
     .then(() => setLoading(false))
     .catch(e => console.error(e));
