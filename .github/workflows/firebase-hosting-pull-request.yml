@@ -1,9 +1,5 @@
 name: Deploy to Firebase Preview
 on:
-  #TODO remove push when we are ready to merge
-  push:
-    branches:
-      - firebase
   pull_request:
 
 jobs:

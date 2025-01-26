@@ -12,14 +12,14 @@ jobs:
       - uses: actions/checkout@v4
       - run: npm ci && npm run build
       - uses: FirebaseExtended/action-hosting-deploy@v0
-        if: ${{ github.event.inputs.is_production }}
+        if: ${{ inputs.is_production }}
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_PACKING_LIST_448814 }}
           channelId: live
           projectId: packing-list-448814
       - uses: FirebaseExtended/action-hosting-deploy@v0
-        if: ${{ !github.event.inputs.is_production }}
+        if: ${{ !inputs.is_production }}
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_PACKING_LIST_448814 }}
