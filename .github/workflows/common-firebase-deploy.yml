@@ -1,10 +1,8 @@
 on:
   workflow_call:
     inputs:
-      is_production:
-        description: 'Is this a production deployment?'
-        type: boolean
-        default: false
+      channelId:
+        type: string
   push:
     branches:
       - main
@@ -18,5 +16,5 @@ jobs:
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_PACKING_LIST_448814 }}
-          channelId: ${{ github.event.inputs.is_production == true && 'live' }}
+          channelId: ${{ github.event.inputs.channelId }}
           projectId: packing-list-448814
