@@ -11,6 +11,7 @@ import { Item } from './types/Item.tsx';
 import { loadData } from './services/api.ts';
 import { Category } from './types/Category.tsx';
 import Categories from './components/category/Categories.tsx';
+import { Auth } from './components/auth/Auth.tsx';
 
 export default function App() {
   const [page, setPage] = useState('Home');
@@ -23,10 +24,14 @@ export default function App() {
 
   return (
     <>
-      {loading ? <div>Loading...</div> :
+      {loading ? (
+        <div>Loading...</div>
+      ) : (
         <Provider initialMembers={initialMembers} initialItems={initialItems} initialCategories={initialCategories}>
           <div className="content p-5">
-            <h1>Packing List</h1>
+            <div className="is-flex is-align-items-center is-justify-content-space-between">
+              <h1>Packing List</h1> <Auth />
+            </div>
             <div className="buttons">
               <NavButton name={'Home'} page={page} setPage={setPage}></NavButton>
               <NavButton name={'Members'} page={page} setPage={setPage}></NavButton>
@@ -37,7 +42,7 @@ export default function App() {
             {page === 'Categories' && <Categories></Categories>}
           </div>
         </Provider>
-      }
+      )}
     </>
   );
 }
