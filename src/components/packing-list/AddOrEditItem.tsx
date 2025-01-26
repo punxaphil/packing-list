@@ -23,6 +23,7 @@ export function AddOrEditItem({
   const [selectedMembers, setSelectedMembers] = useState<number[]>(
     memberIds(item) ?? []
   );
+  const [category, setCategory] = useState<number>(item?.categoryId ?? 0);
   const saveAction = item ? handleUpdateItem : handleAdd;
   const categories = useCategories();
 
@@ -93,6 +94,8 @@ export function AddOrEditItem({
       <div className="mb-5">
         <div className="mt-2 mb-1 is-size-5">Category</div>
         <Select
+          setSelection={setCategory}
+          value={category}
           options={categories.map((category) => ({
             value: category.id,
             text: category.name,
