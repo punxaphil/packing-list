@@ -1,0 +1,22 @@
+on:
+  workflow_call:
+    inputs:
+      channelId:
+        required: true
+        type: string
+        default: ''
+  push:
+    branches:
+      - main
+jobs:
+  build_and_deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: npm ci && npm run build
+      - uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_PACKING_LIST_448814 }}
+          channelId: ${{ github.event.inputs.channelId }}
+          projectId: packing-list-448814
