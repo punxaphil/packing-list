@@ -1,0 +1,8 @@
+name: Deploy to Firebase Preview
+on:
+  pull_request:
+
+jobs:
+  build_and_preview:
+    uses: ./.github/workflows/common-firebase-deploy.yml
+    secrets: inherit

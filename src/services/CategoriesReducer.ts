@@ -1,11 +1,10 @@
 import { ActionType, CategoryAction } from '../types/Action.tsx';
 import { Category } from '../types/Category.tsx';
-
-const STORAGE_KEY = 'categories';
+import { saveCategories } from './api.ts';
 
 export function categoriesReducer(
   categories: Category[],
-  action: CategoryAction
+  action: CategoryAction,
 ) {
   let updatedCategories = categories;
   const { Added, Deleted, Changed } = ActionType;
@@ -18,7 +17,7 @@ export function categoriesReducer(
       updatedCategories = changeCategory(
         categories,
         action.category,
-        action.newName
+        action.newName,
       );
     }
   } else if (action.type === Deleted) {
@@ -26,6 +25,7 @@ export function categoriesReducer(
   } else {
     throw Error(`Unknown action type: ${JSON.stringify(action)}`);
   }
+  updatedCategories.sort((a: Category, b: Category) => a.name.localeCompare(b.name));
   saveCategories(updatedCategories);
   return updatedCategories;
 }
@@ -50,7 +50,7 @@ function addCategory(categories: Category[], name: string) {
 function changeCategory(
   categories: Category[],
   category?: Category,
-  newName?: string
+  newName?: string,
 ) {
   if (!category || !newName) {
     return categories;
@@ -64,12 +64,3 @@ function changeCategory(
   });
 }
 
-function saveCategories(categories: Category[]) {
-  categories.sort((a: Category, b: Category) => a.name.localeCompare(b.name));
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(categories));
-}
-
-export function initialCategories(): Category[] {
-  const localCategories = localStorage.getItem(STORAGE_KEY);
-  return localCategories ? (JSON.parse(localCategories) as Category[]) : [];
-}
