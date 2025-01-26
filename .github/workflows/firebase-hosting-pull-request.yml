@@ -6,6 +6,10 @@ on:
       - firebase
   pull_request:
 
+permissions:
+  checks: write
+  contents: read
+  pull-requests: write
 jobs:
   build_and_preview:
     uses: ./.github/workflows/common-firebase-deploy.yml
