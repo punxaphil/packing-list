@@ -12,7 +12,9 @@ import { loadData } from './services/api.ts';
 import { Category } from './types/Category.tsx';
 import Categories from './components/category/Categories.tsx';
 import { Box, Flex, Theme } from '@radix-ui/themes';
-import { Auth } from './components/auth/Auth.tsx';
+import { Auth, useCurrentUser } from './components/auth/Auth.tsx';
+
+const TITLE = "Pack'n'Go!";
 
 export default function App() {
   const [page, setPage] = useState('Home');
@@ -20,9 +22,11 @@ export default function App() {
   const [initialMembers, setInitialMembers] = useState<Member[]>([]);
   const [initialItems, setInitialItems] = useState<Item[]>([]);
   const [initialCategories, setInitialCategories] = useState<Category[]>([]);
+  const [currentUser] = useCurrentUser();
 
   useEffect(() => loadData(setInitialMembers, setInitialItems, setInitialCategories, setLoading), []);
 
+  const isLoggedIn = !!currentUser;
   return (
     <>
       {loading ? (
@@ -32,16 +36,28 @@ export default function App() {
           <Theme accentColor="teal">
             <Box>
               <div className="is-flex is-align-items-center is-justify-content-space-between">
-                <h1>Packing List</h1> <Auth />
+                <div className="is-flex is-align-items-center is-justify-content-space-between is-align-self-center">
+                <img src="/squirrel_icon.png" alt="squirrel icon" />
+                <span className="mx-2 is-size-1">{TITLE}</span>
+              </div> <Auth />
               </div>
-              <Flex gap="3" mb="3">
+              {isLoggedIn ? (
+              <>
+                <Flex gap="3" mb="3">
                 <NavButton name={'Home'} page={page} setPage={setPage}></NavButton>
                 <NavButton name={'Members'} page={page} setPage={setPage}></NavButton>
                 <NavButton name={'Categories'} page={page} setPage={setPage}></NavButton>
               </Flex>
               {page === 'Home' && <PackingList></PackingList>}
               {page === 'Members' && <Members></Members>}
-              {page === 'Categories' && <Categories></Categories>}
+              {page === 'Categories' && <Categories></Categories>}</>
+            ) : (
+              <div className="is-flex is-justify-content-space-between is-flex-direction-column is-align-items-center">
+                <h3>Welcome to {TITLE}</h3>
+                <p>Start preparing your trip by logging in or registering in the top right corner of this page ✈️</p>
+                <img src="/squirrel_400.png" alt="squirrel" />
+              </div>
+            )}
             </Box>
           </Theme>
         </Provider>

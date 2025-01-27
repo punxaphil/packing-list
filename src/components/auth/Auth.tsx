@@ -8,13 +8,18 @@ import {
   signOut,
 } from 'firebase/auth';
 
+export function useCurrentUser(): [string, (email: string) => void] {
+  const [currentUser, setCurrentUser] = useState('');
+
+  getAuth().onAuthStateChanged((user) => setCurrentUser(user?.email ?? ''));
+  return [currentUser, setCurrentUser];
+}
+
 export function Auth() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
-  const [currentUser, setCurrentUser] = useState('');
-
-  getAuth().onAuthStateChanged((user) => setCurrentUser(user?.email ?? ''));
+  const [currentUser, setCurrentUser] = useCurrentUser();
 
   function handleEmail(event: ChangeEvent<HTMLInputElement>) {
     setEmail(event.target.value);
