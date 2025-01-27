@@ -1,19 +1,20 @@
 import { ChangeEvent, KeyboardEvent, useState } from 'react';
 import MemberRow from './MemberRow.tsx';
-import { useMembers, useMembersDispatch } from '../../services/contexts.ts';
-import { ActionType } from '../../types/Action.tsx';
+import { useFirebase } from '../../services/contexts.ts';
+import { firebase } from '../../services/api.ts';
 import { Box, Button, Card, Flex, TextField } from '@radix-ui/themes';
 
 export default function Members() {
-  const members = useMembers();
-  const dispatch = useMembersDispatch();
+  const members = useFirebase().members;
   const [newName, setNewName] = useState<string>('');
+  const [error, setError] = useState<string>('');
 
-  function handleAdd() {
-    dispatch({
-      type: ActionType.Added,
-      name: newName,
-    });
+  function addMember() {
+    (async function () {
+      if (!members.find((t) => t.name === newName)) {
+        await firebase.addMember(newName);
+      }
+    })().catch(setError);
     setNewName('');
   }
 
@@ -23,7 +24,7 @@ export default function Members() {
 
   function handleEnter(e: KeyboardEvent<HTMLInputElement>) {
     if (e.key === 'Enter') {
-      handleAdd();
+      addMember();
     }
   }
 
@@ -36,14 +37,11 @@ export default function Members() {
         <Flex mt="2" gap="3" align="center">
           <TextField.Root
             size="2"
-            placeholder="Enter a name..."
-            value={newName}
-            onChange={handleOnChange}
-            onKeyDown={handleEnter}
-          />
-          <Button onClick={handleAdd}>Add member</Button>
+            placeholder="Enter a name..." value={newName} onChange={handleOnChange} onKeyDown={handleEnter} />
+          <Button onClick={addMember}>Add member</Button>
         </Flex>
       </Card>
+      {error}
     </Box>
   );
 }

@@ -1,42 +1,12 @@
-import { createContext, Dispatch, useContext } from 'react';
-import { CategoryAction, ItemAction, MemberAction } from '../types/Action.tsx';
-import { Item } from '../types/Item.tsx';
-import { Member } from '../types/Member.tsx';
-import { Category } from '../types/Category.tsx';
+import { createContext, useContext } from 'react';
+import { User } from '../types/User.ts';
 
-export const ItemContext = createContext<Item[]>([]);
-export const ItemDispatchContext = createContext(
-  (() => undefined) as Dispatch<ItemAction>
-);
-export const MemberContext = createContext<Member[]>([]);
-export const MemberDispatchContext = createContext(
-  (() => undefined) as Dispatch<MemberAction>
-);
-export const CategoryContext = createContext<Category[]>([]);
-export const CategoryDispatchContext = createContext(
-  (() => undefined) as Dispatch<CategoryAction>
-);
+export const FirebaseContext = createContext<User | undefined>(undefined);
 
-export function useItems() {
-  return useContext(ItemContext);
-}
-
-export function useItemsDispatch() {
-  return useContext(ItemDispatchContext);
-}
-
-export function useMembers() {
-  return useContext(MemberContext);
-}
-
-export function useMembersDispatch() {
-  return useContext(MemberDispatchContext);
-}
-
-export function useCategories() {
-  return useContext(CategoryContext);
-}
-
-export function useCategoriesDispatch() {
-  return useContext(CategoryDispatchContext);
+export function useFirebase() {
+  const firebaseContext = useContext(FirebaseContext);
+  if (firebaseContext === undefined) {
+    throw new Error('useFirebase must be used within a FirebaseContext.Provider');
+  }
+  return firebaseContext;
 }

@@ -1,50 +1,36 @@
-import { useCategories, useItemsDispatch, useMembers } from '../../services/contexts.ts';
+import { useFirebase } from '../../services/contexts.ts';
 import React, { useState } from 'react';
-import { ActionType } from '../../types/Action.tsx';
-import { Item } from '../../types/Item.tsx';
-import { memberIds } from '../../services/utils.ts';
+import { Item } from '../../types/Item.ts';
 import PLSelect from '../shared/PLSelect.tsx';
 import { Box, Button, Flex, Heading, Text, TextField } from '@radix-ui/themes';
 import PLCheckboxGroup from '../shared/PLCheckboxGroup.tsx';
+import { firebase } from '../../services/api.ts';
 
 export function AddOrEditItem({ item, cancel }: { item?: Item; cancel: () => void }) {
-  const members = useMembers();
-  const dispatch = useItemsDispatch();
+  const { members, categories } = useFirebase();
   const [name, setName] = useState<string>(item?.name ?? '');
-  const [selectedMembers, setSelectedMembers] = useState<string[]>(memberIds(item) ?? []);
+  const [error, setError] = useState('');
+  const [selectedMembers, setSelectedMembers] = useState(item?.members ?? []);
   const [category, setCategory] = useState<string>(item?.category ?? '');
   const saveAction = item ? handleUpdateItem : handleAdd;
-  const categories = useCategories();
 
   function handleAdd() {
-    setName('');
-    setCategory('');
-    dispatch({
-      type: ActionType.Added,
-      name: name,
-      memberIds: selectedMembers,
-      category: category,
-    });
+    (async function () {
+      if (!members.find((t) => t.name === name)) {
+        await firebase.addItem(name, selectedMembers, category);
+        setName('');
+      }
+    })().catch(setError);
   }
 
-  function handleUpdateItem() {
-    if (!item) {
-      return;
-    }
-    let members = item.members?.filter((m) => !!selectedMembers.find((t) => t === m.id)) ?? [];
-    members = [
-      ...members,
-      ...selectedMembers
-        .filter((t) => !members.find((m) => m.id === t))
-        .map((id) => ({
-          id: id,
-          checked: false,
-        })),
-    ];
-    dispatch({
-      type: ActionType.Changed,
-      item: { ...item, name, members, category },
-    });
+  async function handleUpdateItem() {
+    (async function () {
+      if (!item) {
+        return;
+      }
+      const updated = { ...item, name, members: selectedMembers, category };
+      await firebase.updateItem(updated);
+    })().catch(setError);
   }
 
   function handleOnChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -55,6 +41,14 @@ export function AddOrEditItem({ item, cancel }: { item?: Item; cancel: () => voi
     if (e.key === 'Enter') {
       saveAction();
     }
+  }
+
+  function onMembersSelection(selectedIds: string[]) {
+    const newMembers = selectedIds.map((id) => {
+      const checked = !!selectedMembers.find((current) => current.id === id)?.checked;
+      return { checked, id };
+    });
+    setSelectedMembers(newMembers);
   }
 
   return (
@@ -74,8 +68,8 @@ export function AddOrEditItem({ item, cancel }: { item?: Item; cancel: () => voi
           Assign
         </Text>
         <PLCheckboxGroup
-          setSelection={setSelectedMembers}
-          selected={selectedMembers}
+          setSelection={onMembersSelection}
+          selected={selectedMembers.map((member) => member.id)}
           options={members.map((member) => ({
             value: member.id,
             text: member.name,
@@ -104,6 +98,7 @@ export function AddOrEditItem({ item, cancel }: { item?: Item; cancel: () => voi
             Cancel
           </Button>
         )}
+        {error && <div className="is-danger">{error}</div>}
       </Flex>
     </Box>
   );

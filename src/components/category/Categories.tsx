@@ -1,20 +1,20 @@
-import { ChangeEvent, useState, KeyboardEvent } from 'react';
-import { useCategories, useCategoriesDispatch } from '../../services/contexts';
-import { ActionType } from '../../types/Action';
+import { ChangeEvent, KeyboardEvent, useState } from 'react';
+import { useFirebase } from '../../services/contexts';
 import CategoryRow from './CategoryRow';
 import { Box, Button, Card, Flex, TextField } from '@radix-ui/themes';
+import { firebase } from '../../services/api.ts';
 
 export default function Categories() {
-  const categories = useCategories();
-  const dispatch = useCategoriesDispatch();
-
+  const categories = useFirebase().categories;
   const [newName, setNewName] = useState<string>('');
+  const [error, setError] = useState<string>('');
 
-  function handleAdd() {
-    dispatch({
-      type: ActionType.Added,
-      name: newName,
-    });
+  function addCategory() {
+    (async function () {
+      if (!categories.find((t) => t.name === newName)) {
+        await firebase.addCategory(newName);
+      }
+    })().catch(setError);
     setNewName('');
   }
 
@@ -24,7 +24,7 @@ export default function Categories() {
 
   function handleEnter(e: KeyboardEvent<HTMLInputElement>) {
     if (e.key === 'Enter') {
-      handleAdd();
+      addCategory();
     }
   }
 
@@ -37,14 +37,11 @@ export default function Categories() {
         <Flex mt="2" gap="3" align="center">
           <TextField.Root
             size="2"
-            placeholder="Enter a category..."
-            value={newName}
-            onChange={handleOnChange}
-            onKeyDown={handleEnter}
-          />
-          <Button onClick={handleAdd}>Add category</Button>
+            placeholder="Enter a category..." value={newName} onChange={handleOnChange} onKeyDown={handleEnter} />
+          <Button onClick={addCategory}>Add category</Button>
         </Flex>
       </Card>
+      {error}
     </Box>
   );
 }

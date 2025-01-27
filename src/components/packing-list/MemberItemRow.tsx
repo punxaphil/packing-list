@@ -1,32 +1,28 @@
-import { MemberItem } from '../../types/MemberItem.tsx';
+import { MemberItem } from '../../types/MemberItem.ts';
 import { allChecked, getName } from '../../services/utils.ts';
-import { Item } from '../../types/Item.tsx';
-import { ActionType } from '../../types/Action.tsx';
-import { useItemsDispatch, useMembers } from '../../services/contexts.ts';
+import { Item } from '../../types/Item.ts';
 import { PLCheckbox } from '../shared/PLCheckbox.tsx';
 import { Span } from '../shared/Span.tsx';
 import { Flex } from '@radix-ui/themes';
+import { firebase } from '../../services/api.ts';
+import { useFirebase } from '../../services/contexts.ts';
 
-export function MemberItemRow({ memberItem, item }: { memberItem: MemberItem; item: Item }) {
-  const dispatch = useItemsDispatch();
-  const members = useMembers();
+export function MemberItemRow({ memberItem: { checked, id }, parent }: { memberItem: MemberItem; parent: Item }) {
+  const members = useFirebase().members;
 
-  function toggleMember(memberId: string) {
-    const find = item.members?.find((t) => t.id === memberId);
+  async function toggleMember() {
+    const find = parent.members?.find((t) => t.id === id);
     if (find) {
       find.checked = !find.checked;
-      item.checked = allChecked(item);
-      dispatch({
-        type: ActionType.Changed,
-        item,
-      });
+      parent.checked = allChecked(parent);
+      await firebase.updateItem(parent);
     }
   }
 
   return (
-    <Flex pl="5" key={memberItem.id} gap="2" align="center">
-      <PLCheckbox checked={memberItem.checked} onClick={() => toggleMember(memberItem.id)} />
-      <Span strike={memberItem.checked}>{getName(members, memberItem.id)}</Span>
+    <Flex pl="5" key={id} gap="2" align="center">
+      <PLCheckbox checked={checked} onClick={toggleMember} />
+      <Span strike={checked}>{getName(members, id)}</Span>
     </Flex>
   );
 }

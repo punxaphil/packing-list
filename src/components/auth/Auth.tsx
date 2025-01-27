@@ -9,18 +9,24 @@ import {
 } from 'firebase/auth';
 import { Button, Flex, Text, TextField } from '@radix-ui/themes';
 
-export function useCurrentUser(): [string, (email: string) => void] {
-  const [currentUser, setCurrentUser] = useState('');
+export function useCurrentUser() {
+  const [userId, setUserId] = useState('');
+  const [email, setEmail] = useState('');
+  const [loggingIn, setLoggingIn] = useState(true);
 
-  getAuth().onAuthStateChanged((user) => setCurrentUser(user?.email ?? ''));
-  return [currentUser, setCurrentUser];
+  getAuth().onAuthStateChanged((user) => {
+    setUserId(user?.uid ?? '');
+    setEmail(user?.email ?? '');
+    setLoggingIn(false);
+  });
+  return { userId, email, loggingIn };
 }
 
 export function Auth() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
-  const [currentUser, setCurrentUser] = useCurrentUser();
+  const currentUser = useCurrentUser();
 
   function handleEmail(event: ChangeEvent<HTMLInputElement>) {
     setEmail(event.target.value);
@@ -40,13 +46,6 @@ export function Auth() {
     const auth = getAuth();
     setPersistence(auth, browserLocalPersistence)
       .then(() => signInWithEmailAndPassword(auth, email, password))
-      .then((userCredential) => {
-        const user = userCredential.user;
-        if (user.email) {
-          setMessage('');
-          setCurrentUser(user.email);
-        }
-      })
       .catch((error) => handleError(error.code, error.message));
   }
 
@@ -65,20 +64,16 @@ export function Auth() {
   }
 
   function handleLogout() {
-    const auth = getAuth();
-    signOut(auth)
-      .then(() => {
-        setCurrentUser('');
-        setMessage('');
-      })
+    signOut(getAuth())
+      .then(() => setMessage(''))
       .catch((error) => handleError(error.code, error.message));
   }
 
   return (
     <Flex gap="3" align="center">
-      {currentUser ? (
+      {currentUser.userId ? (
         <>
-          <Text size="1">{currentUser}</Text>
+          <Text size="1">{currentUser.email}</Text>
           <Button onClick={handleLogout} size="1" color="red">
             Logout
           </Button>
