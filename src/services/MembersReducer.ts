@@ -1,6 +1,7 @@
 import { ActionType, MemberAction } from '../types/Action.tsx';
 import { Member } from '../types/Member.tsx';
 import { saveMembers } from './api.ts';
+import { v4 } from 'uuid';
 
 export function membersReducer(members: Member[], action: MemberAction) {
   let updatedMembers = members;
@@ -12,7 +13,7 @@ export function membersReducer(members: Member[], action: MemberAction) {
       updatedMembers = changeMember(members, action.member, action.newName);
     }
   } else if (action.type === Deleted) {
-    updatedMembers = members.filter(t => t.id !== action.member?.id);
+    updatedMembers = members.filter((t) => t.id !== action.member?.id);
   } else {
     throw Error(`Unknown action type: ${JSON.stringify(action)}`);
   }
@@ -22,23 +23,26 @@ export function membersReducer(members: Member[], action: MemberAction) {
 }
 
 function addMember(members: Member[], name: string) {
-  const nextAvailableId = members.reduce((max, t) => Math.max(max, t.id), 0) + 1;
+  const nextAvailableId = v4();
 
-  if (members.find(t => t.name === name)) {
+  if (members.find((t) => t.name === name)) {
     return members;
   }
 
-  return [...members, {
-    id: nextAvailableId,
-    name,
-  }];
+  return [
+    ...members,
+    {
+      id: nextAvailableId,
+      name,
+    },
+  ];
 }
 
 function changeMember(members: Member[], member?: Member, newName?: string) {
   if (!member || !newName) {
     return members;
   }
-  return members.map(t => {
+  return members.map((t) => {
     if (t.id === member.id) {
       return { ...t, name: newName };
     } else {
@@ -46,4 +50,3 @@ function changeMember(members: Member[], member?: Member, newName?: string) {
     }
   });
 }
-
