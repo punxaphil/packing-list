@@ -12,14 +12,16 @@ export default function PLCheckboxGroup({
 }) {
   return (
     <CheckboxGroup.Root value={selected} onValueChange={setSelection}>
-      {options.map((option, index) => (
-        <Text size="3" key={index}>
-          <Flex gap="2">
-            <CheckboxGroup.Item value={option.value} />
-            {option.text}
-          </Flex>
-        </Text>
-      ))}
+      <Flex gap="4" direction="row">
+        {options.map((option, index) => (
+          <Text size="3" key={index}>
+            <Flex gap="1">
+              <CheckboxGroup.Item value={option.value} />
+              {option.text}
+            </Flex>
+          </Text>
+        ))}
+      </Flex>
     </CheckboxGroup.Root>
   );
 }

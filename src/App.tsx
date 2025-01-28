@@ -11,7 +11,7 @@ import { Item } from './types/Item.tsx';
 import { loadData } from './services/api.ts';
 import { Category } from './types/Category.tsx';
 import Categories from './components/category/Categories.tsx';
-import { Box, Flex, Theme } from '@radix-ui/themes';
+import { Box, Flex, Heading, Theme } from '@radix-ui/themes';
 import { Auth, useCurrentUser } from './components/auth/Auth.tsx';
 
 const TITLE = "Pack'n'Go!";
@@ -35,29 +35,33 @@ export default function App() {
         <Provider initialMembers={initialMembers} initialItems={initialItems} initialCategories={initialCategories}>
           <Theme accentColor="teal">
             <Box>
-              <div className="is-flex is-align-items-center is-justify-content-space-between">
-                <div className="is-flex is-align-items-center is-justify-content-space-between is-align-self-center">
-                <img src="/squirrel_icon.png" alt="squirrel icon" />
-                <span className="mx-2 is-size-1">{TITLE}</span>
-              </div> <Auth />
-              </div>
-              {isLoggedIn ? (
-              <>
-                <Flex gap="3" mb="3">
-                <NavButton name={'Home'} page={page} setPage={setPage}></NavButton>
-                <NavButton name={'Members'} page={page} setPage={setPage}></NavButton>
-                <NavButton name={'Categories'} page={page} setPage={setPage}></NavButton>
+              <Flex gap="3" align="center" justify="between" my="3">
+                <Flex gap="3" align="center">
+                  <img src="/squirrel_icon.png" alt="squirrel icon" />
+                  <Heading as="h1">{TITLE}</Heading>
+                </Flex>
+                <Auth />
               </Flex>
-              {page === 'Home' && <PackingList></PackingList>}
-              {page === 'Members' && <Members></Members>}
-              {page === 'Categories' && <Categories></Categories>}</>
-            ) : (
-              <div className="is-flex is-justify-content-space-between is-flex-direction-column is-align-items-center">
-                <h3>Welcome to {TITLE}</h3>
-                <p>Start preparing your trip by logging in or registering in the top right corner of this page ✈️</p>
-                <img src="/squirrel_400.png" alt="squirrel" />
-              </div>
-            )}
+              {isLoggedIn ? (
+                <>
+                  <Flex gap="3" mb="3">
+                    <NavButton name={'Home'} page={page} setPage={setPage}></NavButton>
+                    <NavButton name={'Members'} page={page} setPage={setPage}></NavButton>
+                    <NavButton name={'Categories'} page={page} setPage={setPage}></NavButton>
+                  </Flex>
+                  {page === 'Home' && <PackingList></PackingList>}
+                  {page === 'Members' && <Members></Members>}
+                  {page === 'Categories' && <Categories></Categories>}
+                </>
+              ) : (
+                <Flex justify="between" direction="column" align="center" gap="3">
+                  <Heading as="h3">Welcome to {TITLE}</Heading>
+                  <Box>
+                    Start preparing your trip by logging in or registering in the top right corner of this page ✈️
+                  </Box>
+                  <img src="/squirrel_400.png" alt="squirrel" />
+                </Flex>
+              )}
             </Box>
           </Theme>
         </Provider>

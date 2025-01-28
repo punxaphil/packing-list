@@ -7,6 +7,7 @@ import {
   signInWithEmailAndPassword,
   signOut,
 } from 'firebase/auth';
+import { Button, Flex, Text, TextField } from '@radix-ui/themes';
 
 export function useCurrentUser(): [string, (email: string) => void] {
   const [currentUser, setCurrentUser] = useState('');
@@ -74,41 +75,40 @@ export function Auth() {
   }
 
   return (
-    <div className="is-flex is-align-items-center">
+    <Flex gap="3" align="center">
       {currentUser ? (
         <>
-          <span>{currentUser}</span>
-          <button onClick={handleLogout} className="button is-light is-small is-danger m-2">
+          <Text size="1">{currentUser}</Text>
+          <Button onClick={handleLogout} size="1" color="red">
             Logout
-          </button>
+          </Button>
         </>
       ) : (
         <>
-          <input
-            type="text"
+          <TextField.Root
             value={email}
             onChange={handleEmail}
             onKeyDown={handleEnter}
-            className="input is-small"
+            size="1"
             placeholder="email"
-          ></input>
-          <input
+          ></TextField.Root>
+          <TextField.Root
             type="password"
             value={password}
             onChange={handlePassword}
             onKeyDown={handleEnter}
-            className="input is-small m-2"
+            size="1"
             placeholder="password"
-          ></input>
-          <button onClick={handleLogin} className="button is-small is-light is-primary m-2">
+          ></TextField.Root>
+          <Button onClick={handleLogin} size="1">
             Login
-          </button>
-          <button onClick={handleRegister} className="button is-small is-light is-success m-2">
+          </Button>
+          <Button onClick={handleRegister} size="1" color="orange">
             Register
-          </button>
+          </Button>
         </>
       )}
-      <span>{message}</span>
-    </div>
+      {message}
+    </Flex>
   );
 }
