@@ -11,7 +11,7 @@ import { Item } from './types/Item.tsx';
 import { loadData } from './services/api.ts';
 import { Category } from './types/Category.tsx';
 import Categories from './components/category/Categories.tsx';
-import { Flex, Theme } from '@radix-ui/themes';
+import { Box, Flex, Theme } from '@radix-ui/themes';
 
 export default function App() {
   const [page, setPage] = useState('Home');
@@ -29,7 +29,7 @@ export default function App() {
       ) : (
         <Provider initialMembers={initialMembers} initialItems={initialItems} initialCategories={initialCategories}>
           <Theme accentColor="teal">
-            <div className="content p-5">
+            <Box>
               <h1>Packing List</h1>
               <Flex gap="3" mb="3">
                 <NavButton name={'Home'} page={page} setPage={setPage}></NavButton>
@@ -39,7 +39,7 @@ export default function App() {
               {page === 'Home' && <PackingList></PackingList>}
               {page === 'Members' && <Members></Members>}
               {page === 'Categories' && <Categories></Categories>}
-            </div>
+            </Box>
           </Theme>
         </Provider>
       )}

@@ -11,8 +11,9 @@ export enum ActionType {
 export interface ItemAction {
   type: ActionType;
   name?: string;
-  memberIds?: number[];
+  memberIds?: string[];
   item?: Item;
+  category?: string;
 }
 
 export interface MemberAction {

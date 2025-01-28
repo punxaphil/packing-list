@@ -15,7 +15,9 @@ export default function PackingList() {
         ))}
       </Card>
 
-      <AddOrEditItem item={selectedItem} key={selectedItem?.id} cancel={() => setSelectedItem(undefined)} />
+      <Card mt="5">
+        <AddOrEditItem item={selectedItem} key={selectedItem?.id} cancel={() => setSelectedItem(undefined)} />
+      </Card>
     </Box>
   );
 }

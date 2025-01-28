@@ -3,10 +3,10 @@ import { useItemsDispatch, useMembers } from '../../services/contexts.ts';
 import { ActionType } from '../../types/Action.tsx';
 import { getName } from '../../services/utils.ts';
 import { MemberItemRow } from './MemberItemRow.tsx';
-import { Checkbox } from '../shared/Checkbox.tsx';
+import { PLCheckbox } from '../shared/PLCheckbox.tsx';
 import { MultiCheckbox } from '../shared/MultiCheckbox.tsx';
 import { Span } from '../shared/Span.tsx';
-import { Flex, IconButton } from '@radix-ui/themes';
+import { Box, Flex, IconButton } from '@radix-ui/themes';
 import { Pencil1Icon, TrashIcon } from '@radix-ui/react-icons';
 
 function ItemRow({ item, onEdit }: { item: Item; onEdit: (item: Item) => void }) {
@@ -37,13 +37,11 @@ function ItemRow({ item, onEdit }: { item: Item; onEdit: (item: Item) => void })
     item.name + (item.members?.length === 1 ? ` (${getName(members, item.members[0].id)})` : '');
 
   return (
-    <div>
+    <Box>
       <Flex gap="3" align="center">
-        {multipleMembers ? <MultiCheckbox item={item} /> : <Checkbox checked={item.checked} onClick={toggleItem} />}
+        {multipleMembers ? <MultiCheckbox item={item} /> : <PLCheckbox checked={item.checked} onClick={toggleItem} />}
 
-        <Span className="ml-1" strike={item.checked}>
-          {itemNameWithMember}
-        </Span>
+        <Span strike={item.checked}>{itemNameWithMember}</Span>
         <IconButton radius="full" onClick={onRemove} variant="ghost">
           <TrashIcon />
         </IconButton>
@@ -52,7 +50,7 @@ function ItemRow({ item, onEdit }: { item: Item; onEdit: (item: Item) => void })
         </IconButton>
       </Flex>
       {multipleMembers && item.members?.map((m) => <MemberItemRow memberItem={m} item={item} key={m.id} />)}
-    </div>
+    </Box>
   );
 }
 
