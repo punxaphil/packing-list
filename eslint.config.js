@@ -15,6 +15,7 @@ export default [
     },
     rules: {
       'prefer-template': 'error',
+      'object-shorthand': ["error", "always"],
     },
   },
   { languageOptions: { globals: globals.browser } },
