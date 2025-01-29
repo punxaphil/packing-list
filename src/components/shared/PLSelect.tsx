@@ -18,7 +18,7 @@ export default function PLSelect({
         <Select.Trigger placeholder={placeholder} />
         <Select.Content>
           {options.map((option, index) => (
-            <Select.Item key={index} value={option.text}>
+            <Select.Item key={index} value={option.value}>
               {option.text}
             </Select.Item>
           ))}
