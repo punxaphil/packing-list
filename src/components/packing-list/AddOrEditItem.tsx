@@ -6,7 +6,7 @@ import { Box, Button, Flex, Heading, Text, TextField } from '@radix-ui/themes';
 import PLCheckboxGroup from '../shared/PLCheckboxGroup.tsx';
 import { firebase } from '../../services/api.ts';
 
-export function AddOrEditItem({ item, cancel }: { item?: Item; cancel: () => void }) {
+export function AddOrEditItem({ item, done }: { item?: Item; done: () => void }) {
   const { members, categories } = useFirebase();
   const [name, setName] = useState<string>(item?.name ?? '');
   const [error, setError] = useState('');
@@ -18,7 +18,7 @@ export function AddOrEditItem({ item, cancel }: { item?: Item; cancel: () => voi
     (async function () {
       if (!members.find((t) => t.name === name)) {
         await firebase.addItem(name, selectedMembers, category);
-        setName('');
+        done();
       }
     })().catch(setError);
   }
@@ -30,6 +30,7 @@ export function AddOrEditItem({ item, cancel }: { item?: Item; cancel: () => voi
       }
       const updated = { ...item, name, members: selectedMembers, category };
       await firebase.updateItem(updated);
+      done();
     })().catch(setError);
   }
 
@@ -84,9 +85,9 @@ export function AddOrEditItem({ item, cancel }: { item?: Item; cancel: () => voi
           setSelection={setCategory}
           selected={category}
           placeholder="Select a category"
-          options={categories.map((category) => ({
-            value: category.id,
-            text: category.name,
+          options={categories.map(({ id, name }) => ({
+            value: id,
+            text: name,
           }))}
         />
       </Box>
@@ -94,7 +95,7 @@ export function AddOrEditItem({ item, cancel }: { item?: Item; cancel: () => voi
       <Flex gap="3" align="center" mt="5">
         <Button onClick={saveAction}>{item ? 'Update' : 'Add'}</Button>
         {item && (
-          <Button onClick={cancel} color="crimson">
+          <Button onClick={done} color="crimson">
             Cancel
           </Button>
         )}
