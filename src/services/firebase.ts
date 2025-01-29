@@ -1,5 +1,6 @@
 import { getFirestore } from 'firebase/firestore';
 import { initializeApp } from 'firebase/app';
+import { getDatabase } from 'firebase/database';
 
 const firebaseConfig = {
   // This is the public key (used client side in browser), so it's safe to be here
@@ -12,4 +13,5 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-export const db = getFirestore(app);
+export const firestore = getFirestore(app);
+export const db = getDatabase(app);

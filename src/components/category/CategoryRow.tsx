@@ -1,34 +1,42 @@
-import { ChangeEvent } from 'react';
-import { useCategoriesDispatch } from '../../services/contexts.ts';
-import { ActionType } from '../../types/Action.tsx';
-import { Category } from '../../types/Category.tsx';
+import { ChangeEvent, useState } from 'react';
+import { Category } from '../../types/Category.ts';
+import { firebase } from '../../services/api.ts';
 import { Flex, IconButton, TextField } from '@radix-ui/themes';
 import { TrashIcon } from '@radix-ui/react-icons';
+import { useFirebase } from '../../services/contexts.ts';
 
 export default function CategoryRow({ category }: { category: Category }) {
-  const dispatch = useCategoriesDispatch();
+  const [error, setError] = useState('');
+  const items = useFirebase().items;
 
-  function handleOnChange(event: ChangeEvent<HTMLInputElement>) {
-    dispatch({
-      type: ActionType.Changed,
-      category,
-      newName: event.target.value,
-    });
+  function changeName(event: ChangeEvent<HTMLInputElement>) {
+    (async function () {
+      if (category.name !== event.target.value) {
+        category.name = event.target.value;
+        await firebase.updateCategory(category);
+      }
+    })().catch(setError);
   }
 
-  function onRemove() {
-    dispatch({
-      type: ActionType.Deleted,
-      category,
-    });
+  function deleteCategory() {
+    (async function () {
+      for (const item of items) {
+        if (item.category === category.id) {
+          item.category = undefined;
+          await firebase.updateItem(item);
+        }
+      }
+      await firebase.deleteCategory(category.id);
+    })().catch(setError);
   }
 
   return (
     <Flex mt="2" gap="3" align="center">
-      <TextField.Root size="2" placeholder="Enter a category…" value={category.name} onChange={handleOnChange} />
-      <IconButton radius="full" onClick={onRemove} variant="ghost">
+      <TextField.Root size="2" placeholder="Enter a category…" value={category.name} onChange={changeName} />
+      <IconButton radius="full" onClick={deleteCategory} variant="ghost">
         <TrashIcon />
       </IconButton>
+      {error && <div className="is-danger">{error}</div>}
     </Flex>
   );
 }

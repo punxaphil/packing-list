@@ -1,28 +1,18 @@
-import { Item } from '../../types/Item.tsx';
+import { Item } from '../../types/Item.ts';
 import { allChecked, allUnChecked } from '../../services/utils.ts';
-import { useItemsDispatch } from '../../services/contexts.ts';
-import { ActionType } from '../../types/Action.tsx';
 import { Checkbox } from '@radix-ui/themes';
 
-export function MultiCheckbox({ item }: { item: Item }) {
-  const dispatch = useItemsDispatch();
-
+export function MultiCheckbox({ item, onUpdate }: { item: Item; onUpdate: (item: Item) => void }) {
   function checkAll() {
     item.checked = true;
     item.members?.forEach((t) => (t.checked = true));
-    dispatch({
-      type: ActionType.Changed,
-      item,
-    });
+    onUpdate(item);
   }
 
   function uncheckAll() {
     item.checked = false;
     item.members?.forEach((t) => (t.checked = false));
-    dispatch({
-      type: ActionType.Changed,
-      item,
-    });
+    onUpdate(item);
   }
 
   return allChecked(item) ? (

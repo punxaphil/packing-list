@@ -1,7 +1,7 @@
-import { MemberItem } from './MemberItem.tsx';
+import { MemberItem } from './MemberItem.ts';
 
 export interface Item {
-  id: number;
+  id: string;
   name: string;
   checked: boolean;
   members?: MemberItem[];

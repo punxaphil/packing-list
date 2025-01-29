@@ -1,9 +1,5 @@
-import { Item } from '../types/Item.tsx';
-import { Member } from '../types/Member.tsx';
-
-export function memberIds(item?: Item): string[] | undefined {
-  return item?.members?.map((m) => m.id);
-}
+import { Item } from '../types/Item.ts';
+import { Member } from '../types/Member.ts';
 
 export function getName(members: Member[], memberId: string) {
   return members.find((t) => t.id === memberId)?.name;
