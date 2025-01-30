@@ -7,7 +7,7 @@ import {
   signInWithEmailAndPassword,
   signOut,
 } from 'firebase/auth';
-import { Button, Flex, Text, TextField } from '@radix-ui/themes';
+import { Avatar, Button, Flex, Link, TextField, Tooltip } from '@radix-ui/themes';
 
 export function useCurrentUser() {
   const [userId, setUserId] = useState('');
@@ -72,12 +72,11 @@ export function Auth() {
   return (
     <Flex gap="3" align="center">
       {currentUser.userId ? (
-        <>
-          <Text size="1">{currentUser.email}</Text>
-          <Button onClick={handleLogout} size="1" color="red">
-            Logout
-          </Button>
-        </>
+        <Tooltip content={`Logout ${currentUser.email}`}>
+          <Link onClick={handleLogout} size="1" href="#">
+            <Avatar fallback={currentUser.email[0].toUpperCase()} radius="full"></Avatar>
+          </Link>
+        </Tooltip>
       ) : (
         <>
           <TextField.Root
