@@ -9,7 +9,7 @@ import { Pencil1Icon, TrashIcon } from '@radix-ui/react-icons';
 import { firebase } from '../../services/api.ts';
 import { useFirebase } from '../../services/contexts.ts';
 
-function ItemRow({ item, onEdit }: { item: Item; onEdit: (item: Item) => void }) {
+function ItemRow({ item, onEdit, indent }: { item: Item; onEdit: (item: Item) => void; indent?: boolean }) {
   const members = useFirebase().members;
 
   async function toggleItem() {
@@ -30,7 +30,7 @@ function ItemRow({ item, onEdit }: { item: Item; onEdit: (item: Item) => void })
     item.name + (item.members?.length === 1 ? ` (${getName(members, item.members[0].id)})` : '');
 
   return (
-    <Box>
+    <Box ml={indent ? '3' : '0'}>
       <Flex gap="3" align="center">
         {multipleMembers ? (
           <MultiCheckbox item={item} onUpdate={onUpdate} />
