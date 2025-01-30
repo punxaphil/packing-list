@@ -1,13 +1,13 @@
-import { ChangeEvent, useState } from 'react';
+import { ChangeEvent } from 'react';
 import { Member } from '../../types/Member.ts';
 import { Flex, IconButton, TextField } from '@radix-ui/themes';
 import { TrashIcon } from '@radix-ui/react-icons';
 import { firebase } from '../../services/api.ts';
-import { useFirebase } from '../../services/contexts.ts';
+import { useError, useFirebase } from '../../services/contexts.ts';
 
 export default function MemberRow({ member }: { member: Member }) {
   const items = useFirebase().items;
-  const [error, setError] = useState('');
+  const { setError } = useError();
 
   function changeName(event: ChangeEvent<HTMLInputElement>) {
     (async function () {
@@ -36,7 +36,6 @@ export default function MemberRow({ member }: { member: Member }) {
       <TextField.Root size="2" placeholder="Enter a name…" value={member.name} onChange={changeName} />
       <IconButton radius="full" onClick={deleteMember} variant="ghost">
         <TrashIcon />
-        {error && <div className="is-danger">{error}</div>}
       </IconButton>
     </Flex>
   );

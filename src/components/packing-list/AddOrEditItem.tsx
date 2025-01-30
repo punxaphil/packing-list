@@ -1,4 +1,4 @@
-import { useFirebase } from '../../services/contexts.ts';
+import { useError, useFirebase } from '../../services/contexts.ts';
 import React, { useState } from 'react';
 import { Item } from '../../types/Item.ts';
 import PLSelect from '../shared/PLSelect.tsx';
@@ -9,7 +9,7 @@ import { firebase } from '../../services/api.ts';
 export function AddOrEditItem({ item, done }: { item?: Item; done: () => void }) {
   const { members, categories } = useFirebase();
   const [name, setName] = useState<string>(item?.name ?? '');
-  const [error, setError] = useState('');
+  const { setError } = useError();
   const [selectedMembers, setSelectedMembers] = useState(item?.members ?? []);
   const [category, setCategory] = useState<string>(item?.category ?? '');
   const saveAction = item ? handleUpdateItem : handleAdd;
@@ -99,7 +99,6 @@ export function AddOrEditItem({ item, done }: { item?: Item; done: () => void })
             Cancel
           </Button>
         )}
-        {error && <div className="is-danger">{error}</div>}
       </Flex>
     </Box>
   );

@@ -1,13 +1,13 @@
-import { ChangeEvent, useState } from 'react';
+import { ChangeEvent } from 'react';
 import { Category } from '../../types/Category.ts';
 import { firebase } from '../../services/api.ts';
 import { Flex, IconButton, TextField } from '@radix-ui/themes';
 import { TrashIcon } from '@radix-ui/react-icons';
-import { useFirebase } from '../../services/contexts.ts';
+import { useError, useFirebase } from '../../services/contexts.ts';
 
 export default function CategoryRow({ category }: { category: Category }) {
-  const [error, setError] = useState('');
   const items = useFirebase().items;
+  const { setError } = useError();
 
   function changeName(event: ChangeEvent<HTMLInputElement>) {
     (async function () {
@@ -36,7 +36,6 @@ export default function CategoryRow({ category }: { category: Category }) {
       <IconButton radius="full" onClick={deleteCategory} variant="ghost">
         <TrashIcon />
       </IconButton>
-      {error && <div className="is-danger">{error}</div>}
     </Flex>
   );
 }

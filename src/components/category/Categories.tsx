@@ -1,5 +1,5 @@
 import { ChangeEvent, KeyboardEvent, useState } from 'react';
-import { useFirebase } from '../../services/contexts';
+import { useError, useFirebase } from '../../services/contexts';
 import CategoryRow from './CategoryRow';
 import { Box, Button, Card, Flex, TextField } from '@radix-ui/themes';
 import { firebase } from '../../services/api.ts';
@@ -7,7 +7,7 @@ import { firebase } from '../../services/api.ts';
 export default function Categories() {
   const categories = useFirebase().categories;
   const [newName, setNewName] = useState<string>('');
-  const [error, setError] = useState<string>('');
+  const { setError } = useError();
 
   function addCategory() {
     (async function () {
@@ -37,11 +37,14 @@ export default function Categories() {
         <Flex mt="2" gap="3" align="center">
           <TextField.Root
             size="2"
-            placeholder="Enter a category..." value={newName} onChange={handleOnChange} onKeyDown={handleEnter} />
+            placeholder="Enter a category..."
+            value={newName}
+            onChange={handleOnChange}
+            onKeyDown={handleEnter}
+          />
           <Button onClick={addCategory}>Add category</Button>
         </Flex>
       </Card>
-      {error}
     </Box>
   );
 }

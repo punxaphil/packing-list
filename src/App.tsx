@@ -1,13 +1,16 @@
 import '@radix-ui/themes/styles.css';
 
-import { Box, Flex, Heading, Theme } from '@radix-ui/themes';
+import { Box, Callout, Flex, Heading, Theme } from '@radix-ui/themes';
 import { Auth, useCurrentUser } from './components/auth/Auth.tsx';
 import { ManageList } from './components/manage-list/ManageList.tsx';
+import { useError } from './services/contexts.ts';
+import { InfoCircledIcon } from '@radix-ui/react-icons';
 
 const TITLE = "Pack'n'Go!";
 
 export default function App() {
   const { userId, loggingIn } = useCurrentUser();
+  const { error, setError } = useError();
   const isLoggedIn = !!userId;
   return (
     <Theme accentColor="teal">
@@ -37,6 +40,16 @@ export default function App() {
           </Flex>
         )}
       </Box>
+      {error && (
+        <Box position="fixed" bottom="0" m="5">
+          <Callout.Root color="red" onClick={() => setError('')}>
+            <Callout.Icon>
+              <InfoCircledIcon />
+            </Callout.Icon>
+            <Callout.Text>WARNING! {error.toString()}</Callout.Text>
+          </Callout.Root>
+        </Box>
+      )}
     </Theme>
   );
 }

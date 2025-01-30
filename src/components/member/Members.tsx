@@ -1,13 +1,13 @@
 import { ChangeEvent, KeyboardEvent, useState } from 'react';
 import MemberRow from './MemberRow.tsx';
-import { useFirebase } from '../../services/contexts.ts';
+import { useError, useFirebase } from '../../services/contexts.ts';
 import { firebase } from '../../services/api.ts';
 import { Box, Button, Card, Flex, TextField } from '@radix-ui/themes';
 
 export default function Members() {
   const members = useFirebase().members;
   const [newName, setNewName] = useState<string>('');
-  const [error, setError] = useState<string>('');
+  const { setError } = useError();
 
   function addMember() {
     (async function () {
@@ -37,11 +37,14 @@ export default function Members() {
         <Flex mt="2" gap="3" align="center">
           <TextField.Root
             size="2"
-            placeholder="Enter a name..." value={newName} onChange={handleOnChange} onKeyDown={handleEnter} />
+            placeholder="Enter a name..."
+            value={newName}
+            onChange={handleOnChange}
+            onKeyDown={handleEnter}
+          />
           <Button onClick={addMember}>Add member</Button>
         </Flex>
       </Card>
-      {error}
     </Box>
   );
 }
