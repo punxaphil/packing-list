@@ -3,7 +3,7 @@ import NavButton from '../shared/NavButton.tsx';
 import PackingList from '../packing-list/PackingList.tsx';
 import Members from '../member/Members.tsx';
 import Categories from '../category/Categories.tsx';
-import { getUserData } from '../../services/api.ts';
+import { getUserCollectionsAndSubscribe } from '../../services/api.ts';
 import { useEffect, useState } from 'react';
 import { Flex } from '@radix-ui/themes';
 import { getAuth } from 'firebase/auth';
@@ -23,10 +23,7 @@ export function ManageList({ userId }: { userId: string }) {
       if (!userId) {
         throw new Error('No user logged in');
       }
-      const initialData = await getUserData(setMembers, setCategories, setItems);
-      setMembers(initialData.members);
-      setCategories(initialData.categories);
-      setItems(initialData.items);
+      await getUserCollectionsAndSubscribe(setMembers, setCategories, (items: Item[]) => setItems(items));
     })().catch(console.error);
   }, []);
   return (

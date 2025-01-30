@@ -6,6 +6,8 @@ import {
   DocumentData,
   getDocs,
   onSnapshot,
+  QueryDocumentSnapshot,
+  QuerySnapshot,
   updateDoc,
   WithFieldValue,
 } from 'firebase/firestore';
@@ -22,31 +24,22 @@ const USERS_KEY = 'users';
 
 const CATEGORIES_KEY = 'categories';
 
-export async function getUserData(
-  setMember: (members: Member[]) => void,
-  setCategory: (categories: Category[]) => void,
-  setItem: (items: Item[]) => void
+export async function getUserCollectionsAndSubscribe(
+  setMembers: (members: Member[]) => void,
+  setCategories: (categories: Category[]) => void,
+  setItems: (items: Item[]) => void
 ) {
   const userId = getUserId();
   const memberQuery = collection(firestore, USERS_KEY, userId, MEMBERS_KEY);
   const itemsQuery = collection(firestore, USERS_KEY, userId, ITEMS_KEY);
   const categoriesQuery = collection(firestore, USERS_KEY, userId, CATEGORIES_KEY);
-  onSnapshot(memberQuery, (coll) => setMember(coll.docs.map((doc) => ({ id: doc.id, ...doc.data() })) as Member[]));
-  onSnapshot(itemsQuery, (coll) => setItem(coll.docs.map((doc) => ({ id: doc.id, ...doc.data() })) as Item[]));
-  onSnapshot(categoriesQuery, (coll) =>
-    setCategory(coll.docs.map((doc) => ({ id: doc.id, ...doc.data() })) as Category[])
-  );
+  onSnapshot(memberQuery, (res) => setMembers(fromQueryResult(res)));
+  onSnapshot(itemsQuery, (res) => setItems(fromQueryResult(res)));
+  onSnapshot(categoriesQuery, (res) => setCategories(fromQueryResult(res)));
 
-  const members = await getDocs(memberQuery);
-  const items = await getDocs(itemsQuery);
-  const categories = await getDocs(categoriesQuery);
-
-  return {
-    id: userId,
-    members: members.docs.map((doc) => ({ id: doc.id, ...doc.data() })) as Member[],
-    items: items.docs.map((doc) => ({ id: doc.id, ...doc.data() })) as Item[],
-    categories: categories.docs.map((doc) => ({ id: doc.id, ...doc.data() })) as Category[],
-  };
+  setMembers(fromQueryResult(await getDocs(memberQuery)));
+  setCategories(fromQueryResult(await getDocs(categoriesQuery)));
+  setItems(fromQueryResult(await getDocs(itemsQuery)));
 }
 
 function getUserId() {
@@ -55,6 +48,10 @@ function getUserId() {
     throw new Error('No user logged in');
   }
   return userId;
+}
+
+function fromQueryResult<K>(res: QuerySnapshot) {
+  return res.docs.map((doc: QueryDocumentSnapshot) => ({ id: doc.id, ...doc.data() })) as K[];
 }
 
 async function add<K extends DocumentData>(userColl: string, data: WithFieldValue<K>) {
