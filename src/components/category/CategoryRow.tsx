@@ -22,7 +22,7 @@ export default function CategoryRow({ category }: { category: Category }) {
     (async function () {
       for (const item of items) {
         if (item.category === category.id) {
-          item.category = undefined;
+          delete item.category;
           await firebase.updateItem(item);
         }
       }

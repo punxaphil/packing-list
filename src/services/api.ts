@@ -77,8 +77,8 @@ export const firebase = {
       throw new Error('Unable to add item');
     }
   },
-  updateItem: async function ({ checked, id, members, name, category }: Item) {
-    await update(ITEMS_KEY, id, { checked, members, name, category });
+  updateItem: async function (item: Item) {
+    await update(ITEMS_KEY, item.id, item);
   },
   deleteItem: async function (id: string) {
     await del(ITEMS_KEY, id);
@@ -91,8 +91,8 @@ export const firebase = {
       throw new Error('Unable to add member');
     }
   },
-  updateMember: async function ({ id, name }: Member) {
-    await update(MEMBERS_KEY, id, { name });
+  updateMember: async function (member: Member) {
+    await update(MEMBERS_KEY, member.id, member);
   },
   deleteMember: async function (id: string) {
     await del(MEMBERS_KEY, id);
@@ -105,8 +105,8 @@ export const firebase = {
       throw new Error('Unable to add category');
     }
   },
-  updateCategory: async function ({ id, name }: Category) {
-    await update(CATEGORIES_KEY, id, { name });
+  updateCategory: async function (category: Category) {
+    await update(CATEGORIES_KEY, category.id, category);
   },
   deleteCategory: async function (id: string) {
     await del(CATEGORIES_KEY, id);
