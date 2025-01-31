@@ -8,6 +8,7 @@ import {
   signOut,
 } from 'firebase/auth';
 import { Avatar, Button, Flex, Link, TextField, Tooltip } from '@radix-ui/themes';
+import { useError } from '../../services/contexts.ts';
 
 export function useCurrentUser() {
   const [userId, setUserId] = useState('');
@@ -22,12 +23,10 @@ export function useCurrentUser() {
   return { userId, email, loggingIn };
 }
 
-export function Auth() {
+export function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [message, setMessage] = useState('');
-  const currentUser = useCurrentUser();
-
+  const { setError } = useError();
   function handleEmail(event: ChangeEvent<HTMLInputElement>) {
     setEmail(event.target.value);
   }
@@ -46,63 +45,56 @@ export function Auth() {
     const auth = getAuth();
     setPersistence(auth, browserLocalPersistence)
       .then(() => signInWithEmailAndPassword(auth, email, password))
-      .catch((error) => handleError(error.code, error.message));
-  }
-
-  function handleError(code: string, msg: string) {
-    setMessage(`Error: ${code} - ${msg}`);
+      .catch(setError);
   }
 
   function handleRegister() {
     const auth = getAuth();
     createUserWithEmailAndPassword(auth, email, password)
-      .then((userCredential) => {
-        const user = userCredential.user;
-        setMessage(`Registered as ${user.email}`);
-      })
-      .catch((error) => handleError(error.code, error.message));
-  }
-
-  function handleLogout() {
-    signOut(getAuth())
-      .then(() => setMessage(''))
-      .catch((error) => handleError(error.code, error.message));
+      .then(() => signInWithEmailAndPassword(auth, email, password))
+      .catch(setError);
   }
 
   return (
     <Flex gap="3" align="center">
-      {currentUser.userId ? (
-        <Tooltip content={`Logout ${currentUser.email}`}>
-          <Link onClick={handleLogout} size="1" href="#">
-            <Avatar fallback={currentUser.email[0].toUpperCase()} radius="full"></Avatar>
-          </Link>
-        </Tooltip>
-      ) : (
-        <>
-          <TextField.Root
-            value={email}
-            onChange={handleEmail}
-            onKeyDown={handleEnter}
-            size="1"
-            placeholder="email"
-          ></TextField.Root>
-          <TextField.Root
-            type="password"
-            value={password}
-            onChange={handlePassword}
-            onKeyDown={handleEnter}
-            size="1"
-            placeholder="password"
-          ></TextField.Root>
-          <Button onClick={handleLogin} size="1">
-            Login
-          </Button>
-          <Button onClick={handleRegister} size="1" color="orange">
-            Register
-          </Button>
-        </>
-      )}
-      {message}
+      <TextField.Root
+        value={email}
+        onChange={handleEmail}
+        onKeyDown={handleEnter}
+        size="1"
+        placeholder="email"
+      ></TextField.Root>
+      <TextField.Root
+        type="password"
+        value={password}
+        onChange={handlePassword}
+        onKeyDown={handleEnter}
+        size="1"
+        placeholder="password"
+      ></TextField.Root>
+      <Button onClick={handleLogin} size="1">
+        Login
+      </Button>
+      <Button onClick={handleRegister} size="1" color="orange">
+        Register
+      </Button>
     </Flex>
+  );
+}
+
+export function Logout() {
+  const { setError } = useError();
+  const currentUser = useCurrentUser();
+
+  function handleLogout() {
+    signOut(getAuth()).catch(setError);
+  }
+
+  return (
+    <Tooltip content={`Logout ${currentUser.email}`}>
+      <Link onClick={handleLogout} size="1" href="#">
+        <Avatar fallback={currentUser?.email[0]?.toUpperCase()} radius="full"></Avatar>
+      </Link>
+    </Tooltip>
   );
 }
