@@ -34,7 +34,7 @@ export default function App() {
               <>
                 <Heading as="h3">Welcome to {TITLE}</Heading>
                 <Box>Start preparing your trip by logging in or registering below ✈️</Box>
-                <img src="/squirrel_400.png" alt="squirrel" />
+                <img src="/squirrel_400.png" alt="squirrel" style={{ maxWidth: '90%' }} />
                 <Login />
               </>
             )}
