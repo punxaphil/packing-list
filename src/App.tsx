@@ -34,7 +34,7 @@ export default function App() {
             <Route path="categories" element={<Categories />} />
           </Route>
         ) : (
-          <Route path="/" element={<Welcome title={TITLE} />} />
+          <Route path="*" element={<Welcome title={TITLE} />} />
         )}
       </Routes>
       {error && (
