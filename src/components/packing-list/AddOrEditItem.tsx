@@ -1,12 +1,12 @@
+import { Box, Button, Flex, Heading, Input, Text } from '@chakra-ui/react';
 import { useError, useFirebase } from '../../services/contexts.ts';
 import React, { useState } from 'react';
-import { Item } from '../../types/Item.ts';
+import { PackItem } from '../../types/PackItem.ts';
 import PLSelect from '../shared/PLSelect.tsx';
-import { Box, Button, Flex, Heading, Text, TextField } from '@radix-ui/themes';
 import PLCheckboxGroup from '../shared/PLCheckboxGroup.tsx';
 import { firebase } from '../../services/api.ts';
 
-export function AddOrEditItem({ item, done }: { item?: Item; done: () => void }) {
+export function AddOrEditItem({ item, done }: { item?: PackItem; done: () => void }) {
   const { members, categories } = useFirebase();
   const [name, setName] = useState<string>(item?.name ?? '');
   const { setError } = useError();
@@ -56,7 +56,7 @@ export function AddOrEditItem({ item, done }: { item?: Item; done: () => void })
     <Box>
       <Heading as="h2">{item ? 'Edit' : 'Add new'} item</Heading>
       <Box maxWidth="300px">
-        <TextField.Root
+        <Input
           size="2"
           placeholder="Enter a item name..."
           value={name}
@@ -65,31 +65,20 @@ export function AddOrEditItem({ item, done }: { item?: Item; done: () => void })
         />
       </Box>
       <Box mt="2">
-        <Text size="3" weight="bold">
+        <Text size="3" as="b">
           Assign
         </Text>
         <PLCheckboxGroup
           setSelection={onMembersSelection}
-          selected={selectedMembers.map((member) => member.id)}
-          options={members.map((member) => ({
-            value: member.id,
-            text: member.name,
-          }))}
-        ></PLCheckboxGroup>
+          selected={selectedMembers.map((m) => m.id)}
+          options={members}
+        />
       </Box>
       <Box mt="2">
-        <Text size="3" weight="bold">
-          Category
+        <Text size="3" as="b">
+          NamedEntity
         </Text>
-        <PLSelect
-          setSelection={setCategory}
-          selected={category}
-          placeholder="Select a category"
-          options={categories.map(({ id, name }) => ({
-            value: id,
-            text: name,
-          }))}
-        />
+        <PLSelect setSelection={setCategory} selected={category} placeholder="Select a category" options={categories} />
       </Box>
 
       <Flex gap="3" align="center" mt="5">

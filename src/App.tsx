@@ -1,11 +1,20 @@
-import '@radix-ui/themes/styles.css';
-
-import { Box, Callout, Flex, Heading, Theme } from '@radix-ui/themes';
-import { Login, Logout, useCurrentUser } from './components/auth/Auth.tsx';
-import { ManageList } from './components/manage-list/ManageList.tsx';
+import { Login, useCurrentUser } from './components/auth/Auth.tsx';
+import { Layout } from './components/layout/Layout.tsx';
 import { useError } from './services/contexts.ts';
-import { InfoCircledIcon } from '@radix-ui/react-icons';
+import {
+  Alert,
+  AlertDescription,
+  AlertIcon,
+  AlertTitle,
+  Box,
+  ChakraProvider,
+  extendTheme,
+  Flex,
+  Heading,
+  withDefaultColorScheme,
+} from '@chakra-ui/react';
 
+const customTheme = extendTheme(withDefaultColorScheme({ colorScheme: 'teal' }));
 const TITLE = "Pack'n'Go!";
 
 export default function App() {
@@ -13,21 +22,12 @@ export default function App() {
   const { error, setError } = useError();
   const isLoggedIn = !!userId;
   return (
-    <Theme accentColor="teal">
+    <ChakraProvider theme={customTheme}>
       <Box>
         {isLoggedIn ? (
-          <>
-            <Flex gap="3" align="center" justify="between" my="3">
-              <Flex gap="3" align="center">
-                <img src="/squirrel_icon.png" alt="squirrel icon" />
-                <Heading as="h1">{TITLE}</Heading>
-              </Flex>
-              <Logout />
-            </Flex>
-            <ManageList userId={userId} />
-          </>
+          <Layout userId={userId} title={TITLE} />
         ) : (
-          <Flex justify="between" direction="column" align="center" gap="3">
+          <Flex justifyContent="space-between" direction="column" align="center">
             {loggingIn ? (
               <Heading as="h3">Logging in...</Heading>
             ) : (
@@ -43,14 +43,13 @@ export default function App() {
       </Box>
       {error && (
         <Box position="fixed" bottom="0" m="5">
-          <Callout.Root color="red" onClick={() => setError('')}>
-            <Callout.Icon>
-              <InfoCircledIcon />
-            </Callout.Icon>
-            <Callout.Text>WARNING! {error.toString()}</Callout.Text>
-          </Callout.Root>
+          <Alert status="error" onClick={() => setError('')}>
+            <AlertIcon />
+            <AlertTitle>Error detected!</AlertTitle>
+            <AlertDescription>{error.toString()}</AlertDescription>
+          </Alert>
         </Box>
       )}
-    </Theme>
+    </ChakraProvider>
   );
 }

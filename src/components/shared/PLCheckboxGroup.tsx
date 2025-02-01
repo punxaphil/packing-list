@@ -1,27 +1,24 @@
-import { CheckboxGroup, Flex, Text } from '@radix-ui/themes';
-import { Option } from '../../types/Option';
+import { Checkbox, CheckboxGroup, HStack } from '@chakra-ui/react';
+import { NamedEntity } from '../../types/NamedEntity.ts';
 
 export default function PLCheckboxGroup({
   options,
   selected,
   setSelection,
 }: {
-  options: Option[];
+  options: NamedEntity[];
   selected: string[];
   setSelection: (value: string[]) => void;
 }) {
   return (
-    <CheckboxGroup.Root value={selected} onValueChange={setSelection}>
-      <Flex gap="4" direction="row">
+    <CheckboxGroup defaultValue={selected} onChange={setSelection}>
+      <HStack spacing="5">
         {options.map((option, index) => (
-          <Text size="3" key={index}>
-            <Flex gap="1">
-              <CheckboxGroup.Item value={option.value} />
-              {option.text}
-            </Flex>
-          </Text>
+          <Checkbox key={index} value={option.id}>
+            {option.name}
+          </Checkbox>
         ))}
-      </Flex>
-    </CheckboxGroup.Root>
+      </HStack>
+    </CheckboxGroup>
   );
 }

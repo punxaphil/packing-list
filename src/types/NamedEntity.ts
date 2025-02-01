@@ -1,4 +1,4 @@
-export interface Category {
+export interface NamedEntity {
   id: string;
   name: string;
 }

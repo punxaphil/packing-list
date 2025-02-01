@@ -1,6 +1,6 @@
 import { MemberItem } from './MemberItem.ts';
 
-export interface Item {
+export interface PackItem {
   id: string;
   name: string;
   checked: boolean;

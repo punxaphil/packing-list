@@ -5,16 +5,16 @@ import Members from '../member/Members.tsx';
 import Categories from '../category/Categories.tsx';
 import { getUserCollectionsAndSubscribe } from '../../services/api.ts';
 import { useEffect, useState } from 'react';
-import { Flex } from '@radix-ui/themes';
 import { getAuth } from 'firebase/auth';
-import { Item } from '../../types/Item.ts';
-import { Category } from '../../types/Category.ts';
-import { Member } from '../../types/Member.ts';
+import { PackItem } from '../../types/PackItem.ts';
+import { NamedEntity } from '../../types/NamedEntity.ts';
+import { Flex, Heading } from '@chakra-ui/react';
+import { Logout } from '../auth/Auth.tsx';
 
-export function ManageList({ userId }: { userId: string }) {
-  const [members, setMembers] = useState<Member[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [items, setItems] = useState<Item[]>([]);
+export function Layout({ userId, title }: { userId: string; title?: string }) {
+  const [members, setMembers] = useState<NamedEntity[]>([]);
+  const [categories, setCategories] = useState<NamedEntity[]>([]);
+  const [items, setItems] = useState<PackItem[]>([]);
   const [page, setPage] = useState('Home');
 
   useEffect(() => {
@@ -23,21 +23,26 @@ export function ManageList({ userId }: { userId: string }) {
       if (!userId) {
         throw new Error('No user logged in');
       }
-      await getUserCollectionsAndSubscribe(setMembers, setCategories, (items: Item[]) => setItems(items));
+      await getUserCollectionsAndSubscribe(setMembers, setCategories, (items: PackItem[]) => setItems(items));
     })().catch(console.error);
   }, []);
   return (
     <>
       {members ? (
         <FirebaseContext.Provider value={{ id: userId, members, categories, items }}>
+          <Flex align="center" justifyContent="space-between" m="3">
+            <img src="/squirrel_icon.png" alt="squirrel icon" />
+            <Heading as="h1">{title}</Heading>
+            <Logout />
+          </Flex>
           <Flex gap="3" mb="3">
             <NavButton name={'Home'} page={page} setPage={setPage}></NavButton>
             <NavButton name={'Members'} page={page} setPage={setPage}></NavButton>
             <NavButton name={'Categories'} page={page} setPage={setPage}></NavButton>
           </Flex>
-          {page === 'Home' && <PackingList></PackingList>}
-          {page === 'Members' && <Members></Members>}
-          {page === 'Categories' && <Categories></Categories>}
+          {page === 'Home' && <PackingList />}
+          {page === 'Members' && <Members />}
+          {page === 'Categories' && <Categories />}
         </FirebaseContext.Provider>
       ) : (
         <div>Loading...</div>

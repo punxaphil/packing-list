@@ -1,5 +1,5 @@
-import { Checkbox } from '@radix-ui/themes';
+import { Checkbox } from '@chakra-ui/react';
 
 export function PLCheckbox({ checked, onClick }: { checked: boolean; onClick: () => void }) {
-  return <Checkbox size="2" checked={checked} onCheckedChange={onClick} />;
+  return <Checkbox isChecked={checked} onChange={onClick} />;
 }

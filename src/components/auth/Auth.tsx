@@ -7,8 +7,8 @@ import {
   signInWithEmailAndPassword,
   signOut,
 } from 'firebase/auth';
-import { Avatar, Button, Flex, Link, TextField, Tooltip } from '@radix-ui/themes';
 import { useError } from '../../services/contexts.ts';
+import { Avatar, Button, Flex, Input, Link, Tooltip } from '@chakra-ui/react';
 
 export function useCurrentUser() {
   const [userId, setUserId] = useState('');
@@ -57,21 +57,15 @@ export function Login() {
 
   return (
     <Flex gap="3" align="center">
-      <TextField.Root
-        value={email}
-        onChange={handleEmail}
-        onKeyDown={handleEnter}
-        size="1"
-        placeholder="email"
-      ></TextField.Root>
-      <TextField.Root
+      <Input value={email} onChange={handleEmail} onKeyDown={handleEnter} size="1" placeholder="email" />
+      <Input
         type="password"
         value={password}
         onChange={handlePassword}
         onKeyDown={handleEnter}
         size="1"
         placeholder="password"
-      ></TextField.Root>
+      />
       <Button onClick={handleLogin} size="1">
         Login
       </Button>
@@ -93,7 +87,7 @@ export function Logout() {
   return (
     <Tooltip content={`Logout ${currentUser.email}`}>
       <Link onClick={handleLogout} size="1" href="#">
-        <Avatar fallback={currentUser?.email[0]?.toUpperCase()} radius="full"></Avatar>
+        <Avatar name={currentUser?.email[0]?.toUpperCase()} />
       </Link>
     </Tooltip>
   );

@@ -12,9 +12,8 @@ import {
   WithFieldValue,
 } from 'firebase/firestore';
 import { firestore } from './firebase';
-import { Member } from '../types/Member.ts';
-import { Item } from '../types/Item.ts';
-import { Category } from '../types/Category.ts';
+import { NamedEntity } from '../types/NamedEntity.ts';
+import { PackItem } from '../types/PackItem.ts';
 import { getAuth } from 'firebase/auth';
 import { MemberItem } from '../types/MemberItem.ts';
 
@@ -25,9 +24,9 @@ const USERS_KEY = 'users';
 const CATEGORIES_KEY = 'categories';
 
 export async function getUserCollectionsAndSubscribe(
-  setMembers: (members: Member[]) => void,
-  setCategories: (categories: Category[]) => void,
-  setItems: (items: Item[]) => void
+  setMembers: (members: NamedEntity[]) => void,
+  setCategories: (categories: NamedEntity[]) => void,
+  setItems: (items: PackItem[]) => void
 ) {
   const userId = getUserId();
   const memberQuery = collection(firestore, USERS_KEY, userId, MEMBERS_KEY);
@@ -69,7 +68,7 @@ async function del(userColl: string, id: string) {
 }
 
 export const firebase = {
-  addItem: async function (name: string, members: MemberItem[], category: string): Promise<Item | undefined> {
+  addItem: async function (name: string, members: MemberItem[], category: string): Promise<PackItem | undefined> {
     const docRef = await add(ITEMS_KEY, { name, members, category });
     if (docRef) {
       return { id: docRef.id, checked: false, members, name, category };
@@ -77,35 +76,25 @@ export const firebase = {
       throw new Error('Unable to add item');
     }
   },
-  updateItem: async function (item: Item) {
+  updateItem: async function (item: PackItem) {
     await update(ITEMS_KEY, item.id, item);
   },
   deleteItem: async function (id: string) {
     await del(ITEMS_KEY, id);
   },
-  addMember: async function (name: string): Promise<Member> {
-    const docRef = await add(MEMBERS_KEY, { name });
-    if (docRef) {
-      return { id: docRef.id, name };
-    } else {
-      throw new Error('Unable to add member');
-    }
+  addMember: async function (name: string): Promise<void> {
+    await add(MEMBERS_KEY, { name });
   },
-  updateMember: async function (member: Member) {
+  updateMember: async function (member: NamedEntity) {
     await update(MEMBERS_KEY, member.id, member);
   },
   deleteMember: async function (id: string) {
     await del(MEMBERS_KEY, id);
   },
-  addCategory: async function (name: string): Promise<Category> {
-    const docRef = await add(CATEGORIES_KEY, { name });
-    if (docRef) {
-      return { id: docRef.id, name };
-    } else {
-      throw new Error('Unable to add category');
-    }
+  addCategory: async function (name: string): Promise<void> {
+    await add(CATEGORIES_KEY, { name });
   },
-  updateCategory: async function (category: Category) {
+  updateCategory: async function (category: NamedEntity) {
     await update(CATEGORIES_KEY, category.id, category);
   },
   deleteCategory: async function (id: string) {

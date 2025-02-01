@@ -1,7 +1,5 @@
-import { Box, Select } from '@radix-ui/themes';
-import { Option } from '../../types/Option';
-
-const NO_OPTION_VALUE = 'NO_OPTION_VALUE';
+import { Box, Select } from '@chakra-ui/react';
+import { NamedEntity } from '../../types/NamedEntity.ts';
 
 export default function PLSelect({
   options,
@@ -9,29 +7,20 @@ export default function PLSelect({
   placeholder,
   setSelection,
 }: {
-  options: Option[];
+  options: NamedEntity[];
   selected: string;
   placeholder: string;
   setSelection: (value: string) => void;
 }) {
-  options = [{ value: NO_OPTION_VALUE, text: placeholder }, ...options];
-
-  function onValueChange(value: string) {
-    setSelection(value === NO_OPTION_VALUE ? '' : value);
-  }
-
   return (
     <Box>
-      <Select.Root value={selected} onValueChange={onValueChange}>
-        <Select.Trigger placeholder={placeholder} />
-        <Select.Content>
-          {options.map((option, index) => (
-            <Select.Item key={index} value={option.value}>
-              {option.text}
-            </Select.Item>
-          ))}
-        </Select.Content>
-      </Select.Root>
+      <Select placeholder={placeholder} value={selected} onChange={(e) => setSelection(e.target.value)}>
+        {options.map((option, index) => (
+          <option key={index} value={option.id}>
+            {option.name}
+          </option>
+        ))}
+      </Select>
     </Box>
   );
 }

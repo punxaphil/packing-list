@@ -1,8 +1,8 @@
-import { Item } from '../../types/Item.ts';
+import { PackItem } from '../../types/PackItem.ts';
 import { allChecked, allUnChecked } from '../../services/utils.ts';
-import { Checkbox } from '@radix-ui/themes';
+import { Checkbox } from '@chakra-ui/react';
 
-export function MultiCheckbox({ item, onUpdate }: { item: Item; onUpdate: (item: Item) => void }) {
+export function MultiCheckbox({ item, onUpdate }: { item: PackItem; onUpdate: (item: PackItem) => void }) {
   function checkAll() {
     item.checked = true;
     item.members?.forEach((t) => (t.checked = true));
@@ -15,11 +15,11 @@ export function MultiCheckbox({ item, onUpdate }: { item: Item; onUpdate: (item:
     onUpdate(item);
   }
 
-  return allChecked(item) ? (
-    <Checkbox checked={item.checked} onClick={uncheckAll} />
-  ) : allUnChecked(item) ? (
-    <Checkbox checked={item.checked} onClick={checkAll} />
-  ) : (
-    <Checkbox checked="indeterminate" onClick={checkAll} />
+  return (
+    <Checkbox
+      isIndeterminate={!allChecked(item) && !allUnChecked(item)}
+      isChecked={item.checked}
+      onChange={allChecked(item) ? uncheckAll : checkAll}
+    />
   );
 }

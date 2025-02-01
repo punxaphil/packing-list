@@ -1,14 +1,14 @@
-import { Item } from '../types/Item.ts';
-import { Member } from '../types/Member.ts';
+import { PackItem } from '../types/PackItem.ts';
+import { NamedEntity } from '../types/NamedEntity.ts';
 
-export function getName(members: Member[], memberId: string) {
+export function getName(members: NamedEntity[], memberId: string) {
   return members.find((t) => t.id === memberId)?.name;
 }
 
-export function allChecked(item: Item) {
+export function allChecked(item: PackItem) {
   return !!item.members?.every((t) => t.checked);
 }
 
-export function allUnChecked(item: Item) {
+export function allUnChecked(item: PackItem) {
   return !!item.members?.every((t) => !t.checked);
 }

@@ -1,15 +1,15 @@
-import { Item } from '../../types/Item.ts';
+import { PackItem } from '../../types/PackItem.ts';
 import { getName } from '../../services/utils.ts';
 import { MemberItemRow } from './MemberItemRow.tsx';
-import { PLCheckbox } from '../shared/PLCheckbox.tsx';
 import { MultiCheckbox } from '../shared/MultiCheckbox.tsx';
 import { Span } from '../shared/Span.tsx';
-import { Box, Flex, IconButton } from '@radix-ui/themes';
-import { Pencil1Icon, TrashIcon } from '@radix-ui/react-icons';
 import { firebase } from '../../services/api.ts';
 import { useFirebase } from '../../services/contexts.ts';
+import { Box, Flex, IconButton, Spacer } from '@chakra-ui/react';
+import { DeleteIcon, EditIcon } from '@chakra-ui/icons';
+import { PLCheckbox } from '../shared/PLCheckbox.tsx';
 
-function ItemRow({ item, onEdit, indent }: { item: Item; onEdit: (item: Item) => void; indent?: boolean }) {
+function ItemRow({ item, onEdit, indent }: { item: PackItem; onEdit: (item: PackItem) => void; indent?: boolean }) {
   const members = useFirebase().members;
 
   async function toggleItem() {
@@ -17,7 +17,7 @@ function ItemRow({ item, onEdit, indent }: { item: Item; onEdit: (item: Item) =>
     await firebase.updateItem(item);
   }
 
-  async function onUpdate(item: Item) {
+  async function onUpdate(item: PackItem) {
     await firebase.updateItem(item);
   }
 
@@ -39,12 +39,21 @@ function ItemRow({ item, onEdit, indent }: { item: Item; onEdit: (item: Item) =>
         )}
 
         <Span strike={item.checked}>{itemNameWithMember}</Span>
-        <IconButton radius="full" onClick={deleteItem} variant="ghost">
-          <TrashIcon />
-        </IconButton>
-        <IconButton radius="full" onClick={() => onEdit(item)} variant="ghost">
-          <Pencil1Icon />
-        </IconButton>
+        <Spacer />
+        <IconButton
+          borderRadius="full"
+          onClick={deleteItem}
+          variant="ghost"
+          icon={<DeleteIcon />}
+          aria-label="Delete item"
+        />
+        <IconButton
+          borderRadius="full"
+          onClick={() => onEdit(item)}
+          variant="ghost"
+          icon={<EditIcon />}
+          aria-label="Edit item"
+        />
       </Flex>
       {multipleMembers && item.members?.map((m) => <MemberItemRow memberItem={m} parent={item} key={m.id} />)}
     </Box>

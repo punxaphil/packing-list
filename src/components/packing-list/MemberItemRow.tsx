@@ -1,13 +1,13 @@
 import { MemberItem } from '../../types/MemberItem.ts';
 import { allChecked, getName } from '../../services/utils.ts';
-import { Item } from '../../types/Item.ts';
-import { PLCheckbox } from '../shared/PLCheckbox.tsx';
+import { PackItem } from '../../types/PackItem.ts';
 import { Span } from '../shared/Span.tsx';
-import { Flex } from '@radix-ui/themes';
 import { firebase } from '../../services/api.ts';
 import { useFirebase } from '../../services/contexts.ts';
+import { Flex } from '@chakra-ui/react';
+import { PLCheckbox } from '../shared/PLCheckbox.tsx';
 
-export function MemberItemRow({ memberItem: { checked, id }, parent }: { memberItem: MemberItem; parent: Item }) {
+export function MemberItemRow({ memberItem: { checked, id }, parent }: { memberItem: MemberItem; parent: PackItem }) {
   const members = useFirebase().members;
 
   async function toggleMember() {

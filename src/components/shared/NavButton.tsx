@@ -1,4 +1,4 @@
-import { Button } from '@radix-ui/themes';
+import { Button } from '@chakra-ui/react';
 
 export default function NavButton({
   name,
