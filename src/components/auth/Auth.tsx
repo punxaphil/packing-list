@@ -8,7 +8,7 @@ import {
   signOut,
 } from 'firebase/auth';
 import { useError } from '../../services/contexts.ts';
-import { Avatar, Button, Flex, Input, Link, Tooltip } from '@chakra-ui/react';
+import { Avatar, Button, ButtonGroup, Input, Link, Stack, Tooltip } from '@chakra-ui/react';
 
 export function useCurrentUser() {
   const [userId, setUserId] = useState('');
@@ -56,23 +56,22 @@ export function Login() {
   }
 
   return (
-    <Flex gap="3" align="center">
-      <Input value={email} onChange={handleEmail} onKeyDown={handleEnter} size="1" placeholder="email" />
+    <Stack w="300px" spacing={4} align="center" m="5">
+      <Input value={email} onChange={handleEmail} onKeyDown={handleEnter} placeholder="email" />
       <Input
         type="password"
         value={password}
         onChange={handlePassword}
         onKeyDown={handleEnter}
-        size="1"
         placeholder="password"
       />
-      <Button onClick={handleLogin} size="1">
-        Login
-      </Button>
-      <Button onClick={handleRegister} size="1" color="orange">
-        Register
-      </Button>
-    </Flex>
+      <ButtonGroup>
+        <Button onClick={handleLogin}>Login</Button>
+        <Button onClick={handleRegister} variant="outline">
+          Register
+        </Button>
+      </ButtonGroup>
+    </Stack>
   );
 }
 
@@ -87,7 +86,7 @@ export function Logout() {
   return (
     <Tooltip content={`Logout ${currentUser.email}`}>
       <Link onClick={handleLogout} size="1" href="#">
-        <Avatar name={currentUser?.email[0]?.toUpperCase()} />
+        <Avatar size="sm" bg="teal" name={currentUser?.email[0]?.toUpperCase()} />
       </Link>
     </Tooltip>
   );

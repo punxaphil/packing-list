@@ -13,6 +13,7 @@ export default function PackingList() {
 
   return (
     <Box mt="5">
+       {items.length ? (
       <Card>
         <CardBody>
           {Object.entries(grouped).map(([groupCategory, items]) => (
@@ -29,7 +30,7 @@ export default function PackingList() {
           ))}
         </CardBody>
       </Card>
-
+       ) : ('No items yet.')}
       <Card mt="5">
         <CardBody>
           <AddOrEditItem

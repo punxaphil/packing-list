@@ -23,7 +23,7 @@ export default function App() {
   const isLoggedIn = !!userId;
   return (
     <ChakraProvider theme={customTheme}>
-      <Box>
+      <Box m="6">
         {isLoggedIn ? (
           <Layout userId={userId} title={TITLE} />
         ) : (
@@ -32,8 +32,8 @@ export default function App() {
               <Heading as="h3">Logging in...</Heading>
             ) : (
               <>
-                <Heading as="h3">Welcome to {TITLE}</Heading>
-                <Box>Start preparing your trip by logging in or registering below ✈️</Box>
+                <Heading as="h3" m="6">Welcome to {TITLE}</Heading>
+                <Box mb="2">Start preparing your trip by logging in or registering below ✈️</Box>
                 <img src="/squirrel_400.png" alt="squirrel" style={{ maxWidth: '90%' }} />
                 <Login />
               </>

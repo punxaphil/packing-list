@@ -57,7 +57,6 @@ export function AddOrEditItem({ item, done }: { item?: PackItem; done: () => voi
       <Heading as="h2">{item ? 'Edit' : 'Add new'} item</Heading>
       <Box maxWidth="300px">
         <Input
-          size="2"
           placeholder="Enter a item name..."
           value={name}
           onChange={handleOnChange}

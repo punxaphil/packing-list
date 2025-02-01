@@ -8,7 +8,7 @@ import { useEffect, useState } from 'react';
 import { getAuth } from 'firebase/auth';
 import { PackItem } from '../../types/PackItem.ts';
 import { NamedEntity } from '../../types/NamedEntity.ts';
-import { Flex, Heading } from '@chakra-ui/react';
+import { Flex, Heading, Stack } from '@chakra-ui/react';
 import { Logout } from '../auth/Auth.tsx';
 
 export function Layout({ userId, title }: { userId: string; title?: string }) {
@@ -35,11 +35,11 @@ export function Layout({ userId, title }: { userId: string; title?: string }) {
             <Heading as="h1">{title}</Heading>
             <Logout />
           </Flex>
-          <Flex gap="3" mb="3">
+          <Stack direction="row" spacing={4} align="center" pt="3">
             <NavButton name={'Home'} page={page} setPage={setPage}></NavButton>
             <NavButton name={'Members'} page={page} setPage={setPage}></NavButton>
             <NavButton name={'Categories'} page={page} setPage={setPage}></NavButton>
-          </Flex>
+          </Stack>
           {page === 'Home' && <PackingList />}
           {page === 'Members' && <Members />}
           {page === 'Categories' && <Categories />}
