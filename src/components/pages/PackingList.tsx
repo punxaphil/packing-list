@@ -1,9 +1,9 @@
-import ItemRow from './ItemRow.tsx';
-import { useFirebase } from '../../services/contexts.ts';
-import { PackItem } from '../../types/PackItem.ts';
 import { useState } from 'react';
-import { AddOrEditItem } from './AddOrEditItem.tsx';
+import { PackItem } from '../../types/PackItem.ts';
+import { useFirebase } from '../../services/contexts.ts';
 import { Box, Card, CardBody, Text } from '@chakra-ui/react';
+import ItemRow from '../packing-list/ItemRow.tsx';
+import { AddOrEditItem } from '../packing-list/AddOrEditItem.tsx';
 
 export default function PackingList() {
   const [selectedItem, setSelectedItem] = useState<PackItem>();

@@ -9,16 +9,21 @@ import {
 } from 'firebase/auth';
 import { useError } from '../../services/contexts.ts';
 import { Avatar, Button, ButtonGroup, Input, Link, Stack, Tooltip } from '@chakra-ui/react';
+import { useNavigate } from 'react-router';
 
 export function useCurrentUser() {
   const [userId, setUserId] = useState('');
   const [email, setEmail] = useState('');
   const [loggingIn, setLoggingIn] = useState(true);
+  const navigate = useNavigate();
 
   getAuth().onAuthStateChanged((user) => {
     setUserId(user?.uid ?? '');
     setEmail(user?.email ?? '');
     setLoggingIn(false);
+    if (!user) {
+      navigate('/');
+    }
   });
   return { userId, email, loggingIn };
 }

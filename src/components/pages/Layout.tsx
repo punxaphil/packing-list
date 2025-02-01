@@ -1,8 +1,5 @@
 import { FirebaseContext } from '../../services/contexts.ts';
 import NavButton from '../shared/NavButton.tsx';
-import PackingList from '../packing-list/PackingList.tsx';
-import Members from '../member/Members.tsx';
-import Categories from '../category/Categories.tsx';
 import { getUserCollectionsAndSubscribe } from '../../services/api.ts';
 import { useEffect, useState } from 'react';
 import { getAuth } from 'firebase/auth';
@@ -10,12 +7,12 @@ import { PackItem } from '../../types/PackItem.ts';
 import { NamedEntity } from '../../types/NamedEntity.ts';
 import { Flex, Heading, Stack } from '@chakra-ui/react';
 import { Logout } from '../auth/Auth.tsx';
+import { Outlet } from 'react-router';
 
 export function Layout({ userId, title }: { userId: string; title?: string }) {
   const [members, setMembers] = useState<NamedEntity[]>([]);
   const [categories, setCategories] = useState<NamedEntity[]>([]);
   const [items, setItems] = useState<PackItem[]>([]);
-  const [page, setPage] = useState('Home');
 
   useEffect(() => {
     (async function () {
@@ -36,13 +33,11 @@ export function Layout({ userId, title }: { userId: string; title?: string }) {
             <Logout />
           </Flex>
           <Stack direction="row" spacing={4} align="center" pt="3">
-            <NavButton name={'Home'} page={page} setPage={setPage}></NavButton>
-            <NavButton name={'Members'} page={page} setPage={setPage}></NavButton>
-            <NavButton name={'Categories'} page={page} setPage={setPage}></NavButton>
+          <NavButton name="Home" path="/"></NavButton>
+              <NavButton name="Members" path="members"></NavButton>
+              <NavButton name="Categories" path="categories"></NavButton>
           </Stack>
-          {page === 'Home' && <PackingList />}
-          {page === 'Members' && <Members />}
-          {page === 'Categories' && <Categories />}
+          <Outlet />
         </FirebaseContext.Provider>
       ) : (
         <div>Loading...</div>

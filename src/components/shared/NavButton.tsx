@@ -1,17 +1,10 @@
 import { Button } from '@chakra-ui/react';
+import { NavLink } from 'react-router';
 
-export default function NavButton({
-  name,
-  page,
-  setPage,
-}: {
-  name: string;
-  page: string;
-  setPage: (name: string) => void;
-}) {
+export default function NavButton({ name, path }: { name: string; path: string }) {
   return (
-    <Button onClick={() => setPage(name)} variant={page === name ? undefined : 'soft'}>
-      {name}
-    </Button>
+    <NavLink to={path} end>
+      {({ isActive }) => <Button variant={isActive ? undefined : 'soft'}>{name}</Button>}
+    </NavLink>
   );
 }
