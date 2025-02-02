@@ -1,25 +1,5 @@
-export const resizeImage = (maxSize: number, file: File) => {
+export const resizeImageFromFile = (maxSize: number, file: File) => {
   const reader = new FileReader();
-  const image = new Image();
-  const canvas = document.createElement('canvas');
-  const resize = (): string => {
-    let width = image.width;
-    let height = image.height;
-
-    if (width < height) {
-      if (width > maxSize) {
-        height *= maxSize / width;
-        width = maxSize;
-      }
-    } else if (height > maxSize) {
-      width *= maxSize / height;
-      height = maxSize;
-    }
-    canvas.width = width;
-    canvas.height = height;
-    canvas.getContext('2d')?.drawImage(image, 0, 0, width, height);
-    return canvas.toDataURL('image/jpeg');
-  };
 
   return new Promise<string>((resolve, reject) => {
     if (!file.type.match(/image.*/)) {
@@ -27,12 +7,40 @@ export const resizeImage = (maxSize: number, file: File) => {
     }
 
     reader.onload = (readerEvent: ProgressEvent<FileReader>) => {
-      image.onload = () => resolve(resize());
+      const image = new Image();
+      image.onload = () => resolve(resizeOnLoad(image, maxSize));
       image.src = readerEvent.target?.result?.toString() || '';
     };
     reader.readAsDataURL(file);
   });
 };
+
+export const resizeImageFromUrl = (maxSize: number, url: string) => {
+  return new Promise<string>((resolve) => {
+    const image = new Image();
+    image.onload = () => resolve(resizeOnLoad(image, maxSize));
+    image.src = url;
+  });
+};
+
+function resizeOnLoad(image: HTMLImageElement, maxSize: number) {
+  let width = image.width;
+  let height = image.height;
+  if (width < height) {
+    if (width > maxSize) {
+      height *= maxSize / width;
+      width = maxSize;
+    }
+  } else if (height > maxSize) {
+    width *= maxSize / height;
+    height = maxSize;
+  }
+  const canvas = document.createElement('canvas');
+  canvas.width = width;
+  canvas.height = height;
+  canvas.getContext('2d')?.drawImage(image, 0, 0, width, height);
+  return canvas.toDataURL('image/jpeg');
+}
 
 export const cropImage = (url: string, aspectRatio: number) => {
   return new Promise<string>((resolve) => {
