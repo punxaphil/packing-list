@@ -6,6 +6,7 @@ export default function Categories() {
   return (
     <NamedEntities
       namedEntities={useFirebase().categories}
+      type="categories"
       onAdd={firebase.addCategory}
       onUpdate={firebase.updateCategory}
       onDelete={firebase.deleteCategory}

@@ -3,20 +3,24 @@ import { useError } from '../../services/contexts';
 import { Box, Button, Card, CardBody, Flex, Input } from '@chakra-ui/react';
 import { NamedEntity } from '../../types/NamedEntity.ts';
 import NamedEntityRow from './NamedEntityRow.tsx';
+import { Upload } from './Upload.tsx';
 
 export default function NamedEntities({
   namedEntities,
   onAdd,
   onUpdate,
   onDelete,
+  type,
 }: {
   namedEntities: NamedEntity[];
   onAdd: (name: string) => Promise<void>;
   onUpdate: (namedEntity: NamedEntity) => Promise<void>;
   onDelete: (id: string) => Promise<void>;
+  type: string;
 }) {
   const [newName, setNewName] = useState<string>('');
   const { setError } = useError();
+  const [selectedRow, setSelectedRow] = useState<NamedEntity | undefined>(undefined);
 
   function handleAdd() {
     (async function () {
@@ -42,7 +46,15 @@ export default function NamedEntities({
       <Card>
         <CardBody>
           {namedEntities.map((item, index) => (
-            <NamedEntityRow namedEntity={item} key={index} onUpdate={onUpdate} onDelete={onDelete} />
+            <NamedEntityRow
+              namedEntity={item}
+              key={index}
+              onUpdate={onUpdate}
+              onDelete={onDelete}
+              type={type}
+              selected={item === selectedRow}
+              setSelected={(selected: boolean) => setSelectedRow(selected ? item : undefined)}
+            />
           ))}
           <Flex mt="2" gap="3" align="center">
             <Input size="2" placeholder="name" value={newName} onChange={handleOnChange} onKeyDown={handleEnter} />
@@ -50,6 +62,7 @@ export default function NamedEntities({
           </Flex>
         </CardBody>
       </Card>
+      {selectedRow && <Upload type={type} namedEntity={selectedRow} done={() => setSelectedRow(undefined)} />}
     </Box>
   );
 }

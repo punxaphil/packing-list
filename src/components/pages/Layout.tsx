@@ -8,11 +8,13 @@ import { NamedEntity } from '../../types/NamedEntity.ts';
 import { Flex, Heading, Stack } from '@chakra-ui/react';
 import { Logout } from '../auth/Auth.tsx';
 import { Outlet } from 'react-router';
+import { Image } from '../../types/Image.ts';
 
 export function Layout({ userId, title }: { userId: string; title?: string }) {
   const [members, setMembers] = useState<NamedEntity[]>([]);
   const [categories, setCategories] = useState<NamedEntity[]>([]);
   const [items, setItems] = useState<PackItem[]>([]);
+  const [images, setImages] = useState<Image[]>([]);
 
   useEffect(() => {
     (async function () {
@@ -20,22 +22,22 @@ export function Layout({ userId, title }: { userId: string; title?: string }) {
       if (!userId) {
         throw new Error('No user logged in');
       }
-      await getUserCollectionsAndSubscribe(setMembers, setCategories, (items: PackItem[]) => setItems(items));
+      await getUserCollectionsAndSubscribe(setMembers, setCategories, setItems, setImages);
     })().catch(console.error);
   }, []);
   return (
     <>
       {members ? (
-        <FirebaseContext.Provider value={{ id: userId, members, categories, items }}>
+        <FirebaseContext.Provider value={{ id: userId, members, categories, items, images }}>
           <Flex align="center" justifyContent="space-between" m="3">
             <img src="/squirrel_icon.png" alt="squirrel icon" />
             <Heading as="h1">{title}</Heading>
             <Logout />
           </Flex>
           <Stack direction="row" spacing={4} align="center" pt="3">
-          <NavButton name="Home" path="/"></NavButton>
-              <NavButton name="Members" path="members"></NavButton>
-              <NavButton name="Categories" path="categories"></NavButton>
+            <NavButton name="Home" path="/"></NavButton>
+            <NavButton name="Members" path="members"></NavButton>
+            <NavButton name="Categories" path="categories"></NavButton>
           </Stack>
           <Outlet />
         </FirebaseContext.Provider>

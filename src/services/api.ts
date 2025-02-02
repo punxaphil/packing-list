@@ -16,29 +16,35 @@ import { NamedEntity } from '../types/NamedEntity.ts';
 import { PackItem } from '../types/PackItem.ts';
 import { getAuth } from 'firebase/auth';
 import { MemberItem } from '../types/MemberItem.ts';
+import { Image } from '../types/Image.ts';
 
 const MEMBERS_KEY = 'members';
 const ITEMS_KEY = 'items';
 const USERS_KEY = 'users';
+const IMAGES_KEY = 'images';
 
 const CATEGORIES_KEY = 'categories';
 
 export async function getUserCollectionsAndSubscribe(
   setMembers: (members: NamedEntity[]) => void,
   setCategories: (categories: NamedEntity[]) => void,
-  setItems: (items: PackItem[]) => void
+  setItems: (items: PackItem[]) => void,
+  setImages: (images: Image[]) => void
 ) {
   const userId = getUserId();
   const memberQuery = collection(firestore, USERS_KEY, userId, MEMBERS_KEY);
   const itemsQuery = collection(firestore, USERS_KEY, userId, ITEMS_KEY);
   const categoriesQuery = collection(firestore, USERS_KEY, userId, CATEGORIES_KEY);
+  const imagesQuery = collection(firestore, USERS_KEY, userId, IMAGES_KEY);
   onSnapshot(memberQuery, (res) => setMembers(fromQueryResult(res)));
   onSnapshot(itemsQuery, (res) => setItems(fromQueryResult(res)));
   onSnapshot(categoriesQuery, (res) => setCategories(fromQueryResult(res)));
+  onSnapshot(imagesQuery, (res) => setImages(fromQueryResult(res)));
 
   setMembers(fromQueryResult(await getDocs(memberQuery)));
   setCategories(fromQueryResult(await getDocs(categoriesQuery)));
   setItems(fromQueryResult(await getDocs(itemsQuery)));
+  setImages(fromQueryResult(await getDocs(imagesQuery)));
 }
 
 function getUserId() {
@@ -99,5 +105,11 @@ export const firebase = {
   },
   deleteCategory: async function (id: string) {
     await del(CATEGORIES_KEY, id);
+  },
+  addImage: async function (type: string, typeId: string, url: string): Promise<void> {
+    await add(IMAGES_KEY, { type, typeId, url });
+  },
+  async updateImage(imageId: string, fileUrl: string) {
+    await update(IMAGES_KEY, imageId, { url: fileUrl });
   },
 };
