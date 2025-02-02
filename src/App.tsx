@@ -8,6 +8,7 @@ import {
   Box,
   ChakraProvider,
   extendTheme,
+  Heading,
   withDefaultColorScheme,
 } from '@chakra-ui/react';
 import { Route, Routes } from 'react-router';
@@ -21,7 +22,7 @@ const customTheme = extendTheme(withDefaultColorScheme({ colorScheme: 'teal' }))
 const TITLE = "Pack'n'Go!";
 
 export default function App() {
-  const { userId } = useCurrentUser();
+  const { userId, loggingIn } = useCurrentUser();
   const { error, setError } = useError();
   const isLoggedIn = !!userId;
   return (
@@ -33,6 +34,8 @@ export default function App() {
             <Route path="members" element={<Members />} />
             <Route path="categories" element={<Categories />} />
           </Route>
+        ) : loggingIn ? (
+          <Route path="*" element={<Heading as="h3">Logging in...</Heading>} />
         ) : (
           <Route path="*" element={<Welcome title={TITLE} />} />
         )}
