@@ -1,6 +1,6 @@
 import { ChangeEvent, KeyboardEvent, useState } from 'react';
 import { useError } from '../../services/contexts';
-import { Box, Button, Card, CardBody, Flex, Input } from '@chakra-ui/react';
+import { Button, Card, CardBody, Flex, Input, Spacer } from '@chakra-ui/react';
 import { NamedEntity } from '../../types/NamedEntity.ts';
 import NamedEntityRow from './NamedEntityRow.tsx';
 
@@ -40,8 +40,9 @@ export default function NamedEntities({
   }
 
   return (
-    <Box m="5" maxWidth="400px">
-      <Card>
+    <Flex m="5">
+      <Spacer />
+      <Card maxWidth="400px">
         <CardBody>
           {namedEntities.map((item, index) => (
             <NamedEntityRow namedEntity={item} key={index} onUpdate={onUpdate} onDelete={onDelete} type={type} />
@@ -52,6 +53,7 @@ export default function NamedEntities({
           </Flex>
         </CardBody>
       </Card>
-    </Box>
+      <Spacer />
+    </Flex>
   );
 }

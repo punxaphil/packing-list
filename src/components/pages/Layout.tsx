@@ -34,7 +34,7 @@ export function Layout({ userId, title }: { userId: string; title?: string }) {
             <Heading as="h1">{title}</Heading>
             <Logout />
           </Flex>
-          <Stack direction="row" spacing={4} align="center" pt="3">
+          <Stack direction="row" spacing={4} align="center" pt="3" justifyContent="center">
             <NavButton name="Home" path="/"></NavButton>
             <NavButton name="Members" path="members"></NavButton>
             <NavButton name="Categories" path="categories"></NavButton>
