@@ -3,6 +3,7 @@ import { useError } from '../../services/contexts';
 import { Button, Card, CardBody, Flex, Input, Spacer } from '@chakra-ui/react';
 import { NamedEntity } from '../../types/NamedEntity.ts';
 import NamedEntityRow from './NamedEntityRow.tsx';
+import DragAndDrop from './DragAndDrop.tsx';
 
 export default function NamedEntities({
   namedEntities,
@@ -39,16 +40,32 @@ export default function NamedEntities({
     }
   }
 
+  async function onEntitiesUpdated(updated: NamedEntity[]) {
+    for (const entity of updated) {
+      await onUpdate(entity);
+    }
+  }
+
   return (
     <Flex m="5">
       <Spacer />
       <Card maxWidth="400px">
         <CardBody>
-          {namedEntities.map((item, index) => (
-            <NamedEntityRow namedEntity={item} key={index} onUpdate={onUpdate} onDelete={onDelete} type={type} />
-          ))}
+          <DragAndDrop
+            initialEntities={namedEntities}
+            onEntitiesUpdated={onEntitiesUpdated}
+            renderEntity={(item, isDragging) => (
+              <NamedEntityRow
+                namedEntity={item}
+                onUpdate={onUpdate}
+                onDelete={onDelete}
+                type={type}
+                isDragging={isDragging}
+              />
+            )}
+          />
           <Flex mt="2" gap="3" align="center">
-            <Input size="2" placeholder="name" value={newName} onChange={handleOnChange} onKeyDown={handleEnter} />
+            <Input placeholder="name" value={newName} onChange={handleOnChange} onKeyDown={handleEnter} />
             <Button onClick={handleAdd}>Add</Button>
           </Flex>
         </CardBody>

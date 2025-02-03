@@ -3,6 +3,7 @@ import { NamedEntity } from '../../types/NamedEntity.ts';
 import { firebase } from '../../services/api.ts';
 import { useError, useFirebase } from '../../services/contexts.ts';
 import {
+  Box,
   Flex,
   IconButton,
   Image,
@@ -13,7 +14,7 @@ import {
   PopoverTrigger,
   useDisclosure,
 } from '@chakra-ui/react';
-import { ArrowUpIcon, DeleteIcon } from '@chakra-ui/icons';
+import { ArrowUpIcon, DeleteIcon, HamburgerIcon } from '@chakra-ui/icons';
 import { UploadModal } from './UploadModal.tsx';
 
 export default function NamedEntityRow({
@@ -21,11 +22,13 @@ export default function NamedEntityRow({
   onUpdate,
   onDelete,
   type,
+  isDragging = false,
 }: {
   namedEntity: NamedEntity;
   onUpdate: (namedEntity: NamedEntity) => Promise<void>;
   onDelete: (id: string) => Promise<void>;
   type: string;
+  isDragging: boolean;
 }) {
   const items = useFirebase().items;
   const { setError } = useError();
@@ -56,8 +59,9 @@ export default function NamedEntityRow({
   const image = images.find((t) => t.type === type && t.typeId === namedEntity.id);
   const imageUrl = image?.url;
   return (
-    <>
-      <Flex mt="2" gap="3" align="center" borderRadius="md" pl="3">
+    <Box border={isDragging ? '1px solid black' : 'none'} borderRadius="md" bg={isDragging ? 'gray.200' : ''}>
+      <Flex gap="3" align="center">
+        <HamburgerIcon color="gray" />
         <Popover trigger="hover">
           <PopoverTrigger>
             <Link onClick={onOpen}>{imageUrl ? <Image src={imageUrl} w="30px" /> : <ArrowUpIcon />}</Link>
@@ -68,7 +72,7 @@ export default function NamedEntityRow({
             </PopoverContent>
           )}
         </Popover>
-        <Input size="2" placeholder="name" value={namedEntity.name} onChange={changeName} />
+        <Input placeholder="name" value={namedEntity.name} onChange={changeName} />
         <IconButton
           borderRadius="full"
           onClick={handleDelete}
@@ -78,6 +82,6 @@ export default function NamedEntityRow({
         />
       </Flex>
       <UploadModal type={type} namedEntity={namedEntity} isOpen={isOpen} onClose={onClose} />
-    </>
+    </Box>
   );
 }

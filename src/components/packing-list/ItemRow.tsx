@@ -1,5 +1,5 @@
 import { PackItem } from '../../types/PackItem.ts';
-import { getName } from '../../services/utils.ts';
+import { getName, sortItemMembersAccordingToMemberOrder } from '../../services/utils.ts';
 import { MemberItemRow } from './MemberItemRow.tsx';
 import { MultiCheckbox } from '../shared/MultiCheckbox.tsx';
 import { Span } from '../shared/Span.tsx';
@@ -25,6 +25,7 @@ function ItemRow({ item, onEdit, indent }: { item: PackItem; onEdit: (item: Pack
     await firebase.deleteItem(item.id);
   }
 
+  sortItemMembersAccordingToMemberOrder(members, item.members);
   const multipleMembers = !!(item.members && item.members.length > 1);
   const itemNameWithMember =
     item.name + (item.members?.length === 1 ? ` (${getName(members, item.members[0].id)})` : '');
