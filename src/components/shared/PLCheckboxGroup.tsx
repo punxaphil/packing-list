@@ -1,7 +1,7 @@
 import { Checkbox, CheckboxGroup, HStack } from '@chakra-ui/react';
 import { NamedEntity } from '../../types/NamedEntity.ts';
 
-export default function PLCheckboxGroup({
+export function PLCheckboxGroup({
   options,
   selected,
   setSelection,

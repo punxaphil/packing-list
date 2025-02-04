@@ -2,8 +2,8 @@ import { Box, Button, Flex, Heading, Input, Text } from '@chakra-ui/react';
 import { useError, useFirebase } from '../../services/contexts.ts';
 import React, { useState } from 'react';
 import { PackItem } from '../../types/PackItem.ts';
-import PLSelect from '../shared/PLSelect.tsx';
-import PLCheckboxGroup from '../shared/PLCheckboxGroup.tsx';
+import { PLSelect } from '../shared/PLSelect.tsx';
+import { PLCheckboxGroup } from '../shared/PLCheckboxGroup.tsx';
 import { firebase } from '../../services/api.ts';
 
 export function AddOrEditPackItem({ packItem, done }: { packItem?: PackItem; done: () => void }) {

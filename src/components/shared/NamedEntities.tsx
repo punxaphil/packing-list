@@ -2,10 +2,10 @@ import { ChangeEvent, KeyboardEvent, useState } from 'react';
 import { useError } from '../../services/contexts';
 import { Button, Card, CardBody, Flex, Input, Spacer } from '@chakra-ui/react';
 import { NamedEntity } from '../../types/NamedEntity.ts';
-import NamedEntityRow from './NamedEntityRow.tsx';
-import DragAndDrop from './DragAndDrop.tsx';
+import { NamedEntityRow } from './NamedEntityRow.tsx';
+import { DragAndDrop } from './DragAndDrop.tsx';
 
-export default function NamedEntities({
+export function NamedEntities({
   namedEntities,
   onAdd,
   onUpdate,

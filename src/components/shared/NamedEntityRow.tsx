@@ -17,7 +17,7 @@ import {
 import { ArrowUpIcon, DeleteIcon, HamburgerIcon } from '@chakra-ui/icons';
 import { UploadModal } from './UploadModal.tsx';
 
-export default function NamedEntityRow({
+export function NamedEntityRow({
   namedEntity,
   onUpdate,
   onDelete,

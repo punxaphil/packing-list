@@ -13,15 +13,15 @@ import {
 } from '@chakra-ui/react';
 import { Route, Routes } from 'react-router';
 import { Layout } from './components/pages/Layout.tsx';
-import Members from './components/pages/Members.tsx';
-import Categories from './components/pages/Categories.tsx';
+import { Members } from './components/pages/Members.tsx';
+import { Categories } from './components/pages/Categories.tsx';
 import { Welcome } from './components/pages/Welcome.tsx';
 import { PackingList } from './components/pages/PackingList.tsx';
 
 const customTheme = extendTheme(withDefaultColorScheme({ colorScheme: 'teal' }));
 const TITLE = "Pack'n'Go!";
 
-export default function App() {
+export function App() {
   const { userId, loggingIn } = useCurrentUser();
   const { error, setError } = useError();
   const isLoggedIn = !!userId;

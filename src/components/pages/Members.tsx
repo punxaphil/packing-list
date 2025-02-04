@@ -1,8 +1,8 @@
 import { useFirebase } from '../../services/contexts.ts';
 import { firebase } from '../../services/api.ts';
-import NamedEntities from '../shared/NamedEntities.tsx';
+import { NamedEntities } from '../shared/NamedEntities.tsx';
 
-export default function Members() {
+export function Members() {
   return (
     <NamedEntities
       namedEntities={useFirebase().members}

@@ -1,8 +1,8 @@
 import { useFirebase } from '../../services/contexts';
 import { firebase } from '../../services/api.ts';
-import NamedEntities from '../shared/NamedEntities.tsx';
+import { NamedEntities } from '../shared/NamedEntities.tsx';
 
-export default function Categories() {
+export function Categories() {
   return (
     <NamedEntities
       namedEntities={useFirebase().categories}

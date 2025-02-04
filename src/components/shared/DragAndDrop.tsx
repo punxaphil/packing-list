@@ -3,7 +3,7 @@ import { Box } from '@chakra-ui/react';
 import { NamedEntity } from '../../types/NamedEntity.ts';
 import { DragDropContext, Draggable, DragUpdate, Droppable } from '@hello-pangea/dnd';
 
-export default function DragAndDrop({
+export function DragAndDrop({
   entities,
   renderEntity,
   onEntitiesUpdated,

@@ -1,5 +1,5 @@
 import { FirebaseContext } from '../../services/contexts.ts';
-import NavButton from '../shared/NavButton.tsx';
+import { NavButton } from '../shared/NavButton.tsx';
 import { getUserCollectionsAndSubscribe } from '../../services/api.ts';
 import { useEffect, useState } from 'react';
 import { getAuth } from 'firebase/auth';

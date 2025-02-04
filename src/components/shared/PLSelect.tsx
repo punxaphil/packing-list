@@ -1,7 +1,7 @@
 import { Box, Select } from '@chakra-ui/react';
 import { NamedEntity } from '../../types/NamedEntity.ts';
 
-export default function PLSelect({
+export function PLSelect({
   options,
   selected,
   placeholder,
