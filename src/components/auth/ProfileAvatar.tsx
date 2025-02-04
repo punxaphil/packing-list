@@ -1,18 +1,16 @@
-import { Avatar, Tooltip } from '@chakra-ui/react';
+import { Avatar } from '@chakra-ui/react';
 import { useCurrentUser } from './Auth.tsx';
 import { NavLink } from 'react-router';
 import { useFirebase } from '../../services/contexts.ts';
 
-export function ProfileAvatar() {
+export function ProfileAvatar({ shouldNavigate = true, size }: { shouldNavigate?: boolean; size: string }) {
   const currentUser = useCurrentUser();
   const images = useFirebase().images;
   const profileImage = images.find((image) => image.type === 'profile');
 
   return (
-    <Tooltip label={`Show profile page for ${currentUser.email}`}>
-      <NavLink to="/profile">
-        <Avatar size="md" bg="teal" name={currentUser?.email[0]?.toUpperCase()} src={profileImage?.url} />
-      </NavLink>
-    </Tooltip>
+    <NavLink to={shouldNavigate ? '/profile' : ''}>
+      <Avatar size={size} bg="teal" name={currentUser?.email[0]?.toUpperCase()} src={profileImage?.url} />
+    </NavLink>
   );
 }

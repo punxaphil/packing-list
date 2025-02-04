@@ -1,8 +1,11 @@
 import { useError, useFirebase } from '../../services/contexts';
-import { Button, Card, CardBody, Flex, Heading, Image, Spacer, useDisclosure } from '@chakra-ui/react';
+import { Button, ButtonGroup, Card, CardBody, Flex, IconButton, Image, Spacer, useDisclosure } from '@chakra-ui/react';
 import { UploadModal } from '../shared/UploadModal.tsx';
 import { getAuth, signOut } from 'firebase/auth';
 import { useCurrentUser } from '../auth/Auth.tsx';
+import { DeleteIcon } from '@chakra-ui/icons';
+import { firebase } from '../../services/api.ts';
+import { ProfileAvatar } from '../auth/ProfileAvatar.tsx';
 
 export function Profile() {
   const images = useFirebase().images;
@@ -16,32 +19,45 @@ export function Profile() {
     signOut(getAuth()).catch(setError);
   }
 
+  function onDelete() {
+    (async function () {
+      if (profileImage) {
+        await firebase.deleteImage(profileImage.id);
+      }
+    })().catch(setError);
+  }
+
   return (
     <Flex m="5">
       <Spacer />
-      <Card maxWidth="400px">
+      <Card maxWidth="600px">
         <CardBody>
-          <Flex gap="3" direction="column">
-            <Heading as="h2">{currentUser.email}</Heading>
-            <Flex>
-              <Spacer />
-              {profileImage && (
-                <Image
-                  src={profileImage.url}
-                  alt="profile"
-                  shadow="xl"
-                  border="1px"
-                  borderColor="gray"
-                  borderRadius="full"
-                />
+          <Flex gap="3" direction="column" alignItems="center">
+            {currentUser.email}
+            <Flex alignItems="end">
+              {profileImage ? (
+                <>
+                  <Image
+                    src={profileImage.url}
+                    alt="profile"
+                    shadow="xl"
+                    border="1px"
+                    borderColor="gray"
+                    borderRadius="full"
+                  />
+                  <IconButton size="xs" icon={<DeleteIcon />} aria-label="Delete profile picture" onClick={onDelete} />
+                </>
+              ) : (
+                <ProfileAvatar shouldNavigate={false} size="xl" />
               )}
-              <Spacer />
             </Flex>
             <Spacer />
-            <Button onClick={onOpen}>{profileImage ? 'Change' : 'Add'} profile picture</Button>
-            <Button onClick={handleLogout} colorScheme="red">
-              Logout
-            </Button>
+            <ButtonGroup flexDirection="column" gap="2">
+              <Button onClick={onOpen}>{profileImage ? 'Change' : 'Add'} profile picture</Button>
+              <Button onClick={handleLogout} colorScheme="gray">
+                Logout
+              </Button>
+            </ButtonGroup>
           </Flex>
           <UploadModal
             type="profile"

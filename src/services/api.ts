@@ -127,4 +127,7 @@ export const firebase = {
   async updateImage(imageId: string, fileUrl: string) {
     await update(IMAGES_KEY, imageId, { url: fileUrl });
   },
+  async deleteImage(imageId: string) {
+    await del(IMAGES_KEY, imageId);
+  },
 };
