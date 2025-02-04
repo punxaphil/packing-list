@@ -81,7 +81,14 @@ export function NamedEntityRow({
           aria-label="Delete"
         />
       </Flex>
-      <UploadModal type={type} namedEntity={namedEntity} isOpen={isOpen} onClose={onClose} />
+      <UploadModal
+        type={type}
+        name={namedEntity.name}
+        typeId={namedEntity.id}
+        imageFinder={(t) => t.type === type && t.typeId === namedEntity.id}
+        isOpen={isOpen}
+        onClose={onClose}
+      />
     </Box>
   );
 }

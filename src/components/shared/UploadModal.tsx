@@ -18,23 +18,26 @@ import {
   Switch,
 } from '@chakra-ui/react';
 import { AttachmentIcon, RepeatIcon } from '@chakra-ui/icons';
-import { NamedEntity } from '../../types/NamedEntity.ts';
 import { useFirebase } from '../../services/contexts.ts';
+import { Image } from '../../types/Image.ts';
 
 export function UploadModal({
   type,
-  namedEntity,
+  typeId,
+  name,
   isOpen,
   onClose,
+  imageFinder,
 }: {
   type: string;
-  namedEntity: NamedEntity;
+  typeId: string;
+  name: string;
   isOpen: boolean;
   onClose: () => void;
+  imageFinder: (image: Image) => boolean;
 }) {
   const images = useFirebase().images;
-  const entityImage = images.find((t) => t.type === type && t.typeId === namedEntity.id);
-  const imageId = entityImage?.id;
+  const entityImage = images.find(imageFinder);
   const [fileUrl, setFileUrl] = useState(entityImage?.url);
   const [manualUrl, setManualUrl] = useState('');
   const [uploadFromUrl, setUploadFromUrl] = useState(false);
@@ -69,10 +72,10 @@ export function UploadModal({
       await resizeAndCropManualURL();
     }
     if (fileUrl) {
-      if (imageId) {
-        await firebase.updateImage(imageId, fileUrl);
+      if (entityImage) {
+        await firebase.updateImage(typeId, fileUrl);
       } else {
-        await firebase.addImage(type, namedEntity.id, fileUrl);
+        await firebase.addImage(type, type, fileUrl);
       }
     }
     onClose();
@@ -87,7 +90,7 @@ export function UploadModal({
       <Modal closeOnOverlayClick={false} isOpen={isOpen} onClose={onClose}>
         <ModalOverlay />
         <ModalContent>
-          <ModalHeader>Set image - {namedEntity.name}</ModalHeader>
+          <ModalHeader>Set image - {name}</ModalHeader>
           <ModalCloseButton />
           <ModalBody pb={6}>
             <Stack m="5" spacing={4} align="center">

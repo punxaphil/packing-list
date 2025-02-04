@@ -5,10 +5,9 @@ import {
   getAuth,
   setPersistence,
   signInWithEmailAndPassword,
-  signOut,
 } from 'firebase/auth';
 import { useError } from '../../services/contexts.ts';
-import { Avatar, Button, ButtonGroup, Input, Link, Stack, Tooltip } from '@chakra-ui/react';
+import { Button, ButtonGroup, Input, Stack } from '@chakra-ui/react';
 import { useNavigate } from 'react-router';
 
 export function useCurrentUser() {
@@ -77,22 +76,5 @@ export function Login() {
         </Button>
       </ButtonGroup>
     </Stack>
-  );
-}
-
-export function Logout() {
-  const { setError } = useError();
-  const currentUser = useCurrentUser();
-
-  function handleLogout() {
-    signOut(getAuth()).catch(setError);
-  }
-
-  return (
-    <Tooltip content={`Logout ${currentUser.email}`}>
-      <Link onClick={handleLogout} size="1" href="#">
-        <Avatar size="sm" bg="teal" name={currentUser?.email[0]?.toUpperCase()} />
-      </Link>
-    </Tooltip>
   );
 }
