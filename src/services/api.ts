@@ -19,7 +19,7 @@ import { MemberPackItem } from '../types/MemberPackItem.ts';
 import { Image } from '../types/Image.ts';
 
 const MEMBERS_KEY = 'members';
-const ITEMS_KEY = 'packItems';
+const PACK_ITEMS_KEY = 'packItems';
 const USERS_KEY = 'users';
 const IMAGES_KEY = 'images';
 
@@ -33,7 +33,7 @@ export async function getUserCollectionsAndSubscribe(
 ) {
   const userId = getUserId();
   const memberQuery = collection(firestore, USERS_KEY, userId, MEMBERS_KEY);
-  const itemsQuery = collection(firestore, USERS_KEY, userId, ITEMS_KEY);
+  const itemsQuery = collection(firestore, USERS_KEY, userId, PACK_ITEMS_KEY);
   const categoriesQuery = collection(firestore, USERS_KEY, userId, CATEGORIES_KEY);
   const imagesQuery = collection(firestore, USERS_KEY, userId, IMAGES_KEY);
 
@@ -90,7 +90,7 @@ export const firebase = {
     members: MemberPackItem[],
     category: string
   ): Promise<PackItem | undefined> {
-    const docRef = await add(ITEMS_KEY, { name, members, category });
+    const docRef = await add(PACK_ITEMS_KEY, { name, members, category });
     if (docRef) {
       return { id: docRef.id, checked: false, members, name, category };
     } else {
@@ -98,10 +98,10 @@ export const firebase = {
     }
   },
   updatePackItem: async function (packItem: PackItem) {
-    await update(ITEMS_KEY, packItem.id, packItem);
+    await update(PACK_ITEMS_KEY, packItem.id, packItem);
   },
   deleteItem: async function (id: string) {
-    await del(ITEMS_KEY, id);
+    await del(PACK_ITEMS_KEY, id);
   },
   addMember: async function (name: string): Promise<void> {
     await add(MEMBERS_KEY, { name });
