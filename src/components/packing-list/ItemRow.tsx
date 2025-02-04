@@ -1,6 +1,6 @@
 import { PackItem } from '../../types/PackItem.ts';
-import { getName, sortItemMembersAccordingToMemberOrder } from '../../services/utils.ts';
-import { MemberItemRow } from './MemberItemRow.tsx';
+import { getName } from '../../services/utils.ts';
+import { MemberPackItemRow } from './MemberPackItemRow.tsx';
 import { MultiCheckbox } from '../shared/MultiCheckbox.tsx';
 import { Span } from '../shared/Span.tsx';
 import { firebase } from '../../services/api.ts';
@@ -9,37 +9,44 @@ import { Box, Flex, IconButton, Spacer } from '@chakra-ui/react';
 import { DeleteIcon, EditIcon } from '@chakra-ui/icons';
 import { PLCheckbox } from '../shared/PLCheckbox.tsx';
 
-function ItemRow({ item, onEdit, indent }: { item: PackItem; onEdit: (item: PackItem) => void; indent?: boolean }) {
+function ItemRow({
+  packItem,
+  onEdit,
+  indent,
+}: {
+  packItem: PackItem;
+  onEdit: (packItem: PackItem) => void;
+  indent?: boolean;
+}) {
   const members = useFirebase().members;
 
   async function toggleItem() {
-    item.checked = !item.checked;
-    await firebase.updateItem(item);
+    packItem.checked = !packItem.checked;
+    await firebase.updatePackItem(packItem);
   }
 
-  async function onUpdate(item: PackItem) {
-    await firebase.updateItem(item);
+  async function onUpdate(packItem: PackItem) {
+    await firebase.updatePackItem(packItem);
   }
 
   async function deleteItem() {
-    await firebase.deleteItem(item.id);
+    await firebase.deleteItem(packItem.id);
   }
 
-  sortItemMembersAccordingToMemberOrder(members, item.members);
-  const multipleMembers = !!(item.members && item.members.length > 1);
+  const multipleMembers = !!(packItem.members && packItem.members.length > 1);
   const itemNameWithMember =
-    item.name + (item.members?.length === 1 ? ` (${getName(members, item.members[0].id)})` : '');
+    packItem.name + (packItem.members?.length === 1 ? ` (${getName(members, packItem.members[0].id)})` : '');
 
   return (
     <Box ml={indent ? '3' : '0'}>
       <Flex gap="3" align="center">
         {multipleMembers ? (
-          <MultiCheckbox item={item} onUpdate={onUpdate} />
+          <MultiCheckbox packItem={packItem} onUpdate={onUpdate} />
         ) : (
-          <PLCheckbox checked={item.checked} onClick={toggleItem} />
+          <PLCheckbox checked={packItem.checked} onClick={toggleItem} />
         )}
 
-        <Span strike={item.checked}>{itemNameWithMember}</Span>
+        <Span strike={packItem.checked}>{itemNameWithMember}</Span>
         <Spacer />
         <IconButton
           borderRadius="full"
@@ -50,13 +57,14 @@ function ItemRow({ item, onEdit, indent }: { item: PackItem; onEdit: (item: Pack
         />
         <IconButton
           borderRadius="full"
-          onClick={() => onEdit(item)}
+          onClick={() => onEdit(packItem)}
           variant="ghost"
           icon={<EditIcon />}
           aria-label="Edit item"
         />
       </Flex>
-      {multipleMembers && item.members?.map((m) => <MemberItemRow memberItem={m} parent={item} key={m.id} />)}
+      {multipleMembers &&
+        packItem.members?.map((m) => <MemberPackItemRow memberItem={m} parent={packItem} key={m.id} />)}
     </Box>
   );
 }

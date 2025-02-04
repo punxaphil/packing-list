@@ -15,11 +15,11 @@ import { firestore } from './firebase';
 import { NamedEntity } from '../types/NamedEntity.ts';
 import { PackItem } from '../types/PackItem.ts';
 import { getAuth } from 'firebase/auth';
-import { MemberItem } from '../types/MemberItem.ts';
+import { MemberPackItem } from '../types/MemberPackItem.ts';
 import { Image } from '../types/Image.ts';
 
 const MEMBERS_KEY = 'members';
-const ITEMS_KEY = 'items';
+const ITEMS_KEY = 'packItems';
 const USERS_KEY = 'users';
 const IMAGES_KEY = 'images';
 
@@ -28,7 +28,7 @@ const CATEGORIES_KEY = 'categories';
 export async function getUserCollectionsAndSubscribe(
   setMembers: (members: NamedEntity[]) => void,
   setCategories: (categories: NamedEntity[]) => void,
-  setItems: (items: PackItem[]) => void,
+  setPackItems: (packItems: PackItem[]) => void,
   setImages: (images: Image[]) => void
 ) {
   const userId = getUserId();
@@ -36,15 +36,26 @@ export async function getUserCollectionsAndSubscribe(
   const itemsQuery = collection(firestore, USERS_KEY, userId, ITEMS_KEY);
   const categoriesQuery = collection(firestore, USERS_KEY, userId, CATEGORIES_KEY);
   const imagesQuery = collection(firestore, USERS_KEY, userId, IMAGES_KEY);
-  onSnapshot(memberQuery, (res) => setMembers(fromQueryResult(res)));
-  onSnapshot(itemsQuery, (res) => setItems(fromQueryResult(res)));
-  onSnapshot(categoriesQuery, (res) => setCategories(fromQueryResult(res)));
-  onSnapshot(imagesQuery, (res) => setImages(fromQueryResult(res)));
 
-  setMembers(fromQueryResult(await getDocs(memberQuery)));
-  setCategories(fromQueryResult(await getDocs(categoriesQuery)));
-  setItems(fromQueryResult(await getDocs(itemsQuery)));
-  setImages(fromQueryResult(await getDocs(imagesQuery)));
+  await getInitialData();
+  createSubscriptions();
+
+  async function getInitialData() {
+    const members: NamedEntity[] = fromQueryResult(await getDocs(memberQuery));
+    const categories: NamedEntity[] = fromQueryResult(await getDocs(categoriesQuery));
+    const packItems: PackItem[] = fromQueryResult(await getDocs(itemsQuery));
+    setMembers(members);
+    setCategories(categories);
+    setPackItems(packItems);
+    setImages(fromQueryResult(await getDocs(imagesQuery)));
+  }
+
+  function createSubscriptions() {
+    onSnapshot(memberQuery, (res) => fromQueryResult(res));
+    onSnapshot(categoriesQuery, (res) => fromQueryResult(res));
+    onSnapshot(itemsQuery, (res) => fromQueryResult(res));
+    onSnapshot(imagesQuery, (res) => setImages(fromQueryResult(res)));
+  }
 }
 
 function getUserId() {
@@ -74,7 +85,11 @@ async function del(userColl: string, id: string) {
 }
 
 export const firebase = {
-  addItem: async function (name: string, members: MemberItem[], category: string): Promise<PackItem | undefined> {
+  addPackItem: async function (
+    name: string,
+    members: MemberPackItem[],
+    category: string
+  ): Promise<PackItem | undefined> {
     const docRef = await add(ITEMS_KEY, { name, members, category });
     if (docRef) {
       return { id: docRef.id, checked: false, members, name, category };
@@ -82,8 +97,8 @@ export const firebase = {
       throw new Error('Unable to add item');
     }
   },
-  updateItem: async function (item: PackItem) {
-    await update(ITEMS_KEY, item.id, item);
+  updatePackItem: async function (packItem: PackItem) {
+    await update(ITEMS_KEY, packItem.id, packItem);
   },
   deleteItem: async function (id: string) {
     await del(ITEMS_KEY, id);

@@ -30,7 +30,7 @@ export default function NamedEntityRow({
   type: string;
   isDragging: boolean;
 }) {
-  const items = useFirebase().items;
+  const packItems = useFirebase().packItems;
   const { setError } = useError();
   const { isOpen, onOpen, onClose } = useDisclosure();
 
@@ -45,10 +45,10 @@ export default function NamedEntityRow({
 
   function handleDelete() {
     (async function () {
-      for (const item of items) {
-        if (item.category === namedEntity.id) {
-          delete item.category;
-          await firebase.updateItem(item);
+      for (const packItem of packItems) {
+        if (packItem.category === namedEntity.id) {
+          delete packItem.category;
+          await firebase.updatePackItem(packItem);
         }
       }
       await onDelete(namedEntity.id);

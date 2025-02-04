@@ -27,21 +27,19 @@ export default function DragAndDrop({
     }
     const reordered = reorder(result.source.index, result.destination.index);
     reordered.forEach((entity, index) => {
-      entity.order = index;
+      entity.rank = index;
     });
     onEntitiesUpdated(reordered);
     setEntities(reordered);
   }
-
-  entities.sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
 
   return (
     <DragDropContext onDragEnd={onDragEnd}>
       <Droppable droppableId="droppable">
         {(provided) => (
           <div {...provided.droppableProps} ref={provided.innerRef}>
-            {entities.map((item, index) => (
-              <Draggable key={item.id} draggableId={item.id} index={index}>
+            {entities.map((entity, index) => (
+              <Draggable key={entity.id} draggableId={entity.id} index={index}>
                 {(provided, snapshot) => {
                   return (
                     <Box
@@ -53,7 +51,7 @@ export default function DragAndDrop({
                         padding: '1px',
                       }}
                     >
-                      {renderEntity(item, snapshot.isDragging)}
+                      {renderEntity(entity, snapshot.isDragging)}
                     </Box>
                   );
                 }}

@@ -6,30 +6,30 @@ import PLSelect from '../shared/PLSelect.tsx';
 import PLCheckboxGroup from '../shared/PLCheckboxGroup.tsx';
 import { firebase } from '../../services/api.ts';
 
-export function AddOrEditItem({ item, done }: { item?: PackItem; done: () => void }) {
+export function AddOrEditPackItem({ packItem, done }: { packItem?: PackItem; done: () => void }) {
   const { members, categories } = useFirebase();
-  const [name, setName] = useState<string>(item?.name ?? '');
+  const [name, setName] = useState<string>(packItem?.name ?? '');
   const { setError } = useError();
-  const [selectedMembers, setSelectedMembers] = useState(item?.members ?? []);
-  const [category, setCategory] = useState<string>(item?.category ?? '');
-  const saveAction = item ? handleUpdateItem : handleAdd;
+  const [selectedMembers, setSelectedMembers] = useState(packItem?.members ?? []);
+  const [category, setCategory] = useState<string>(packItem?.category ?? '');
+  const saveAction = packItem ? handleUpdate : handleAdd;
 
   function handleAdd() {
     (async function () {
       if (!members.find((t) => t.name === name)) {
-        await firebase.addItem(name, selectedMembers, category);
+        await firebase.addPackItem(name, selectedMembers, category);
         done();
       }
     })().catch(setError);
   }
 
-  async function handleUpdateItem() {
+  async function handleUpdate() {
     (async function () {
-      if (!item) {
+      if (!packItem) {
         return;
       }
-      const updated = { ...item, name, members: selectedMembers, category };
-      await firebase.updateItem(updated);
+      const updated = { ...packItem, name, members: selectedMembers, category };
+      await firebase.updatePackItem(updated);
       done();
     })().catch(setError);
   }
@@ -54,14 +54,9 @@ export function AddOrEditItem({ item, done }: { item?: PackItem; done: () => voi
 
   return (
     <Box>
-      <Heading as="h2">{item ? 'Edit' : 'Add new'} item</Heading>
+      <Heading as="h2">{packItem ? 'Edit' : 'Add new'} item</Heading>
       <Box maxWidth="300px">
-        <Input
-          placeholder="Enter a item name..."
-          value={name}
-          onChange={handleOnChange}
-          onKeyDown={handleEnter}
-        />
+        <Input placeholder="Enter an item name..." value={name} onChange={handleOnChange} onKeyDown={handleEnter} />
       </Box>
       <Box mt="2">
         <Text size="3" as="b">
@@ -81,8 +76,8 @@ export function AddOrEditItem({ item, done }: { item?: PackItem; done: () => voi
       </Box>
 
       <Flex gap="3" align="center" mt="5">
-        <Button onClick={saveAction}>{item ? 'Update' : 'Add'}</Button>
-        {item && (
+        <Button onClick={saveAction}>{packItem ? 'Update' : 'Add'}</Button>
+        {packItem && (
           <Button onClick={done} color="crimson">
             Cancel
           </Button>

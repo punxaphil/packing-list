@@ -1,9 +1,9 @@
-import { MemberItem } from './MemberItem.ts';
+import { MemberPackItem } from './MemberPackItem.ts';
 
 export interface PackItem {
   id: string;
   name: string;
   checked: boolean;
-  members?: MemberItem[];
+  members?: MemberPackItem[];
   category?: string;
 }

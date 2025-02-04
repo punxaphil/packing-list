@@ -5,7 +5,7 @@ import { Image } from './Image.ts';
 export interface User {
   id: string;
   members: NamedEntity[];
-  items: PackItem[];
+  packItems: PackItem[];
   categories: NamedEntity[];
   images: Image[];
 }

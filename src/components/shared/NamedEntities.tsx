@@ -54,9 +54,9 @@ export default function NamedEntities({
           <DragAndDrop
             initialEntities={namedEntities}
             onEntitiesUpdated={onEntitiesUpdated}
-            renderEntity={(item, isDragging) => (
+            renderEntity={(entity, isDragging) => (
               <NamedEntityRow
-                namedEntity={item}
+                namedEntity={entity}
                 onUpdate={onUpdate}
                 onDelete={onDelete}
                 type={type}

@@ -1,4 +1,4 @@
-import { MemberItem } from '../../types/MemberItem.ts';
+import { MemberPackItem } from '../../types/MemberPackItem.ts';
 import { allChecked, getName } from '../../services/utils.ts';
 import { PackItem } from '../../types/PackItem.ts';
 import { Span } from '../shared/Span.tsx';
@@ -7,7 +7,13 @@ import { useFirebase } from '../../services/contexts.ts';
 import { Flex } from '@chakra-ui/react';
 import { PLCheckbox } from '../shared/PLCheckbox.tsx';
 
-export function MemberItemRow({ memberItem: { checked, id }, parent }: { memberItem: MemberItem; parent: PackItem }) {
+export function MemberPackItemRow({
+  memberItem: { checked, id },
+  parent,
+}: {
+  memberItem: MemberPackItem;
+  parent: PackItem;
+}) {
   const members = useFirebase().members;
 
   async function toggleMember() {
@@ -15,7 +21,7 @@ export function MemberItemRow({ memberItem: { checked, id }, parent }: { memberI
     if (find) {
       find.checked = !find.checked;
       parent.checked = allChecked(parent);
-      await firebase.updateItem(parent);
+      await firebase.updatePackItem(parent);
     }
   }
 

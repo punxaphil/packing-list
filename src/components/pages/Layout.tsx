@@ -9,12 +9,15 @@ import { Flex, Heading, Stack } from '@chakra-ui/react';
 import { Logout } from '../auth/Auth.tsx';
 import { Outlet } from 'react-router';
 import { Image } from '../../types/Image.ts';
+import { sortAll } from '../../services/utils.ts';
 
 export function Layout({ userId, title }: { userId: string; title?: string }) {
   const [members, setMembers] = useState<NamedEntity[]>([]);
   const [categories, setCategories] = useState<NamedEntity[]>([]);
-  const [items, setItems] = useState<PackItem[]>([]);
+  const [packItems, setPackItems] = useState<PackItem[]>([]);
   const [images, setImages] = useState<Image[]>([]);
+
+  sortAll(members, categories, packItems);
 
   useEffect(() => {
     (async function () {
@@ -22,13 +25,13 @@ export function Layout({ userId, title }: { userId: string; title?: string }) {
       if (!userId) {
         throw new Error('No user logged in');
       }
-      await getUserCollectionsAndSubscribe(setMembers, setCategories, setItems, setImages);
+      await getUserCollectionsAndSubscribe(setMembers, setCategories, setPackItems, setImages);
     })().catch(console.error);
   }, []);
   return (
     <>
       {members ? (
-        <FirebaseContext.Provider value={{ id: userId, members, categories, items, images }}>
+        <FirebaseContext.Provider value={{ id: userId, members, categories, packItems, images }}>
           <Flex align="center" justifyContent="space-between" m="3">
             <img src="/squirrel_icon.png" alt="squirrel icon" />
             <Heading as="h1">{title}</Heading>
