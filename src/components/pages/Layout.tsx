@@ -33,7 +33,6 @@ export function Layout({ userId, title }: { userId: string; title?: string }) {
   }
   return (
     <>
-      {members ? (
       <Flex align="center" justifyContent="space-between" m="3">
         <img src="/squirrel_icon.png" alt="squirrel icon" />
         <Heading as="h1">{title}</Heading>
