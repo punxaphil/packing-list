@@ -12,12 +12,10 @@ import { Image } from '../../types/Image.ts';
 import { sortAll } from '../../services/utils.ts';
 
 export function Layout({ userId, title }: { userId: string; title?: string }) {
-  const [members, setMembers] = useState<NamedEntity[]>([]);
-  const [categories, setCategories] = useState<NamedEntity[]>([]);
-  const [packItems, setPackItems] = useState<PackItem[]>([]);
-  const [images, setImages] = useState<Image[]>([]);
-
-  sortAll(members, categories, packItems);
+  const [members, setMembers] = useState<NamedEntity[]>();
+  const [categories, setCategories] = useState<NamedEntity[]>();
+  const [packItems, setPackItems] = useState<PackItem[]>();
+  const [images, setImages] = useState<Image[]>();
 
   useEffect(() => {
     (async function () {
@@ -28,15 +26,21 @@ export function Layout({ userId, title }: { userId: string; title?: string }) {
       await getUserCollectionsAndSubscribe(setMembers, setCategories, setPackItems, setImages);
     })().catch(console.error);
   }, []);
+
+  const isInitialized = members && categories && packItems && images;
+  if (isInitialized) {
+    sortAll(members, categories, packItems);
+  }
   return (
     <>
       {members ? (
+      <Flex align="center" justifyContent="space-between" m="3">
+        <img src="/squirrel_icon.png" alt="squirrel icon" />
+        <Heading as="h1">{title}</Heading>
+        <Logout />
+      </Flex>
+      {isInitialized && (
         <FirebaseContext.Provider value={{ id: userId, members, categories, packItems, images }}>
-          <Flex align="center" justifyContent="space-between" m="3">
-            <img src="/squirrel_icon.png" alt="squirrel icon" />
-            <Heading as="h1">{title}</Heading>
-            <Logout />
-          </Flex>
           <Stack direction="row" spacing={4} align="center" pt="3" justifyContent="center">
             <NavButton name="Home" path="/"></NavButton>
             <NavButton name="Members" path="members"></NavButton>
@@ -44,8 +48,6 @@ export function Layout({ userId, title }: { userId: string; title?: string }) {
           </Stack>
           <Outlet />
         </FirebaseContext.Provider>
-      ) : (
-        <div>Loading...</div>
       )}
     </>
   );

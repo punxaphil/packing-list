@@ -1,19 +1,17 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Box } from '@chakra-ui/react';
 import { NamedEntity } from '../../types/NamedEntity.ts';
 import { DragDropContext, Draggable, DragUpdate, Droppable } from '@hello-pangea/dnd';
 
 export default function DragAndDrop({
-  initialEntities,
+  entities,
   renderEntity,
   onEntitiesUpdated,
 }: {
-  initialEntities: NamedEntity[];
+  entities: NamedEntity[];
   renderEntity: (namedEntity: NamedEntity, isDragging: boolean) => React.ReactNode;
   onEntitiesUpdated: (value: NamedEntity[]) => void;
 }) {
-  const [entities, setEntities] = useState<NamedEntity[]>(initialEntities);
-
   function reorder(startIndex: number, endIndex: number) {
     const result = [...entities];
     const [removed] = result.splice(startIndex, 1);
@@ -30,7 +28,6 @@ export default function DragAndDrop({
       entity.rank = index;
     });
     onEntitiesUpdated(reordered);
-    setEntities(reordered);
   }
 
   return (

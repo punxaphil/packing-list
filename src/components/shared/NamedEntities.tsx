@@ -52,7 +52,7 @@ export default function NamedEntities({
       <Card maxWidth="400px">
         <CardBody>
           <DragAndDrop
-            initialEntities={namedEntities}
+            entities={namedEntities}
             onEntitiesUpdated={onEntitiesUpdated}
             renderEntity={(entity, isDragging) => (
               <NamedEntityRow
