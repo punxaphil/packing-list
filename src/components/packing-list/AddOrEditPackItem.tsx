@@ -54,31 +54,42 @@ export function AddOrEditPackItem({ packItem, done }: { packItem?: PackItem; don
 
   return (
     <Box>
-      <Heading as="h2">{packItem ? 'Edit' : 'Add new'} item</Heading>
-      <Box maxWidth="300px">
-        <Input placeholder="Enter an item name..." value={name} onChange={handleOnChange} onKeyDown={handleEnter} />
-      </Box>
-      <Box mt="2">
-        <Text size="3" as="b">
-          Assign
-        </Text>
-        <PLCheckboxGroup
-          setSelection={onMembersSelection}
-          selected={selectedMembers.map((m) => m.id)}
-          options={members}
-        />
-      </Box>
-      <Box mt="2">
-        <Text size="3" as="b">
-          NamedEntity
-        </Text>
-        <PLSelect setSelection={setCategory} selected={category} placeholder="Select a category" options={categories} />
-      </Box>
+      <Flex gap="3" direction="column">
+        <Heading as="h2" size="md">
+          {packItem ? 'Edit' : 'Add new'} item
+        </Heading>
+        <Box maxWidth="300px">
+          <Input placeholder="Enter an item name..." value={name} onChange={handleOnChange} onKeyDown={handleEnter} />
+        </Box>
+        {members.length > 0 && (
+          <Box mt="2">
+            <Text size="3" as="b">
+              Assign
+            </Text>
+            <PLCheckboxGroup
+              setSelection={onMembersSelection}
+              selected={selectedMembers.map((m) => m.id)}
+              options={members}
+            />
+          </Box>
+        )}
+        <Box mt="2">
+          <Text size="3" as="b">
+            Category
+          </Text>
+          <PLSelect
+            setSelection={setCategory}
+            selected={category}
+            placeholder="Select a category"
+            options={categories}
+          />
+        </Box>
+      </Flex>
 
       <Flex gap="3" align="center" mt="5">
         <Button onClick={saveAction}>{packItem ? 'Update' : 'Add'}</Button>
         {packItem && (
-          <Button onClick={done} color="crimson">
+          <Button onClick={done} colorScheme="gray">
             Cancel
           </Button>
         )}

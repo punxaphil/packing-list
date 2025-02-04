@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { PackItem } from '../../types/PackItem.ts';
 import { useFirebase } from '../../services/contexts.ts';
-import { Box, Card, CardBody, Text } from '@chakra-ui/react';
+import { Box, Card, CardBody, Flex, Text } from '@chakra-ui/react';
 import PackItemRow from '../packing-list/ItemRow.tsx';
 import { AddOrEditPackItem } from '../packing-list/AddOrEditPackItem.tsx';
 import { groupByCategories } from '../../services/utils.ts';
@@ -14,7 +14,7 @@ export default function PackingList() {
   const grouped = groupByCategories(packItems);
 
   return (
-    <Box mt="5">
+    <Box mt="5" maxWidth="600px" mx="auto">
       {packItems.length ? (
         <Card>
           <CardBody>
@@ -38,8 +38,11 @@ export default function PackingList() {
           </CardBody>
         </Card>
       ) : (
-        'No items yet.'
+        <Flex justifyContent="center" minWidth="max-content">
+          <Text>No items yet.</Text>
+        </Flex>
       )}
+      {/* </Flex> */}
       <Card mt="5">
         <CardBody>
           <AddOrEditPackItem

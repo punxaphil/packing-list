@@ -65,7 +65,7 @@ export default function NamedEntities({
             )}
           />
           <Flex mt="2" gap="3" align="center">
-            <Input placeholder="name" value={newName} onChange={handleOnChange} onKeyDown={handleEnter} />
+            <Input placeholder="Enter a name" value={newName} onChange={handleOnChange} onKeyDown={handleEnter} />
             <Button onClick={handleAdd}>Add</Button>
           </Flex>
         </CardBody>
