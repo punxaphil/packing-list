@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import { getAuth } from 'firebase/auth';
 import { PackItem } from '../../types/PackItem.ts';
 import { NamedEntity } from '../../types/NamedEntity.ts';
-import { Flex, Heading, Stack } from '@chakra-ui/react';
+import { Flex, Heading, Spacer, Spinner, Stack } from '@chakra-ui/react';
 import { Logout } from '../auth/Auth.tsx';
 import { Outlet } from 'react-router';
 import { Image } from '../../types/Image.ts';
@@ -38,7 +38,7 @@ export function Layout({ userId, title }: { userId: string; title?: string }) {
         <Heading as="h1">{title}</Heading>
         <Logout />
       </Flex>
-      {isInitialized && (
+      {isInitialized ? (
         <FirebaseContext.Provider value={{ id: userId, members, categories, packItems, images }}>
           <Stack direction="row" spacing={4} align="center" pt="3" justifyContent="center">
             <NavButton name="Home" path="/"></NavButton>
@@ -47,6 +47,12 @@ export function Layout({ userId, title }: { userId: string; title?: string }) {
           </Stack>
           <Outlet />
         </FirebaseContext.Provider>
+      ) : (
+        <Flex>
+          <Spacer />
+          <Spinner thickness="4px" speed="0.65s" emptyColor="gray.200" color="teal" size="xl" />
+          <Spacer />
+        </Flex>
       )}
     </>
   );
