@@ -12,11 +12,11 @@ import {
   withDefaultColorScheme,
 } from '@chakra-ui/react';
 import { Route, Routes } from 'react-router';
-import PackingList from './components/pages/PackingList.tsx';
 import { Layout } from './components/pages/Layout.tsx';
 import Members from './components/pages/Members.tsx';
 import Categories from './components/pages/Categories.tsx';
 import { Welcome } from './components/pages/Welcome.tsx';
+import { PackingList } from './components/pages/PackingList.tsx';
 
 const customTheme = extendTheme(withDefaultColorScheme({ colorScheme: 'teal' }));
 const TITLE = "Pack'n'Go!";

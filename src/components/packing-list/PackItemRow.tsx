@@ -9,7 +9,7 @@ import { Box, Flex, IconButton, Spacer } from '@chakra-ui/react';
 import { DeleteIcon, EditIcon } from '@chakra-ui/icons';
 import { PLCheckbox } from '../shared/PLCheckbox.tsx';
 
-function ItemRow({
+export function PackItemRow({
   packItem,
   onEdit,
   indent,
@@ -69,4 +69,3 @@ function ItemRow({
   );
 }
 
-export default ItemRow;

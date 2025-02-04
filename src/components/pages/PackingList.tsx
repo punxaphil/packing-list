@@ -2,11 +2,11 @@ import { useState } from 'react';
 import { PackItem } from '../../types/PackItem.ts';
 import { useFirebase } from '../../services/contexts.ts';
 import { Box, Card, CardBody, Flex, Text } from '@chakra-ui/react';
-import PackItemRow from '../packing-list/ItemRow.tsx';
 import { AddOrEditPackItem } from '../packing-list/AddOrEditPackItem.tsx';
 import { groupByCategories } from '../../services/utils.ts';
+import { PackItemRow } from '../packing-list/PackItemRow.tsx';
 
-export default function PackingList() {
+export function PackingList() {
   const [selectedItem, setSelectedItem] = useState<PackItem>();
 
   const packItems = useFirebase().packItems;
