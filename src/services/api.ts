@@ -51,9 +51,9 @@ export async function getUserCollectionsAndSubscribe(
   }
 
   function createSubscriptions() {
-    onSnapshot(memberQuery, (res) => fromQueryResult(res));
-    onSnapshot(categoriesQuery, (res) => fromQueryResult(res));
-    onSnapshot(itemsQuery, (res) => fromQueryResult(res));
+    onSnapshot(memberQuery, (res) => setMembers(fromQueryResult(res)));
+    onSnapshot(categoriesQuery, (res) => setCategories(fromQueryResult(res)));
+    onSnapshot(itemsQuery, (res) => setPackItems(fromQueryResult(res)));
     onSnapshot(imagesQuery, (res) => setImages(fromQueryResult(res)));
   }
 }
