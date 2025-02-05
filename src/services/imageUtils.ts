@@ -15,14 +15,6 @@ export const resizeImageFromFile = (maxSize: number, file: File) => {
   });
 };
 
-export const resizeImageFromUrl = (maxSize: number, url: string) => {
-  return new Promise<string>((resolve) => {
-    const image = new Image();
-    image.onload = () => resolve(resizeOnLoad(image, maxSize));
-    image.src = url;
-  });
-};
-
 function resizeOnLoad(image: HTMLImageElement, maxSize: number) {
   let width = image.width;
   let height = image.height;
