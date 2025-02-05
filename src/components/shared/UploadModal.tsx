@@ -1,11 +1,10 @@
 import { ChangeEvent, useState } from 'react';
 import { firebase } from '../../services/api.ts';
-import { cropImage, resizeImageFromFile, resizeImageFromUrl } from '../../services/imageUtils.ts';
+import { cropImage, resizeImageFromFile } from '../../services/imageUtils.ts';
 import {
   Button,
   ButtonGroup,
   HStack,
-  IconButton,
   Input,
   Modal,
   ModalBody,
@@ -17,7 +16,7 @@ import {
   Stack,
   Switch,
 } from '@chakra-ui/react';
-import { AttachmentIcon, RepeatIcon } from '@chakra-ui/icons';
+import { AttachmentIcon } from '@chakra-ui/icons';
 import { useFirebase } from '../../services/contexts.ts';
 import { Image } from '../../types/Image.ts';
 
@@ -39,38 +38,24 @@ export function UploadModal({
   const images = useFirebase().images;
   const entityImage = images.find(imageFinder);
   const [fileUrl, setFileUrl] = useState(entityImage?.url);
-  const [manualUrl, setManualUrl] = useState('');
-  const [uploadFromUrl, setUploadFromUrl] = useState(false);
+  const [pasteImage, setPasteImage] = useState(false);
 
-  function onManualUrlChange(event: ChangeEvent<HTMLInputElement>) {
-    setManualUrl(event.target.value);
+  async function resizeCropAndSet(file: File) {
+    let result = await resizeImageFromFile(100, file);
+    result = await cropImage(result, 1);
+    if (result) {
+      setFileUrl(result);
+    }
   }
 
   async function onFileSelected(event: ChangeEvent<HTMLInputElement>) {
     const file = event.currentTarget.files?.[0];
     if (file) {
-      let result = await resizeImageFromFile(100, file);
-      result = await cropImage(result, 1);
-      if (result) {
-        setFileUrl(result);
-      }
-    }
-  }
-
-  async function resizeAndCropManualURL() {
-    if (manualUrl) {
-      let result = await resizeImageFromUrl(100, manualUrl);
-      result = await cropImage(result, 1);
-      if (result) {
-        setFileUrl(result);
-      }
+      await resizeCropAndSet(file);
     }
   }
 
   async function handleUpload() {
-    if (manualUrl !== fileUrl) {
-      await resizeAndCropManualURL();
-    }
     if (fileUrl) {
       if (entityImage) {
         await firebase.updateImage(typeId, fileUrl);
@@ -82,7 +67,23 @@ export function UploadModal({
   }
 
   function onSwitch() {
-    return setUploadFromUrl(!uploadFromUrl);
+    return setPasteImage(!pasteImage);
+  }
+
+  async function onPaste() {
+    const clipboardItems = await navigator.clipboard.read();
+    for (const clipboardItem of clipboardItems) {
+      for (const type of clipboardItem.types) {
+        if (/^image\//.test(type)) {
+          const blob = await clipboardItem.getType(type);
+          const file = new File([blob], 'pasted-image', { type });
+          if (file) {
+            await resizeCropAndSet(file);
+          }
+          return;
+        }
+      }
+    }
   }
 
   return (
@@ -94,21 +95,23 @@ export function UploadModal({
           <ModalCloseButton />
           <ModalBody pb={6}>
             <Stack m="5" spacing={4} align="center">
-              <Switch colorScheme="blue" onChange={onSwitch} isChecked={uploadFromUrl}>
-                Upload from URL?
+              <Switch colorScheme="blue" onChange={onSwitch} isChecked={pasteImage} hidden={fileUrl !== undefined}>
+                Paste image?
               </Switch>
-              {uploadFromUrl ? (
+              {pasteImage ? (
                 <HStack>
-                  <Input placeholder="URL of image to use" value={manualUrl} onChange={onManualUrlChange} />
-                  <IconButton
-                    aria-label="Add manual url"
-                    icon={<RepeatIcon />}
-                    onClick={resizeAndCropManualURL}
-                    colorScheme="gray"
+                  <Input
+                    placeholder="Paste image here"
+                    onPaste={onPaste}
+                    autoFocus
+                    readOnly
+                    width="200px"
+                    height="200px"
+                    hidden={fileUrl !== undefined}
                   />
                 </HStack>
               ) : (
-                <Input type="file" onChange={onFileSelected} accept="/image/*" p="1" />
+                <Input type="file" onChange={onFileSelected} accept="/image/*" p="1" hidden={fileUrl !== undefined} />
               )}
               {fileUrl && <img src={fileUrl} alt="firebase" />}
             </Stack>
@@ -119,7 +122,14 @@ export function UploadModal({
               <Button onClick={handleUpload} colorScheme="blue" leftIcon={<AttachmentIcon />} isDisabled={!fileUrl}>
                 Set image
               </Button>
-              <Button onClick={onClose}>Cancel</Button>
+              <Button
+                onClick={() => {
+                  setFileUrl(undefined);
+                  onClose();
+                }}
+              >
+                Cancel
+              </Button>
             </ButtonGroup>
           </ModalFooter>
         </ModalContent>
