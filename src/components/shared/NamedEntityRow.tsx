@@ -14,7 +14,7 @@ import {
   PopoverTrigger,
   useDisclosure,
 } from '@chakra-ui/react';
-import { ArrowUpIcon, DeleteIcon, HamburgerIcon } from '@chakra-ui/icons';
+import { ArrowUpIcon, DeleteIcon, DragHandleIcon } from '@chakra-ui/icons';
 import { UploadModal } from './UploadModal.tsx';
 
 export function NamedEntityRow({
@@ -61,7 +61,7 @@ export function NamedEntityRow({
   return (
     <Box border={isDragging ? '1px solid black' : 'none'} borderRadius="md" bg={isDragging ? 'gray.200' : ''}>
       <Flex gap="3" align="center">
-        <HamburgerIcon color="gray" />
+        <DragHandleIcon color="gray" />
         <Popover trigger="hover">
           <PopoverTrigger>
             <Link onClick={onOpen}>{imageUrl ? <Image src={imageUrl} w="30px" /> : <ArrowUpIcon />}</Link>
