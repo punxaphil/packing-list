@@ -16,7 +16,7 @@ import {
   Stack,
   Switch,
 } from '@chakra-ui/react';
-import { AttachmentIcon } from '@chakra-ui/icons';
+import { AttachmentIcon, CloseIcon, DeleteIcon } from '@chakra-ui/icons';
 import { useFirebase } from '../../services/contexts.ts';
 import { Image } from '../../types/Image.ts';
 
@@ -41,7 +41,7 @@ export function UploadModal({
   const [pasteImage, setPasteImage] = useState(false);
 
   async function resizeCropAndSet(file: File) {
-    let result = await resizeImageFromFile(100, file);
+    let result = await resizeImageFromFile(400, file);
     result = await cropImage(result, 1);
     if (result) {
       setFileUrl(result);
@@ -60,10 +60,17 @@ export function UploadModal({
       if (entityImage) {
         await firebase.updateImage(typeId, fileUrl);
       } else {
-        await firebase.addImage(type, type, fileUrl);
+        await firebase.addImage(type, typeId, fileUrl);
       }
     }
     onClose();
+  }
+
+  async function handleDelete() {
+    if (entityImage) {
+      await firebase.deleteImage(entityImage.id);
+    }
+    resetAndClose();
   }
 
   function onSwitch() {
@@ -84,6 +91,11 @@ export function UploadModal({
         }
       }
     }
+  }
+
+  function resetAndClose() {
+    setFileUrl(undefined);
+    onClose();
   }
 
   return (
@@ -120,14 +132,12 @@ export function UploadModal({
           <ModalFooter>
             <ButtonGroup>
               <Button onClick={handleUpload} colorScheme="blue" leftIcon={<AttachmentIcon />} isDisabled={!fileUrl}>
-                Set image
+                Save
               </Button>
-              <Button
-                onClick={() => {
-                  setFileUrl(undefined);
-                  onClose();
-                }}
-              >
+              <Button onClick={handleDelete} colorScheme="orange" leftIcon={<DeleteIcon />} isDisabled={!entityImage}>
+                Remove
+              </Button>
+              <Button onClick={resetAndClose} colorScheme="gray" leftIcon={<CloseIcon />}>
                 Cancel
               </Button>
             </ButtonGroup>
