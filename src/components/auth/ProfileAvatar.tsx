@@ -10,7 +10,14 @@ export function ProfileAvatar({ shouldNavigate = true, size }: { shouldNavigate?
 
   return (
     <NavLink to={shouldNavigate ? '/profile' : ''}>
-      <Avatar size={size} bg="teal" name={currentUser?.email[0]?.toUpperCase()} src={profileImage?.url} />
+      <Avatar
+        size={size}
+        bg="teal"
+        name={currentUser?.email[0]?.toUpperCase()}
+        src={profileImage?.url}
+        borderColor="teal"
+        showBorder={true}
+      />
     </NavLink>
   );
 }

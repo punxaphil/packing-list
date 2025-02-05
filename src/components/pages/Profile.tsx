@@ -1,5 +1,5 @@
 import { useError, useFirebase } from '../../services/contexts';
-import { Button, ButtonGroup, Card, CardBody, Flex, IconButton, Image, Spacer, useDisclosure } from '@chakra-ui/react';
+import { Button, ButtonGroup, Card, CardBody, Flex, IconButton, Spacer, useDisclosure } from '@chakra-ui/react';
 import { UploadModal } from '../shared/UploadModal.tsx';
 import { getAuth, signOut } from 'firebase/auth';
 import { useCurrentUser } from '../auth/Auth.tsx';
@@ -35,21 +35,16 @@ export function Profile() {
           <Flex gap="3" direction="column" alignItems="center">
             {currentUser.email}
             <Flex alignItems="end">
-              {profileImage ? (
-                <>
-                  <Image
-                    src={profileImage.url}
-                    alt="profile"
-                    shadow="xl"
-                    border="1px"
-                    borderColor="gray"
-                    borderRadius="full"
-                  />
-                  <IconButton size="xs" icon={<DeleteIcon />} aria-label="Delete profile picture" onClick={onDelete} />
-                </>
-              ) : (
-                <ProfileAvatar shouldNavigate={false} size="xl" />
-              )}
+              <>
+                <ProfileAvatar shouldNavigate={false} size="full" />
+                <IconButton
+                  size="xs"
+                  icon={<DeleteIcon />}
+                  aria-label="Delete profile picture"
+                  onClick={onDelete}
+                  hidden={!profileImage}
+                />
+              </>
             </Flex>
             <Spacer />
             <ButtonGroup flexDirection="column" gap="2">
