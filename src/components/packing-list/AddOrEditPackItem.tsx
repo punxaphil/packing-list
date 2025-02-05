@@ -1,4 +1,4 @@
-import { Box, Button, Flex, Heading, Input, Text } from '@chakra-ui/react';
+import { Box, Button, Flex, Heading, Input, Spacer, Text } from '@chakra-ui/react';
 import { useError, useFirebase } from '../../services/contexts.ts';
 import React, { useState } from 'react';
 import { PackItem } from '../../types/PackItem.ts';
@@ -66,6 +66,7 @@ export function AddOrEditPackItem({ packItem, done }: { packItem?: PackItem; don
             <Text size="3" as="b">
               Assign
             </Text>
+            <Spacer />
             <PLCheckboxGroup
               setSelection={onMembersSelection}
               selected={selectedMembers.map((m) => m.id)}

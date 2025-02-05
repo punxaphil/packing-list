@@ -1,4 +1,4 @@
-import { Checkbox, CheckboxGroup, HStack } from '@chakra-ui/react';
+import { Checkbox, CheckboxGroup } from '@chakra-ui/react';
 import { NamedEntity } from '../../types/NamedEntity.ts';
 
 export function PLCheckboxGroup({
@@ -12,13 +12,11 @@ export function PLCheckboxGroup({
 }) {
   return (
     <CheckboxGroup defaultValue={selected} onChange={setSelection}>
-      <HStack spacing="5">
-        {options.map((option, index) => (
-          <Checkbox key={index} value={option.id}>
-            {option.name}
-          </Checkbox>
-        ))}
-      </HStack>
+      {options.map((option, index) => (
+        <Checkbox key={index} value={option.id} mr={5} border="thick" borderColor="gray.200">
+          {option.name}
+        </Checkbox>
+      ))}
     </CheckboxGroup>
   );
 }
