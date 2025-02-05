@@ -100,11 +100,15 @@ export const firebase = {
   updatePackItem: async function (packItem: PackItem) {
     await update(PACK_ITEMS_KEY, packItem.id, packItem);
   },
-  deleteItem: async function (id: string) {
+  deletePackItem: async function (id: string) {
     await del(PACK_ITEMS_KEY, id);
   },
-  addMember: async function (name: string): Promise<void> {
-    await add(MEMBERS_KEY, { name });
+  addMember: async function (name: string): Promise<string> {
+    const docRef = await add(MEMBERS_KEY, { name });
+    if (!docRef) {
+      throw new Error('Unable to add member');
+    }
+    return docRef.id;
   },
   updateMember: async function (member: NamedEntity) {
     await update(MEMBERS_KEY, member.id, member);
@@ -112,8 +116,12 @@ export const firebase = {
   deleteMember: async function (id: string) {
     await del(MEMBERS_KEY, id);
   },
-  addCategory: async function (name: string): Promise<void> {
-    await add(CATEGORIES_KEY, { name });
+  addCategory: async function (name: string): Promise<string> {
+    const docRef = await add(CATEGORIES_KEY, { name });
+    if (!docRef) {
+      throw new Error('Unable to add category');
+    }
+    return docRef.id;
   },
   updateCategory: async function (category: NamedEntity) {
     await update(CATEGORIES_KEY, category.id, category);

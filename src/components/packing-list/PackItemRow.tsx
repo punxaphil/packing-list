@@ -30,7 +30,7 @@ export function PackItemRow({
   }
 
   async function deleteItem() {
-    await firebase.deleteItem(packItem.id);
+    await firebase.deletePackItem(packItem.id);
   }
 
   const multipleMembers = !!(packItem.members && packItem.members.length > 1);
@@ -68,4 +68,3 @@ export function PackItemRow({
     </Box>
   );
 }
-
