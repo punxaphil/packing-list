@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { PackItem } from '../../types/PackItem.ts';
 import { useFirebase } from '../../services/contexts.ts';
-import { Box, Card, CardBody, Flex, Text, Image, Stack, Heading } from '@chakra-ui/react';
+import { Box, Card, CardBody, Flex, Image, Stack, Text } from '@chakra-ui/react';
 import { AddOrEditPackItem } from '../packing-list/AddOrEditPackItem.tsx';
 import { groupByCategories } from '../../services/utils.ts';
 import { PackItemRow } from '../packing-list/PackItemRow.tsx';
@@ -11,6 +11,7 @@ export function PackingList() {
   const [selectedItem, setSelectedItem] = useState<PackItem>();
   const packItems = useFirebase().packItems;
   const [filteredPackItems, setFilteredPackItems] = useState(packItems);
+  const [filterCategory, setFilterCategory] = useState<string>('');
   const images = useFirebase().images;
 
   const categories = useFirebase().categories;
@@ -22,7 +23,12 @@ export function PackingList() {
   }
 
   function filterOnCategory(category: string) {
-    setFilteredPackItems(packItems.filter((packItem) => packItem.category === category));
+    if (category) {
+      setFilteredPackItems(packItems.filter((packItem) => packItem.category === category));
+    } else {
+      setFilteredPackItems(packItems);
+    }
+    setFilterCategory(category);
   }
 
   return (
@@ -30,15 +36,12 @@ export function PackingList() {
       {filteredPackItems.length ? (
         <>
           {/* Move to a seperate component */}
-          <Flex mb="3" gap="2" direction="column">
-            <Heading as="h2" size="md">
-              Filters
-            </Heading>
+          <Flex mb="3" gap="2">
             <Stack direction="row" justifyContent="space-between" alignItems="center">
               <PLSelect
                 setSelection={filterOnCategory}
-                selected=""
-                placeholder="Select category"
+                selected={filterCategory}
+                placeholder="Filter category"
                 options={categories}
               />
             </Stack>
