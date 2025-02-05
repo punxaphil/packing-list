@@ -8,19 +8,20 @@ import {
 } from 'firebase/auth';
 import { useError } from '../../services/contexts.ts';
 import { Button, ButtonGroup, Input, Stack } from '@chakra-ui/react';
-import { useNavigate } from 'react-router';
+import { useLocation, useNavigate } from 'react-router';
 
 export function useCurrentUser() {
   const [userId, setUserId] = useState('');
   const [email, setEmail] = useState('');
   const [loggingIn, setLoggingIn] = useState(true);
   const navigate = useNavigate();
+  const location = useLocation();
 
   getAuth().onAuthStateChanged((user) => {
     setUserId(user?.uid ?? '');
     setEmail(user?.email ?? '');
     setLoggingIn(false);
-    if (!user) {
+    if (!user && location.pathname !== '/') {
       navigate('/');
     }
   });
