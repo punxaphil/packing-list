@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Box } from '@chakra-ui/react';
 import { NamedEntity } from '../../types/NamedEntity.ts';
 import { DragDropContext, Draggable, DragUpdate, Droppable } from '@hello-pangea/dnd';
@@ -12,6 +12,12 @@ export function DragAndDrop({
   renderEntity: (namedEntity: NamedEntity, isDragging: boolean) => React.ReactNode;
   onEntitiesUpdated: (value: NamedEntity[]) => void;
 }) {
+  const [reordered, setReordered] = useState(entities);
+
+  useEffect(() => {
+    setReordered(entities);
+  }, [entities]);
+
   function reorder(startIndex: number, endIndex: number) {
     const result = [...entities];
     const [removed] = result.splice(startIndex, 1);
@@ -23,11 +29,12 @@ export function DragAndDrop({
     if (!result.destination) {
       return;
     }
-    const reordered = reorder(result.source.index, result.destination.index);
-    reordered.forEach((entity, index) => {
+    const updated = reorder(result.source.index, result.destination.index);
+    updated.forEach((entity, index) => {
       entity.rank = index;
     });
-    onEntitiesUpdated(reordered);
+    onEntitiesUpdated(updated);
+    setReordered(updated);
   }
 
   return (
@@ -35,7 +42,7 @@ export function DragAndDrop({
       <Droppable droppableId="droppable">
         {(provided) => (
           <div {...provided.droppableProps} ref={provided.innerRef}>
-            {entities.map((entity, index) => (
+            {reordered.map((entity, index) => (
               <Draggable key={entity.id} draggableId={entity.id} index={index}>
                 {(provided, snapshot) => {
                   return (
