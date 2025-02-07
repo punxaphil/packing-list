@@ -85,11 +85,7 @@ async function del(userColl: string, id: string) {
 }
 
 export const firebase = {
-  addPackItem: async function (
-    name: string,
-    members: MemberPackItem[],
-    category: string
-  ): Promise<PackItem | undefined> {
+  addPackItem: async function (name: string, members: MemberPackItem[], category: string): Promise<PackItem> {
     const docRef = await add(PACK_ITEMS_KEY, { name, members, category });
     if (docRef) {
       return { id: docRef.id, checked: false, members, name, category };

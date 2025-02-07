@@ -13,7 +13,7 @@ export function NamedEntities({
   type,
 }: {
   namedEntities: NamedEntity[];
-  onAdd: (name: string) => Promise<void>;
+  onAdd: (name: string) => Promise<string>;
   onUpdate: (namedEntity: NamedEntity) => Promise<void>;
   onDelete: (id: string) => Promise<void>;
   type: string;

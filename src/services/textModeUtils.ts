@@ -7,16 +7,16 @@ export function createTextPackItemsFromText(groupedAsText: string): TextPackItem
   let currentItem: TextPackItem | undefined = undefined;
   let currentCategory: string | undefined = undefined;
   groupedAsText.split('\n').forEach((line) => {
-    if (/^ {4}[^ ].*/.test(line)) {
-      const memberName = line.trim();
+    if (/^--.*/.test(line)) {
+      const memberName = line.trim().replace('--', '').trim();
       if (currentItem) {
         currentItem.members.push(memberName);
       }
-    } else if (/^ {2}[^ ].*/.test(line)) {
-      const itemName = line.trim();
+    } else if (/^-.*/.test(line)) {
+      const itemName = line.trim().replace('-', '').trim();
       currentItem = { name: itemName, members: [], category: currentCategory };
       items.push(currentItem);
-    } else if (/^[^ ].*/.test(line)) {
+    } else {
       currentCategory = line.trim();
     }
   });
@@ -35,7 +35,8 @@ export async function updateFirebaseFromTextPackItems(
     if (packItem) {
       await updateExistingPackItem(t, members, packItem, categories);
     } else {
-      await addNewPackItem(t, members, categories);
+      const newPI = await addNewPackItem(t, members, categories);
+      packItems.push(newPI);
     }
   }
 }
@@ -55,31 +56,51 @@ async function updateExistingPackItem(
   packItem: PackItem,
   categories: NamedEntity[]
 ) {
-  const memberPackItems = [];
-  for (const m of t.members) {
-    const member = members.find((member) => member.name === m);
-    const id = member ? member.id : await firebase.addMember(m);
-    const checked = packItem.members?.find((mpi) => mpi.id === member?.id)?.checked ?? false;
-    memberPackItems.push({ id, checked });
+  let memberPackItems;
+  if (t.members) {
+    memberPackItems = [];
+    for (const m of t.members) {
+      const member = members.find((member) => member.name === m);
+      let id: string;
+      const checked = packItem.members?.find((mpi) => mpi.id === member?.id)?.checked ?? false;
+      if (member) {
+        id = member.id;
+      } else {
+        id = await firebase.addMember(m);
+        members.push({ id, name: m });
+      }
+      memberPackItems.push({ id, checked });
+    }
   }
   // update if category has changed
   let category = categories.find((cat) => cat.name === t.category);
   if (!category && t.category) {
     const id = await firebase.addCategory(t.category);
     category = { id, name: t.category };
+    categories.push(category);
   }
   const memberPackItemsChanged = JSON.stringify(memberPackItems) !== JSON.stringify(packItem.members);
   if (category?.id !== packItem.category || memberPackItemsChanged) {
-    await firebase.updatePackItem({ ...packItem, members: memberPackItems, category: category?.id ?? '' });
+    packItem.category = category?.id ?? '';
+    packItem.members = memberPackItems;
+    await firebase.updatePackItem(packItem);
   }
 }
 
 async function addNewPackItem(t: TextPackItem, members: NamedEntity[], categories: NamedEntity[]) {
   const memberPackItems = [];
-  for (const m of t.members) {
-    const member = members.find((member) => member.name === m);
-    const id = member ? member.id : await firebase.addMember(m);
-    memberPackItems.push({ id, checked: false });
+  if (t.members) {
+    for (const m of t.members) {
+      const member = members.find((member) => member.name === m);
+      let id: string;
+      if (member) {
+        id = member.id;
+      } else {
+        id = await firebase.addMember(m);
+        members.push({ id, name: m });
+      }
+      memberPackItems.push({ id, checked: false });
+    }
   }
   let category;
   if (t.category) {
@@ -88,7 +109,32 @@ async function addNewPackItem(t: TextPackItem, members: NamedEntity[], categorie
     if (!category) {
       const newId = await firebase.addCategory(t.category);
       category = { id: newId, name: t.category };
+      categories.push(category);
     }
   }
-  await firebase.addPackItem(t.name, memberPackItems, category?.id ?? '');
+  return await firebase.addPackItem(t.name, memberPackItems, category?.id ?? '');
+}
+
+export function getGroupedAsText(
+  grouped: Record<string, PackItem[]>,
+  categories: NamedEntity[],
+  members: NamedEntity[]
+) {
+  let result = '';
+  for (const [category, items] of Object.entries(grouped)) {
+    const categoryName = categories.find((c) => c.id === category)?.name;
+    if (categoryName) {
+      result += categoryName + '\n';
+    }
+
+    for (const item of items) {
+      result += '- ' + item.name + '\n';
+      if (item.members) {
+        for (const m of item.members) {
+          result += '-- ' + members.find((t) => t.id === m.id)?.name + '\n';
+        }
+      }
+    }
+  }
+  return result;
 }
