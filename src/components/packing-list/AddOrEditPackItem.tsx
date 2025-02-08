@@ -1,6 +1,6 @@
 import { Box, Button, Flex, Heading, Input, Spacer, Text } from '@chakra-ui/react';
 import { useError, useFirebase } from '../../services/contexts.ts';
-import React, { useState } from 'react';
+import { ChangeEvent, KeyboardEvent, useState } from 'react';
 import { PackItem } from '../../types/PackItem.ts';
 import { PLSelect } from '../shared/PLSelect.tsx';
 import { PLCheckboxGroup } from '../shared/PLCheckboxGroup.tsx';
@@ -34,11 +34,11 @@ export function AddOrEditPackItem({ packItem, done }: { packItem?: PackItem; don
     })().catch(setError);
   }
 
-  function handleOnChange(e: React.ChangeEvent<HTMLInputElement>) {
+  function handleOnChange(e: ChangeEvent<HTMLInputElement>) {
     setName(e.target.value);
   }
 
-  function handleEnter(e: React.KeyboardEvent<HTMLInputElement>) {
+  function handleEnter(e: KeyboardEvent<HTMLInputElement>) {
     if (e.key === 'Enter') {
       saveAction();
     }

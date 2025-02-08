@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { ReactNode, useEffect, useState } from 'react';
 import { Box } from '@chakra-ui/react';
 import { NamedEntity } from '../../types/NamedEntity.ts';
 import { DragDropContext, Draggable, DragUpdate, Droppable } from '@hello-pangea/dnd';
@@ -9,7 +9,7 @@ export function DragAndDrop({
   onEntitiesUpdated,
 }: {
   entities: NamedEntity[];
-  renderEntity: (namedEntity: NamedEntity, isDragging: boolean) => React.ReactNode;
+  renderEntity: (namedEntity: NamedEntity, isDragging: boolean) => ReactNode;
   onEntitiesUpdated: (value: NamedEntity[]) => void;
 }) {
   const [reordered, setReordered] = useState(entities);
