@@ -14,7 +14,7 @@ export function NamedEntities({
 }: {
   namedEntities: NamedEntity[];
   onAdd: (name: string) => Promise<string>;
-  onUpdate: (namedEntity: NamedEntity) => Promise<void>;
+  onUpdate: (toUpdate: NamedEntity[] | NamedEntity) => Promise<void>;
   onDelete: (id: string) => Promise<void>;
   type: string;
 }) {
@@ -40,10 +40,8 @@ export function NamedEntities({
     }
   }
 
-  async function onEntitiesUpdated(updated: NamedEntity[]) {
-    for (const entity of updated) {
-      await onUpdate(entity);
-    }
+  async function onEntitiesUpdated(entities: NamedEntity[]) {
+    await onUpdate(entities);
   }
 
   return (

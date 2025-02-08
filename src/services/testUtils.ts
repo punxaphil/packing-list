@@ -21,9 +21,9 @@ type FirebaseMethod =
   | typeof firebase.deletePackItem
   | typeof firebase.addPackItem
   | typeof firebase.addMember
-  | typeof firebase.updateMember
+  | typeof firebase.updateMembers
   | typeof firebase.deleteMember
-  | typeof firebase.updateCategory
+  | typeof firebase.updateCategories
   | typeof firebase.deleteCategory
   | typeof firebase.addImage
   | typeof firebase.updateImage

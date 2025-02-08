@@ -10,6 +10,7 @@ import {
   QuerySnapshot,
   updateDoc,
   WithFieldValue,
+  writeBatch,
 } from 'firebase/firestore';
 import { firestore } from './firebase';
 import { NamedEntity } from '../types/NamedEntity.ts';
@@ -80,6 +81,15 @@ async function add<K extends DocumentData>(userColl: string, data: WithFieldValu
   }
 }
 
+async function updateInBatch<K extends DocumentData>(userColl: string, data: WithFieldValue<K>[]) {
+  const batch = writeBatch(firestore);
+  const coll = collection(firestore, USERS_KEY, getUserId(), userColl);
+  data.forEach((d) => {
+    batch.update(doc(coll, d.id), d);
+  });
+  await batch.commit();
+}
+
 async function update<K extends DocumentData>(userColl: string, id: string, data: WithFieldValue<K>) {
   const coll = collection(firestore, USERS_KEY, getUserId(), userColl);
   await updateDoc(doc(coll, id), data);
@@ -107,6 +117,13 @@ export const firebase = {
   updateMember: async function (member: NamedEntity) {
     await update(MEMBERS_KEY, member.id, member);
   },
+  updateMembers: async function (toUpdate: NamedEntity[] | NamedEntity) {
+    if (Array.isArray(toUpdate)) {
+      await updateInBatch(MEMBERS_KEY, toUpdate);
+    } else {
+      await update(MEMBERS_KEY, toUpdate.id, toUpdate);
+    }
+  },
   deleteMember: async function (id: string) {
     await del(MEMBERS_KEY, id);
   },
@@ -114,8 +131,12 @@ export const firebase = {
     const docRef = await add(CATEGORIES_KEY, { name });
     return docRef.id;
   },
-  updateCategory: async function (category: NamedEntity) {
-    await update(CATEGORIES_KEY, category.id, category);
+  updateCategories: async function (categories: NamedEntity[] | NamedEntity) {
+    if (Array.isArray(categories)) {
+      await updateInBatch(CATEGORIES_KEY, categories);
+    } else {
+      await update(CATEGORIES_KEY, categories.id, categories);
+    }
   },
   deleteCategory: async function (id: string) {
     await del(CATEGORIES_KEY, id);

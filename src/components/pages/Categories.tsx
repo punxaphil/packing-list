@@ -8,7 +8,7 @@ export function Categories() {
       namedEntities={useFirebase().categories}
       type="categories"
       onAdd={firebase.addCategory}
-      onUpdate={firebase.updateCategory}
+      onUpdate={firebase.updateCategories}
       onDelete={firebase.deleteCategory}
     />
   );
