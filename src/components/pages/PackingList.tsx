@@ -1,26 +1,27 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { PackItem } from '../../types/PackItem.ts';
 import { useFirebase } from '../../services/contexts.ts';
-import { Box, Card, CardBody, Flex, Image, Stack, Text } from '@chakra-ui/react';
+import { Box, Button, Card, CardBody, Flex, Spacer, Stack, Text } from '@chakra-ui/react';
 import { AddOrEditPackItem } from '../packing-list/AddOrEditPackItem.tsx';
 import { groupByCategories } from '../../services/utils.ts';
-import { PackItemRow } from '../packing-list/PackItemRow.tsx';
 import { PLSelect } from '../shared/PLSelect.tsx';
+import { EditIcon } from '@chakra-ui/icons';
+import { PackItemRows } from '../packing-list/PackItemRows.tsx';
+import { PackItemsTextMode } from '../packing-list/PackItemsTextMode.tsx';
 
 export function PackingList() {
   const [selectedItem, setSelectedItem] = useState<PackItem>();
   const packItems = useFirebase().packItems;
   const [filteredPackItems, setFilteredPackItems] = useState(packItems);
   const [filterCategory, setFilterCategory] = useState<string>('');
-  const images = useFirebase().images;
+  const [textMode, setTextMode] = useState(false);
 
   const categories = useFirebase().categories;
   const grouped = groupByCategories(filteredPackItems);
 
-  function getCategoryImage(typeId: string) {
-    const image = images.find((t) => t.type === 'categories' && t.typeId === typeId);
-    return image?.url;
-  }
+  useEffect(() => {
+    setFilteredPackItems(packItems);
+  }, [packItems]);
 
   function filterOnCategory(category: string) {
     if (category) {
@@ -33,54 +34,37 @@ export function PackingList() {
 
   return (
     <Box mt="5" maxWidth="600px" mx="auto">
-      {filteredPackItems.length ? (
-        <>
-          {/* Move to a seperate component */}
-          <Flex mb="3" gap="2">
-            <Stack direction="row" justifyContent="space-between" alignItems="center">
-              <PLSelect
-                setSelection={filterOnCategory}
-                selected={filterCategory}
-                placeholder="Filter category"
-                options={categories}
-              />
-            </Stack>
-          </Flex>
-          {/* ---- */}
-          <Card>
-            <CardBody>
-              {Object.entries(grouped).map(([groupCategory, packItems]) => (
-                <Box key={groupCategory}>
-                  {groupCategory && (
-                    <Flex gap="3" alignItems="center" mt="5">
-                      {getCategoryImage(groupCategory) && (
-                        <Image borderRadius="full" boxSize="30px" src={getCategoryImage(groupCategory)}></Image>
-                      )}
-
-                      <Box>
-                        <Text as="b">{categories.find((cat) => cat.id === groupCategory)?.name ?? ''}</Text>
-                      </Box>
-                    </Flex>
-                  )}
-                  {packItems.map((packItem) => (
-                    <PackItemRow
-                      packItem={packItem}
-                      key={packItem.id}
-                      onEdit={setSelectedItem}
-                      indent={!!groupCategory}
-                    />
-                  ))}
-                </Box>
-              ))}
-            </CardBody>
-          </Card>
-        </>
-      ) : (
-        <Flex justifyContent="center" minWidth="max-content">
-          <Text>No items yet.</Text>
-        </Flex>
-      )}
-      <Card mt="5">
+      <>
+        {/* Move to a separate component */}
+        <Stack direction="row" justifyContent="space-between" alignItems="center">
+          <PLSelect
+            setSelection={filterOnCategory}
+            selected={filterCategory}
+            placeholder="Filter category"
+            options={categories}
+            hidden={textMode}
+          />
+          <Spacer />
+          <Button onClick={() => setTextMode(!textMode)} hidden={textMode}>
+            <EditIcon /> Text mode
+          </Button>
+        </Stack>
+        {/* ---- */}
+        <Card>
+          <CardBody>
+            <PackItemsTextMode grouped={grouped} onDone={() => setTextMode(false)} hidden={!textMode} />
+            <PackItemRows
+              grouped={grouped}
+              setSelectedItem={setSelectedItem}
+              hidden={textMode || !filteredPackItems.length}
+            />
+            <Flex justifyContent="center" minWidth="max-content" hidden={textMode || !!filteredPackItems.length}>
+              <Text>No items yet.</Text>
+            </Flex>
+          </CardBody>
+        </Card>
+      </>
+      <Card mt="5" hidden={textMode}>
         <CardBody>
           <AddOrEditPackItem
             packItem={selectedItem}

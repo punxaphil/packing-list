@@ -107,7 +107,7 @@ export function UploadModal({
           <ModalCloseButton />
           <ModalBody pb={6}>
             <Stack m="5" spacing={4} align="center">
-              <Switch colorScheme="blue" onChange={onSwitch} isChecked={pasteImage} hidden={fileUrl !== undefined}>
+              <Switch onChange={onSwitch} isChecked={pasteImage} hidden={fileUrl !== undefined}>
                 Paste image?
               </Switch>
               {pasteImage ? (

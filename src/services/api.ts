@@ -72,7 +72,12 @@ function fromQueryResult<K>(res: QuerySnapshot) {
 
 async function add<K extends DocumentData>(userColl: string, data: WithFieldValue<K>) {
   const coll = collection(firestore, USERS_KEY, getUserId(), userColl);
-  return await addDoc(coll, data);
+  const docRef = await addDoc(coll, data);
+  if (docRef) {
+    return docRef;
+  } else {
+    throw new Error('Unable to add to database');
+  }
 }
 
 async function update<K extends DocumentData>(userColl: string, id: string, data: WithFieldValue<K>) {
@@ -85,26 +90,19 @@ async function del(userColl: string, id: string) {
 }
 
 export const firebase = {
-  addPackItem: async function (
-    name: string,
-    members: MemberPackItem[],
-    category: string
-  ): Promise<PackItem | undefined> {
+  addPackItem: async function (name: string, members: MemberPackItem[], category: string): Promise<PackItem> {
     const docRef = await add(PACK_ITEMS_KEY, { name, members, category });
-    if (docRef) {
-      return { id: docRef.id, checked: false, members, name, category };
-    } else {
-      throw new Error('Unable to add item');
-    }
+    return { id: docRef.id, checked: false, members, name, category };
   },
   updatePackItem: async function (packItem: PackItem) {
     await update(PACK_ITEMS_KEY, packItem.id, packItem);
   },
-  deleteItem: async function (id: string) {
+  deletePackItem: async function (id: string) {
     await del(PACK_ITEMS_KEY, id);
   },
-  addMember: async function (name: string): Promise<void> {
-    await add(MEMBERS_KEY, { name });
+  addMember: async function (name: string): Promise<string> {
+    const docRef = await add(MEMBERS_KEY, { name });
+    return docRef.id;
   },
   updateMember: async function (member: NamedEntity) {
     await update(MEMBERS_KEY, member.id, member);
@@ -112,8 +110,9 @@ export const firebase = {
   deleteMember: async function (id: string) {
     await del(MEMBERS_KEY, id);
   },
-  addCategory: async function (name: string): Promise<void> {
-    await add(CATEGORIES_KEY, { name });
+  addCategory: async function (name: string): Promise<string> {
+    const docRef = await add(CATEGORIES_KEY, { name });
+    return docRef.id;
   },
   updateCategory: async function (category: NamedEntity) {
     await update(CATEGORIES_KEY, category.id, category);

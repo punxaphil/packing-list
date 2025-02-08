@@ -7,3 +7,9 @@ export interface PackItem {
   members?: MemberPackItem[];
   category?: string;
 }
+
+export interface TextPackItem {
+  name: string;
+  members: string[];
+  category?: string;
+}
