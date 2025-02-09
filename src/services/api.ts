@@ -1,23 +1,23 @@
+import { getAuth } from 'firebase/auth';
 import {
+  DocumentData,
+  QueryDocumentSnapshot,
+  QuerySnapshot,
+  WithFieldValue,
   addDoc,
   collection,
   deleteDoc,
   doc,
-  DocumentData,
   getDocs,
   onSnapshot,
-  QueryDocumentSnapshot,
-  QuerySnapshot,
   updateDoc,
-  WithFieldValue,
   writeBatch,
 } from 'firebase/firestore';
-import { firestore } from './firebase';
+import { Image } from '../types/Image.ts';
+import { MemberPackItem } from '../types/MemberPackItem.ts';
 import { NamedEntity } from '../types/NamedEntity.ts';
 import { PackItem } from '../types/PackItem.ts';
-import { getAuth } from 'firebase/auth';
-import { MemberPackItem } from '../types/MemberPackItem.ts';
-import { Image } from '../types/Image.ts';
+import { firestore } from './firebase';
 
 const MEMBERS_KEY = 'members';
 const PACK_ITEMS_KEY = 'packItems';
@@ -76,17 +76,16 @@ async function add<K extends DocumentData>(userColl: string, data: WithFieldValu
   const docRef = await addDoc(coll, data);
   if (docRef) {
     return docRef;
-  } else {
-    throw new Error('Unable to add to database');
   }
+  throw new Error('Unable to add to database');
 }
 
 async function updateInBatch<K extends DocumentData>(userColl: string, data: WithFieldValue<K>[]) {
   const batch = writeBatch(firestore);
   const coll = collection(firestore, USERS_KEY, getUserId(), userColl);
-  data.forEach((d) => {
+  for (const d of data) {
     batch.update(doc(coll, d.id), d);
-  });
+  }
   await batch.commit();
 }
 
@@ -100,48 +99,45 @@ async function del(userColl: string, id: string) {
 }
 
 export const firebase = {
-  addPackItem: async function (name: string, members: MemberPackItem[], category: string): Promise<PackItem> {
+  addPackItem: async (name: string, members: MemberPackItem[], category: string): Promise<PackItem> => {
     const docRef = await add(PACK_ITEMS_KEY, { name, members, category });
     return { id: docRef.id, checked: false, members, name, category };
   },
-  updatePackItem: async function (packItem: PackItem) {
+  updatePackItem: async (packItem: PackItem) => {
     await update(PACK_ITEMS_KEY, packItem.id, packItem);
   },
-  deletePackItem: async function (id: string) {
+  deletePackItem: async (id: string) => {
     await del(PACK_ITEMS_KEY, id);
   },
-  addMember: async function (name: string): Promise<string> {
+  addMember: async (name: string): Promise<string> => {
     const docRef = await add(MEMBERS_KEY, { name });
     return docRef.id;
   },
-  updateMember: async function (member: NamedEntity) {
-    await update(MEMBERS_KEY, member.id, member);
-  },
-  updateMembers: async function (toUpdate: NamedEntity[] | NamedEntity) {
+  updateMembers: async (toUpdate: NamedEntity[] | NamedEntity) => {
     if (Array.isArray(toUpdate)) {
       await updateInBatch(MEMBERS_KEY, toUpdate);
     } else {
       await update(MEMBERS_KEY, toUpdate.id, toUpdate);
     }
   },
-  deleteMember: async function (id: string) {
+  deleteMember: async (id: string) => {
     await del(MEMBERS_KEY, id);
   },
-  addCategory: async function (name: string): Promise<string> {
+  addCategory: async (name: string): Promise<string> => {
     const docRef = await add(CATEGORIES_KEY, { name });
     return docRef.id;
   },
-  updateCategories: async function (categories: NamedEntity[] | NamedEntity) {
+  updateCategories: async (categories: NamedEntity[] | NamedEntity) => {
     if (Array.isArray(categories)) {
       await updateInBatch(CATEGORIES_KEY, categories);
     } else {
       await update(CATEGORIES_KEY, categories.id, categories);
     }
   },
-  deleteCategory: async function (id: string) {
+  deleteCategory: async (id: string) => {
     await del(CATEGORIES_KEY, id);
   },
-  addImage: async function (type: string, typeId: string, url: string): Promise<void> {
+  addImage: async (type: string, typeId: string, url: string): Promise<void> => {
     await add(IMAGES_KEY, { type, typeId, url });
   },
   async updateImage(imageId: string, fileUrl: string) {

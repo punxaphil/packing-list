@@ -1,6 +1,6 @@
+import { Image } from './Image.ts';
 import { NamedEntity } from './NamedEntity.ts';
 import { PackItem } from './PackItem.ts';
-import { Image } from './Image.ts';
 
 export interface User {
   id: string;

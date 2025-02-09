@@ -1,13 +1,13 @@
-import { PackItem } from '../../types/PackItem.ts';
-import { getName } from '../../services/utils.ts';
-import { MemberPackItemRow } from './MemberPackItemRow.tsx';
-import { MultiCheckbox } from '../shared/MultiCheckbox.tsx';
-import { Span } from '../shared/Span.tsx';
+import { DeleteIcon, EditIcon } from '@chakra-ui/icons';
+import { Box, Flex, IconButton, Spacer } from '@chakra-ui/react';
 import { firebase } from '../../services/api.ts';
 import { useFirebase } from '../../services/contexts.ts';
-import { Box, Flex, IconButton, Spacer } from '@chakra-ui/react';
-import { DeleteIcon, EditIcon } from '@chakra-ui/icons';
+import { getName } from '../../services/utils.ts';
+import { PackItem } from '../../types/PackItem.ts';
+import { MultiCheckbox } from '../shared/MultiCheckbox.tsx';
 import { PLCheckbox } from '../shared/PLCheckbox.tsx';
+import { Span } from '../shared/Span.tsx';
+import { MemberPackItemRow } from './MemberPackItemRow.tsx';
 
 export function PackItemRow({
   packItem,

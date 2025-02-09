@@ -1,7 +1,4 @@
-import { ChangeEvent } from 'react';
-import { NamedEntity } from '../../types/NamedEntity.ts';
-import { firebase } from '../../services/api.ts';
-import { useError, useFirebase } from '../../services/contexts.ts';
+import { ArrowUpIcon, DeleteIcon, DragHandleIcon } from '@chakra-ui/icons';
 import {
   Box,
   Flex,
@@ -14,7 +11,10 @@ import {
   PopoverTrigger,
   useDisclosure,
 } from '@chakra-ui/react';
-import { ArrowUpIcon, DeleteIcon, DragHandleIcon } from '@chakra-ui/icons';
+import { ChangeEvent } from 'react';
+import { firebase } from '../../services/api.ts';
+import { useError, useFirebase } from '../../services/contexts.ts';
+import { NamedEntity } from '../../types/NamedEntity.ts';
 import { UploadModal } from './UploadModal.tsx';
 
 export function NamedEntityRow({
@@ -35,7 +35,7 @@ export function NamedEntityRow({
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   function changeName(event: ChangeEvent<HTMLInputElement>) {
-    (async function () {
+    (async () => {
       if (namedEntity.name !== event.target.value) {
         namedEntity.name = event.target.value;
         await onUpdate(namedEntity);
@@ -44,7 +44,7 @@ export function NamedEntityRow({
   }
 
   function handleDelete() {
-    (async function () {
+    (async () => {
       for (const packItem of packItems) {
         if (packItem.category === namedEntity.id) {
           delete packItem.category;

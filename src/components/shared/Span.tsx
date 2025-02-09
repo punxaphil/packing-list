@@ -7,5 +7,5 @@ export function Span({
   strike: boolean;
   className?: string;
 }) {
-  return <span className={`${className} ${strike ? 'strike' : ''}`}>{children}</span>;
+  return <span className={`${className} ${strike ? 'strike' : ''} `}>{children}</span>;
 }

@@ -12,8 +12,8 @@ export function PLCheckboxGroup({
 }) {
   return (
     <CheckboxGroup defaultValue={selected} onChange={setSelection}>
-      {options.map((option, index) => (
-        <Checkbox key={index} value={option.id} mr={5} border="thick" borderColor="gray.200">
+      {options.map((option) => (
+        <Checkbox key={option.id} value={option.id} mr={5} border="thick" borderColor="gray.200">
           {option.name}
         </Checkbox>
       ))}

@@ -1,5 +1,5 @@
-import { getFirestore } from 'firebase/firestore';
 import { initializeApp } from 'firebase/app';
+import { getFirestore } from 'firebase/firestore';
 
 const firebaseConfig = {
   // This is the public key (used client side in browser), so it's safe to be here

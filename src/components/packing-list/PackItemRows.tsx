@@ -1,7 +1,7 @@
 import { Box, Flex, Image, Text } from '@chakra-ui/react';
-import { PackItemRow } from './PackItemRow.tsx';
 import { useFirebase } from '../../services/contexts.ts';
 import { PackItem } from '../../types/PackItem.ts';
+import { PackItemRow } from './PackItemRow.tsx';
 
 export function PackItemRows({
   grouped,
@@ -28,7 +28,7 @@ export function PackItemRows({
             {groupCategory && (
               <Flex gap="3" alignItems="center" mt="5">
                 {getCategoryImage(groupCategory) && (
-                  <Image borderRadius="full" boxSize="30px" src={getCategoryImage(groupCategory)}></Image>
+                  <Image borderRadius="full" boxSize="30px" src={getCategoryImage(groupCategory)} />
                 )}
 
                 <Box>

@@ -1,11 +1,11 @@
-import { MemberPackItem } from '../../types/MemberPackItem.ts';
-import { allChecked, getName } from '../../services/utils.ts';
-import { PackItem } from '../../types/PackItem.ts';
-import { Span } from '../shared/Span.tsx';
+import { Flex } from '@chakra-ui/react';
 import { firebase } from '../../services/api.ts';
 import { useFirebase } from '../../services/contexts.ts';
-import { Flex } from '@chakra-ui/react';
+import { allChecked, getName } from '../../services/utils.ts';
+import { MemberPackItem } from '../../types/MemberPackItem.ts';
+import { PackItem } from '../../types/PackItem.ts';
 import { PLCheckbox } from '../shared/PLCheckbox.tsx';
+import { Span } from '../shared/Span.tsx';
 
 export function MemberPackItemRow({
   memberItem: { checked, id },

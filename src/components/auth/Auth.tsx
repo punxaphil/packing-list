@@ -1,4 +1,4 @@
-import { ChangeEvent, KeyboardEvent, useState } from 'react';
+import { Button, ButtonGroup, Input, Stack } from '@chakra-ui/react';
 import {
   browserLocalPersistence,
   createUserWithEmailAndPassword,
@@ -6,9 +6,9 @@ import {
   setPersistence,
   signInWithEmailAndPassword,
 } from 'firebase/auth';
-import { useError } from '../../services/contexts.ts';
-import { Button, ButtonGroup, Input, Stack } from '@chakra-ui/react';
+import { ChangeEvent, KeyboardEvent, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router';
+import { useError } from '../../services/contexts.ts';
 
 export function useCurrentUser() {
   const [userId, setUserId] = useState('');

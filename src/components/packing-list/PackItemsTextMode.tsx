@@ -1,3 +1,4 @@
+import { QuestionIcon } from '@chakra-ui/icons';
 import {
   Button,
   ButtonGroup,
@@ -11,15 +12,14 @@ import {
   Textarea,
   useDisclosure,
 } from '@chakra-ui/react';
-import { PackItem } from '../../types/PackItem.ts';
-import { useFirebase } from '../../services/contexts.ts';
 import { ChangeEvent, useEffect, useState } from 'react';
+import { useFirebase } from '../../services/contexts.ts';
 import {
   createTextPackItemsFromText,
   getGroupedAsText,
   updateFirebaseFromTextPackItems,
 } from '../../services/textModeUtils.ts';
-import { QuestionIcon } from '@chakra-ui/icons';
+import { PackItem } from '../../types/PackItem.ts';
 
 export function PackItemsTextMode({
   grouped,

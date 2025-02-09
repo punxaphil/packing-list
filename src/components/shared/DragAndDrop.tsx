@@ -1,7 +1,7 @@
-import { ReactNode, useEffect, useState } from 'react';
 import { Box } from '@chakra-ui/react';
+import { DragDropContext, DragUpdate, Draggable, Droppable } from '@hello-pangea/dnd';
+import { ReactNode, useEffect, useState } from 'react';
 import { NamedEntity } from '../../types/NamedEntity.ts';
-import { DragDropContext, Draggable, DragUpdate, Droppable } from '@hello-pangea/dnd';
 
 export function DragAndDrop({
   entities,

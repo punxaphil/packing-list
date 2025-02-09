@@ -1,9 +1,9 @@
+import { Button, Card, CardBody, Flex, Input, Spacer } from '@chakra-ui/react';
 import { ChangeEvent, KeyboardEvent, useState } from 'react';
 import { useError } from '../../services/contexts';
-import { Button, Card, CardBody, Flex, Input, Spacer } from '@chakra-ui/react';
 import { NamedEntity } from '../../types/NamedEntity.ts';
-import { NamedEntityRow } from './NamedEntityRow.tsx';
 import { DragAndDrop } from './DragAndDrop.tsx';
+import { NamedEntityRow } from './NamedEntityRow.tsx';
 
 export function NamedEntities({
   namedEntities,
@@ -22,7 +22,7 @@ export function NamedEntities({
   const { setError } = useError();
 
   function handleAdd() {
-    (async function () {
+    (async () => {
       if (!namedEntities.find((t) => t.name === newName)) {
         await onAdd(newName);
       }

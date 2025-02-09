@@ -1,10 +1,10 @@
 import { Box, Button, Flex, Heading, Input, Spacer, Text } from '@chakra-ui/react';
-import { useError, useFirebase } from '../../services/contexts.ts';
 import { ChangeEvent, KeyboardEvent, useState } from 'react';
-import { PackItem } from '../../types/PackItem.ts';
-import { PLSelect } from '../shared/PLSelect.tsx';
-import { PLCheckboxGroup } from '../shared/PLCheckboxGroup.tsx';
 import { firebase } from '../../services/api.ts';
+import { useError, useFirebase } from '../../services/contexts.ts';
+import { PackItem } from '../../types/PackItem.ts';
+import { PLCheckboxGroup } from '../shared/PLCheckboxGroup.tsx';
+import { PLSelect } from '../shared/PLSelect.tsx';
 
 export function AddOrEditPackItem({ packItem, done }: { packItem?: PackItem; done: () => void }) {
   const { members, categories } = useFirebase();
@@ -15,7 +15,7 @@ export function AddOrEditPackItem({ packItem, done }: { packItem?: PackItem; don
   const saveAction = packItem ? handleUpdate : handleAdd;
 
   function handleAdd() {
-    (async function () {
+    (async () => {
       if (!members.find((t) => t.name === name)) {
         await firebase.addPackItem(name, selectedMembers, category);
         done();
@@ -24,7 +24,7 @@ export function AddOrEditPackItem({ packItem, done }: { packItem?: PackItem; don
   }
 
   async function handleUpdate() {
-    (async function () {
+    (async () => {
       if (!packItem) {
         return;
       }

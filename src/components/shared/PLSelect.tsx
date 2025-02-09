@@ -17,8 +17,8 @@ export function PLSelect({
   return (
     <Box hidden={hidden}>
       <Select placeholder={placeholder} value={selected} onChange={(e) => setSelection(e.target.value)}>
-        {options.map((option, index) => (
-          <option key={index} value={option.id}>
+        {options.map((option) => (
+          <option key={option.id} value={option.id}>
             {option.name}
           </option>
         ))}

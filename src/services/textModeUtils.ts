@@ -1,7 +1,7 @@
-import { PackItem, TextPackItem } from '../types/PackItem.ts';
-import { NamedEntity } from '../types/NamedEntity.ts';
-import { firebase } from './api.ts';
 import { MemberPackItem } from '../types/MemberPackItem.ts';
+import { NamedEntity } from '../types/NamedEntity.ts';
+import { PackItem, TextPackItem } from '../types/PackItem.ts';
+import { firebase } from './api.ts';
 
 export function getGroupedAsText(
   grouped: Record<string, PackItem[]>,
@@ -12,14 +12,14 @@ export function getGroupedAsText(
   for (const [category, items] of Object.entries(grouped)) {
     const categoryName = categories.find((c) => c.id === category)?.name;
     if (categoryName) {
-      result += categoryName + '\n';
+      result += `${categoryName}\n`;
     }
 
     for (const item of items) {
-      result += '- ' + item.name + '\n';
+      result += `- ${item.name}\n`;
       if (item.members) {
         for (const m of item.members) {
-          result += '-- ' + members.find((t) => t.id === m.id)?.name + '\n';
+          result += `-- ${members.find((t) => t.id === m.id)?.name}\n`;
         }
       }
     }
@@ -30,8 +30,8 @@ export function getGroupedAsText(
 export function createTextPackItemsFromText(groupedAsText: string): TextPackItem[] {
   const items: TextPackItem[] = [];
   let currentItem: TextPackItem | undefined = undefined;
-  let currentCategory: string = '';
-  groupedAsText.split('\n').forEach((line) => {
+  let currentCategory = '';
+  for (const line of groupedAsText.split('\n')) {
     if (/^ *--.*/.test(line)) {
       const memberName = line.trim().replace('--', '').trim();
       if (currentItem) {
@@ -44,7 +44,7 @@ export function createTextPackItemsFromText(groupedAsText: string): TextPackItem
     } else {
       currentCategory = line.trim();
     }
-  });
+  }
   return items;
 }
 
@@ -143,7 +143,7 @@ async function addNewPackItem(t: TextPackItem, members: NamedEntity[], categorie
       memberPackItems.push({ id, checked: false });
     }
   }
-  let category;
+  let category: NamedEntity | undefined;
   if (t.category) {
     // find or create category
     category = categories.find((cat) => cat.name === t.category);

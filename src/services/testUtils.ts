@@ -1,8 +1,8 @@
-import { firebase } from './api.ts';
 import { expect } from 'vitest';
+import { firebase } from './api.ts';
 
 export function expectFirebaseCallsToThese(...newParam: FirebaseMethod[]) {
-  Object.values(firebase).forEach((mockFn) => {
+  for (const mockFn of Object.values(firebase)) {
     if (
       newParam.every((mockFn2) => {
         return mockFn !== mockFn2;
@@ -12,7 +12,7 @@ export function expectFirebaseCallsToThese(...newParam: FirebaseMethod[]) {
     } else {
       expect(mockFn).toBeCalled();
     }
-  });
+  }
 }
 
 type FirebaseMethod =

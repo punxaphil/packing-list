@@ -1,13 +1,13 @@
-import { useEffect, useState } from 'react';
-import { PackItem } from '../../types/PackItem.ts';
-import { useFirebase } from '../../services/contexts.ts';
-import { Box, Button, Card, CardBody, Flex, Spacer, Stack, Text } from '@chakra-ui/react';
-import { AddOrEditPackItem } from '../packing-list/AddOrEditPackItem.tsx';
-import { groupByCategories } from '../../services/utils.ts';
-import { PLSelect } from '../shared/PLSelect.tsx';
 import { EditIcon } from '@chakra-ui/icons';
+import { Box, Button, Card, CardBody, Flex, Spacer, Stack, Text } from '@chakra-ui/react';
+import { useEffect, useState } from 'react';
+import { useFirebase } from '../../services/contexts.ts';
+import { groupByCategories } from '../../services/utils.ts';
+import { PackItem } from '../../types/PackItem.ts';
+import { AddOrEditPackItem } from '../packing-list/AddOrEditPackItem.tsx';
 import { PackItemRows } from '../packing-list/PackItemRows.tsx';
 import { PackItemsTextMode } from '../packing-list/PackItemsTextMode.tsx';
+import { PLSelect } from '../shared/PLSelect.tsx';
 
 export function PackingList() {
   const [selectedItem, setSelectedItem] = useState<PackItem>();

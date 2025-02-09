@@ -1,6 +1,6 @@
-import { PackItem } from '../types/PackItem.ts';
-import { NamedEntity } from '../types/NamedEntity.ts';
 import { MemberPackItem } from '../types/MemberPackItem.ts';
+import { NamedEntity } from '../types/NamedEntity.ts';
+import { PackItem } from '../types/PackItem.ts';
 
 export function getName(members: NamedEntity[], memberId: string) {
   return members.find((t) => t.id === memberId)?.name;

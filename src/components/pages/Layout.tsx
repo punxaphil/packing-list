@@ -1,15 +1,15 @@
-import { FirebaseContext } from '../../services/contexts.ts';
-import { NavButton } from '../shared/NavButton.tsx';
-import { getUserCollectionsAndSubscribe } from '../../services/api.ts';
-import { useEffect, useState } from 'react';
-import { getAuth } from 'firebase/auth';
-import { PackItem } from '../../types/PackItem.ts';
-import { NamedEntity } from '../../types/NamedEntity.ts';
 import { Flex, Heading, Spacer, Spinner, Stack } from '@chakra-ui/react';
+import { getAuth } from 'firebase/auth';
+import { useEffect, useState } from 'react';
 import { Outlet } from 'react-router';
-import { Image } from '../../types/Image.ts';
+import { getUserCollectionsAndSubscribe } from '../../services/api.ts';
+import { FirebaseContext } from '../../services/contexts.ts';
 import { sortAll } from '../../services/utils.ts';
+import { Image } from '../../types/Image.ts';
+import { NamedEntity } from '../../types/NamedEntity.ts';
+import { PackItem } from '../../types/PackItem.ts';
 import { ProfileAvatar } from '../auth/ProfileAvatar.tsx';
+import { NavButton } from '../shared/NavButton.tsx';
 
 export function Layout({ userId, title }: { userId: string; title?: string }) {
   const [members, setMembers] = useState<NamedEntity[]>();
@@ -18,7 +18,7 @@ export function Layout({ userId, title }: { userId: string; title?: string }) {
   const [images, setImages] = useState<Image[]>();
 
   useEffect(() => {
-    (async function () {
+    (async () => {
       const userId = getAuth().currentUser?.uid;
       if (!userId) {
         throw new Error('No user logged in');
@@ -41,10 +41,10 @@ export function Layout({ userId, title }: { userId: string; title?: string }) {
             <ProfileAvatar size="sm" />
           </Flex>
           <Stack direction="row" spacing={2} align="center" pt="3" justifyContent="center">
-            <NavButton name="Home" path="/"></NavButton>
-            <NavButton name="Members" path="members"></NavButton>
-            <NavButton name="Categories" path="categories"></NavButton>
-            <NavButton name="Profile" path="profile"></NavButton>
+            <NavButton name="Home" path="/" />
+            <NavButton name="Members" path="members" />
+            <NavButton name="Categories" path="categories" />
+            <NavButton name="Profile" path="profile" />
           </Stack>
           <Outlet />
         </FirebaseContext.Provider>

@@ -1,10 +1,10 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { createTextPackItemsFromText, updateFirebaseFromTextPackItems } from './textModeUtils.ts';
+import { MemberPackItem } from '../types/MemberPackItem.ts';
+import { NamedEntity } from '../types/NamedEntity';
 import { PackItem, TextPackItem } from '../types/PackItem';
 import { firebase } from './api';
-import { NamedEntity } from '../types/NamedEntity';
 import { expectFirebaseCallsToThese } from './testUtils.ts';
-import { MemberPackItem } from '../types/MemberPackItem.ts';
+import { createTextPackItemsFromText, updateFirebaseFromTextPackItems } from './textModeUtils.ts';
 
 vi.mock('./api');
 
@@ -203,10 +203,10 @@ describe('textModeUtils', () => {
       ];
 
       vi.mocked(firebase.addPackItem).mockImplementation((name: string, members: MemberPackItem[], category: string) =>
-        Promise.resolve({ id: 'added' + name, name, members, category, checked: false })
+        Promise.resolve({ id: `added${name}`, name, members, category, checked: false })
       );
-      vi.mocked(firebase.addMember).mockImplementation((name: string) => Promise.resolve('added' + name));
-      vi.mocked(firebase.addCategory).mockImplementation((name: string) => Promise.resolve('added' + name));
+      vi.mocked(firebase.addMember).mockImplementation((name: string) => Promise.resolve(`added${name}`));
+      vi.mocked(firebase.addCategory).mockImplementation((name: string) => Promise.resolve(`added${name}`));
 
       await updateFirebaseFromTextPackItems(packItems, textPackItems, members, categories);
       expect(firebase.addPackItem).toHaveBeenCalledTimes(3);

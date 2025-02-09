@@ -1,6 +1,4 @@
-import { ChangeEvent, useState } from 'react';
-import { firebase } from '../../services/api.ts';
-import { cropImage, resizeImageFromFile } from '../../services/imageUtils.ts';
+import { AttachmentIcon, CloseIcon, DeleteIcon } from '@chakra-ui/icons';
 import {
   Button,
   ButtonGroup,
@@ -16,8 +14,10 @@ import {
   Stack,
   Switch,
 } from '@chakra-ui/react';
-import { AttachmentIcon, CloseIcon, DeleteIcon } from '@chakra-ui/icons';
+import { ChangeEvent, useState } from 'react';
+import { firebase } from '../../services/api.ts';
 import { useFirebase } from '../../services/contexts.ts';
+import { cropImage, resizeImageFromFile } from '../../services/imageUtils.ts';
 import { Image } from '../../types/Image.ts';
 
 export function UploadModal({

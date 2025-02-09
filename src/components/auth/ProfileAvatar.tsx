@@ -1,7 +1,7 @@
 import { Avatar } from '@chakra-ui/react';
-import { useCurrentUser } from './Auth.tsx';
 import { NavLink } from 'react-router';
 import { useFirebase } from '../../services/contexts.ts';
+import { useCurrentUser } from './Auth.tsx';
 
 export function ProfileAvatar({ shouldNavigate = true, size }: { shouldNavigate?: boolean; size: string }) {
   const currentUser = useCurrentUser();
