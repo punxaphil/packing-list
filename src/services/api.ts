@@ -4,6 +4,7 @@ import {
   QueryDocumentSnapshot,
   QuerySnapshot,
   WithFieldValue,
+  WriteBatch,
   addDoc,
   collection,
   deleteDoc,
@@ -98,6 +99,12 @@ async function del(userColl: string, id: string) {
   await deleteDoc(doc(firestore, USERS_KEY, getUserId(), userColl, id));
 }
 
+function addBatch<K extends DocumentData>(userColl: string, writeBatch: WriteBatch, data: WithFieldValue<K>) {
+  const docRef = doc(collection(firestore, USERS_KEY, getUserId(), userColl));
+  writeBatch.set(docRef, data);
+  return docRef.id;
+}
+
 export const firebase = {
   addPackItem: async (name: string, members: MemberPackItem[], category: string): Promise<PackItem> => {
     const docRef = await add(PACK_ITEMS_KEY, { name, members, category });
@@ -145,5 +152,24 @@ export const firebase = {
   },
   async deleteImage(imageId: string) {
     await del(IMAGES_KEY, imageId);
+  },
+  writeBatch: () => {
+    return writeBatch(firestore);
+  },
+  deletePackItemBatch(id: string, writeBatch: WriteBatch) {
+    writeBatch.delete(doc(firestore, USERS_KEY, getUserId(), PACK_ITEMS_KEY, id));
+  },
+  addCategoryBatch(category: string, writeBatch: WriteBatch) {
+    return addBatch(CATEGORIES_KEY, writeBatch, { name: category });
+  },
+  addMemberBatch(member: string, writeBatch: WriteBatch) {
+    return addBatch(MEMBERS_KEY, writeBatch, { name: member });
+  },
+  updatePackItemBatch<K extends DocumentData>(data: WithFieldValue<K>, writeBatch: WriteBatch) {
+    writeBatch.update(doc(firestore, USERS_KEY, getUserId(), PACK_ITEMS_KEY, data.id), data);
+  },
+  addPackItemBatch(writeBatch: WriteBatch, name: string, members: MemberPackItem[], category: string) {
+    const id = addBatch(PACK_ITEMS_KEY, writeBatch, { name, members: members, category: category });
+    return { id, checked: false, members, name, category };
   },
 };

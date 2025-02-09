@@ -1,3 +1,4 @@
+import { WriteBatch } from 'firebase/firestore';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { MemberPackItem } from '../types/MemberPackItem.ts';
 import { NamedEntity } from '../types/NamedEntity';
@@ -7,6 +8,10 @@ import { expectFirebaseCallsToThese } from './testUtils.ts';
 import { createTextPackItemsFromText, updateFirebaseFromTextPackItems } from './textModeUtils.ts';
 
 vi.mock('./api');
+
+vi.mocked(firebase.writeBatch).mockImplementation(() => {
+  return { commit: () => {} } as WriteBatch;
+});
 
 describe('textModeUtils', () => {
   afterEach(() => {
@@ -89,7 +94,7 @@ describe('textModeUtils', () => {
 
       await updateFirebaseFromTextPackItems(packItems, textPackItems, members, categories);
 
-      expectFirebaseCallsToThese(firebase.deletePackItem);
+      expectFirebaseCallsToThese(firebase.deletePackItemBatch, firebase.writeBatch);
     });
 
     it('should not update existing pack items', async () => {
@@ -100,7 +105,7 @@ describe('textModeUtils', () => {
 
       await updateFirebaseFromTextPackItems(packItems, textPackItems, members, categories);
 
-      expectFirebaseCallsToThese();
+      expectFirebaseCallsToThese(firebase.writeBatch);
     });
 
     it('should update existing pack items', async () => {
@@ -111,7 +116,7 @@ describe('textModeUtils', () => {
 
       await updateFirebaseFromTextPackItems(packItems, textPackItems, members, categories);
 
-      expectFirebaseCallsToThese(firebase.updatePackItem);
+      expectFirebaseCallsToThese(firebase.updatePackItemBatch, firebase.writeBatch);
     });
 
     it('should update existing pack items because category changed', async () => {
@@ -122,7 +127,7 @@ describe('textModeUtils', () => {
 
       await updateFirebaseFromTextPackItems(packItems, textPackItems, members, categories);
 
-      expectFirebaseCallsToThese(firebase.updatePackItem, firebase.addCategory);
+      expectFirebaseCallsToThese(firebase.updatePackItemBatch, firebase.addCategoryBatch, firebase.writeBatch);
     });
 
     it('should add new pack items', async () => {
@@ -133,7 +138,7 @@ describe('textModeUtils', () => {
 
       await updateFirebaseFromTextPackItems(packItems, textPackItems, members, categories);
 
-      expectFirebaseCallsToThese(firebase.addPackItem);
+      expectFirebaseCallsToThese(firebase.addPackItemBatch, firebase.writeBatch);
     });
 
     it('should add 3 new pack items, update 2 pack items, delete 5 pack items, add one new category, add 2 members', async () => {
@@ -202,19 +207,27 @@ describe('textModeUtils', () => {
         },
       ];
 
-      vi.mocked(firebase.addPackItem).mockImplementation((name: string, members: MemberPackItem[], category: string) =>
-        Promise.resolve({ id: `added${name}`, name, members, category, checked: false })
+      vi.mocked(firebase.addPackItemBatch).mockImplementation(
+        (_writeBatch: WriteBatch, name: string, members: MemberPackItem[], category: string) => {
+          return {
+            id: `added${name}`,
+            name,
+            members,
+            category,
+            checked: false,
+          };
+        }
       );
-      vi.mocked(firebase.addMember).mockImplementation((name: string) => Promise.resolve(`added${name}`));
-      vi.mocked(firebase.addCategory).mockImplementation((name: string) => Promise.resolve(`added${name}`));
+      vi.mocked(firebase.addMemberBatch).mockImplementation((name: string) => `added${name}`);
+      vi.mocked(firebase.addCategoryBatch).mockImplementation((name: string) => `added${name}`);
 
       await updateFirebaseFromTextPackItems(packItems, textPackItems, members, categories);
-      expect(firebase.addPackItem).toHaveBeenCalledTimes(3);
-      expect(firebase.updatePackItem).toHaveBeenCalledTimes(2);
-      expect(firebase.addCategory).toHaveBeenCalledTimes(1);
-      expect(firebase.addMember).toHaveBeenCalledTimes(2);
+      expect(firebase.addPackItemBatch).toHaveBeenCalledTimes(3);
+      expect(firebase.updatePackItemBatch).toHaveBeenCalledTimes(2);
+      expect(firebase.addCategoryBatch).toHaveBeenCalledTimes(1);
+      expect(firebase.addMemberBatch).toHaveBeenCalledTimes(2);
 
-      expect(firebase.deletePackItem).toHaveBeenCalledTimes(5);
+      expect(firebase.deletePackItemBatch).toHaveBeenCalledTimes(5);
 
       expect(packItems).toEqual(expected);
     });

@@ -16,15 +16,8 @@ export function expectFirebaseCallsToThese(...newParam: FirebaseMethod[]) {
 }
 
 type FirebaseMethod =
-  | typeof firebase.updatePackItem
-  | typeof firebase.addCategory
-  | typeof firebase.deletePackItem
-  | typeof firebase.addPackItem
-  | typeof firebase.addMember
-  | typeof firebase.updateMembers
-  | typeof firebase.deleteMember
-  | typeof firebase.updateCategories
-  | typeof firebase.deleteCategory
-  | typeof firebase.addImage
-  | typeof firebase.updateImage
-  | typeof firebase.deleteImage;
+  | typeof firebase.updatePackItemBatch
+  | typeof firebase.addCategoryBatch
+  | typeof firebase.deletePackItemBatch
+  | typeof firebase.addPackItemBatch
+  | typeof firebase.addMemberBatch;

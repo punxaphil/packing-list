@@ -1,3 +1,4 @@
+import { WriteBatch } from 'firebase/firestore';
 import { MemberPackItem } from '../types/MemberPackItem.ts';
 import { NamedEntity } from '../types/NamedEntity.ts';
 import { PackItem, TextPackItem } from '../types/PackItem.ts';
@@ -54,92 +55,101 @@ export async function updateFirebaseFromTextPackItems(
   members: NamedEntity[],
   categories: NamedEntity[]
 ) {
-  await deleteRemovedPackItems(textPackItems, packItems);
+  const writeBatch = firebase.writeBatch();
+  deleteRemovedPackItems(textPackItems, packItems, writeBatch);
   for (const t of textPackItems) {
     const packItem = packItems.find((pi) => pi.name === t.name);
     if (packItem) {
-      await updateExistingPackItem(t, members, packItem, categories);
+      updateExistingPackItem(t, members, packItem, categories, writeBatch);
     } else {
-      const newPI = await addNewPackItem(t, members, categories);
-      packItems.push(newPI);
+      const newPackItem = addNewPackItem(t, members, categories, writeBatch);
+      packItems.push(newPackItem);
     }
   }
+  await writeBatch.commit();
 }
 
-async function deleteRemovedPackItems(textPackItems: TextPackItem[], packItems: PackItem[]) {
+function deleteRemovedPackItems(textPackItems: TextPackItem[], packItems: PackItem[], writeBatch: WriteBatch) {
   const existingPackItemNames = textPackItems.map((t) => t.name);
   for (const packItem of packItems) {
     if (!existingPackItemNames.includes(packItem.name)) {
-      await firebase.deletePackItem(packItem.id);
+      firebase.deletePackItemBatch(packItem.id, writeBatch);
     }
   }
 }
 
-async function updateExistingPackItem(
+function updateExistingPackItem(
   t: TextPackItem,
   members: NamedEntity[],
   packItem: PackItem,
-  categories: NamedEntity[]
+  categories: NamedEntity[],
+  writeBatch: WriteBatch
 ) {
-  const memberPackItems = await getMemberPackItems(t, members, packItem);
-  const category = await addCategoryIfNew(categories, t);
-  await updatePackItemIfChanged(packItem, category, memberPackItems);
+  const memberPackItems = getMemberPackItems(t, members, packItem, writeBatch);
+  const category = addCategoryIfNew(categories, t, writeBatch);
+  updatePackItemIfChanged(packItem, category, memberPackItems, writeBatch);
 }
 
-async function getMemberPackItems(t: TextPackItem, members: NamedEntity[], packItem: PackItem) {
+function getMemberPackItems(t: TextPackItem, members: NamedEntity[], packItem: PackItem, writeBatch: WriteBatch) {
   let memberPackItems: MemberPackItem[] | undefined;
   if (t.members) {
     memberPackItems = [];
-    for (const tpim of t.members) {
-      const member = members.find((member) => member.name === tpim);
+    for (const textPackItemMember of t.members) {
+      const member = members.find((member) => member.name === textPackItemMember);
       const checked = packItem.members?.find((mpi) => mpi.id === member?.id)?.checked ?? false;
-      const id = await addMemberIfNew(tpim, members, member);
+      const id = addMemberIfNew(textPackItemMember, members, member, writeBatch);
       memberPackItems.push({ id, checked });
     }
   }
   return memberPackItems;
 }
 
-async function addMemberIfNew(textPackItemMember: string, members: NamedEntity[], member?: NamedEntity) {
+function addMemberIfNew(
+  textPackItemMember: string,
+  members: NamedEntity[],
+  member: NamedEntity | undefined,
+  writeBatch: WriteBatch
+) {
   let id: string;
   if (member) {
     id = member.id;
   } else {
-    id = await firebase.addMember(textPackItemMember);
+    id = firebase.addMemberBatch(textPackItemMember, writeBatch);
     members.push({ id, name: textPackItemMember });
   }
   return id;
 }
 
-async function addCategoryIfNew(categories: NamedEntity[], t: TextPackItem) {
+function addCategoryIfNew(categories: NamedEntity[], t: TextPackItem, writeBatch: WriteBatch) {
   let category = categories.find((cat) => cat.name === t.category);
   if (!category && t.category) {
-    const id = await firebase.addCategory(t.category);
+    const id = firebase.addCategoryBatch(t.category, writeBatch);
     category = { id, name: t.category };
     categories.push(category);
   }
   return category;
 }
 
-async function updatePackItemIfChanged(
+function updatePackItemIfChanged(
   packItem: PackItem,
   category: NamedEntity | undefined,
-  memberPackItems?: MemberPackItem[]
+  memberPackItems: MemberPackItem[] | undefined,
+  writeBatch: WriteBatch
 ) {
   const memberPackItemsChanged = JSON.stringify(memberPackItems) !== JSON.stringify(packItem.members);
   if (category?.id !== packItem.category || memberPackItemsChanged) {
     packItem.category = category?.id ?? '';
     packItem.members = memberPackItems;
-    await firebase.updatePackItem(packItem);
+    firebase.updatePackItemBatch(packItem, writeBatch);
   }
 }
 
-async function addNewPackItem(t: TextPackItem, members: NamedEntity[], categories: NamedEntity[]) {
+function addNewPackItem(t: TextPackItem, members: NamedEntity[], categories: NamedEntity[], writeBatch: WriteBatch) {
   const memberPackItems = [];
   if (t.members) {
-    for (const tpim of t.members) {
-      const member = members.find((member) => member.name === tpim);
-      const id = await addMemberIfNew(tpim, members, member);
+    for (const textPackItemMember of t.members) {
+      const member = members.find((member) => member.name === textPackItemMember);
+      const id = addMemberIfNew(textPackItemMember, members, member, writeBatch);
       memberPackItems.push({ id, checked: false });
     }
   }
@@ -148,10 +158,10 @@ async function addNewPackItem(t: TextPackItem, members: NamedEntity[], categorie
     // find or create category
     category = categories.find((cat) => cat.name === t.category);
     if (!category) {
-      const newId = await firebase.addCategory(t.category);
+      const newId = firebase.addCategoryBatch(t.category, writeBatch);
       category = { id: newId, name: t.category };
       categories.push(category);
     }
   }
-  return await firebase.addPackItem(t.name, memberPackItems, category?.id ?? '');
+  return firebase.addPackItemBatch(writeBatch, t.name, memberPackItems, category?.id ?? '');
 }
