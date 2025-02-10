@@ -1,5 +1,17 @@
-import { EditIcon } from '@chakra-ui/icons';
-import { Box, Card, CardBody, Flex, Link, Spacer, Stack, Text } from '@chakra-ui/react';
+import { EditIcon, Menu, MenuButton, MenuList } from '@chakra-ui/icons';
+import {
+  Box,
+  Card,
+  CardBody,
+  Flex,
+  Link,
+  MenuItemOption,
+  MenuOptionGroup,
+  Spacer,
+  Stack,
+  Text,
+} from '@chakra-ui/react';
+import { IoFilterOutline } from '@react-icons/all-files/io5/IoFilterOutline';
 import { useEffect, useState } from 'react';
 import { useFirebase } from '../../services/contexts.ts';
 import { groupByCategories } from '../../services/utils.ts';
@@ -7,43 +19,49 @@ import { PackItem } from '../../types/PackItem.ts';
 import { AddOrEditPackItem } from '../packing-list/AddOrEditPackItem.tsx';
 import { PackItemRows } from '../packing-list/PackItemRows.tsx';
 import { PackItemsTextMode } from '../packing-list/PackItemsTextMode.tsx';
-import { PLSelect } from '../shared/PLSelect.tsx';
 
 export function PackingList() {
+  const categories = useFirebase().categories;
+
   const [selectedItem, setSelectedItem] = useState<PackItem>();
   const packItems = useFirebase().packItems;
   const [filteredPackItems, setFilteredPackItems] = useState(packItems);
-  const [filterCategory, setFilterCategory] = useState<string>('');
+  const [filterCategories, setFilterCategories] = useState<string | string[]>(categories.map((c) => c.id));
   const [textMode, setTextMode] = useState(false);
 
-  const categories = useFirebase().categories;
   const grouped = groupByCategories(filteredPackItems);
 
   useEffect(() => {
     setFilteredPackItems(packItems);
   }, [packItems]);
 
-  function filterOnCategory(category: string) {
-    if (category) {
-      setFilteredPackItems(packItems.filter((packItem) => packItem.category === category));
-    } else {
-      setFilteredPackItems(packItems);
-    }
-    setFilterCategory(category);
+  function filterOnCategories(filter: string | string[]) {
+    const filterArray = Array.isArray(filter) ? filter : [filter];
+    setFilteredPackItems(packItems.filter((packItem) => !packItem.category || filterArray.includes(packItem.category)));
+    setFilterCategories(filter);
   }
 
   return (
     <Box mt="5" maxWidth="600px" mx="auto">
       <>
         {/* Move to a separate component */}
-        <Stack direction="row" justifyContent="space-between" alignItems="center" mb="3">
-          <PLSelect
-            setSelection={filterOnCategory}
-            selected={filterCategory}
-            placeholder="Filter category"
-            options={categories}
-            hidden={textMode}
-          />
+        <Stack direction="row" justifyContent="space-between" alignItems="center">
+          <Menu closeOnSelect={false}>
+            <MenuButton as={Link} m="3" color="teal.500" hidden={textMode}>
+              <Flex alignItems="center" gap="1">
+                <IoFilterOutline /> Filter categories {filterCategories.length < categories.length && '*'}
+              </Flex>
+            </MenuButton>
+            <MenuList>
+              <MenuOptionGroup type="checkbox" value={filterCategories} onChange={filterOnCategories}>
+                {categories.map((category) => (
+                  <MenuItemOption key={category.id} value={category.id}>
+                    {category.name}
+                  </MenuItemOption>
+                ))}
+              </MenuOptionGroup>
+            </MenuList>
+          </Menu>
           <Spacer />
           <Link color="teal.500" onClick={() => setTextMode(!textMode)} variant="outline" hidden={textMode} m="3">
             <EditIcon /> Text mode
