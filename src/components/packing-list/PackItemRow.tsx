@@ -66,20 +66,16 @@ export function PackItemRow({
           </Text>
         </Flex>
         <Spacer />
-        <IconButton
-          borderRadius="full"
-          onClick={deleteItem}
-          variant="ghost"
-          icon={<DeleteIcon />}
-          aria-label="Delete item"
-        />
-        <IconButton
-          borderRadius="full"
-          onClick={() => onEdit(packItem)}
-          variant="ghost"
-          icon={<EditIcon />}
-          aria-label="Edit item"
-        />
+        <Flex alignItems="center">
+          <IconButton onClick={deleteItem} variant="ghost" icon={<DeleteIcon />} aria-label="Delete item" />
+          <IconButton
+            borderRadius="full"
+            onClick={() => onEdit(packItem)}
+            variant="ghost"
+            icon={<EditIcon />}
+            aria-label="Edit item"
+          />
+        </Flex>
       </Flex>
       {!!memberRows &&
         memberRows.map(({ memberItem, member }) => (

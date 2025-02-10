@@ -12,7 +12,6 @@ import {
   useDisclosure,
 } from '@chakra-ui/react';
 import { ChangeEvent } from 'react';
-import { firebase } from '../../services/api.ts';
 import { useError, useFirebase } from '../../services/contexts.ts';
 import { NamedEntity } from '../../types/NamedEntity.ts';
 import { UploadModal } from './UploadModal.tsx';
@@ -30,7 +29,6 @@ export function NamedEntityRow({
   type: string;
   isDragging: boolean;
 }) {
-  const packItems = useFirebase().packItems;
   const { setError } = useError();
   const { isOpen, onOpen, onClose } = useDisclosure();
 
@@ -45,12 +43,6 @@ export function NamedEntityRow({
 
   function handleDelete() {
     (async () => {
-      for (const packItem of packItems) {
-        if (packItem.category === namedEntity.id) {
-          delete packItem.category;
-          await firebase.updatePackItem(packItem);
-        }
-      }
       await onDelete(namedEntity.id);
     })().catch(setError);
   }

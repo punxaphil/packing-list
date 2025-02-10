@@ -9,7 +9,7 @@ import { createTextPackItemsFromText, updateFirebaseFromTextPackItems } from './
 
 vi.mock('./api');
 
-vi.mocked(firebase.writeBatch).mockImplementation(() => {
+vi.mocked(firebase.initBatch).mockImplementation(() => {
   return { commit: () => {} } as WriteBatch;
 });
 
@@ -94,7 +94,7 @@ describe('textModeUtils', () => {
 
       await updateFirebaseFromTextPackItems(packItems, textPackItems, members, categories);
 
-      expectFirebaseCallsToThese(firebase.deletePackItemBatch, firebase.writeBatch);
+      expectFirebaseCallsToThese(firebase.deletePackItemBatch, firebase.initBatch);
     });
 
     it('should not update existing pack items', async () => {
@@ -105,7 +105,7 @@ describe('textModeUtils', () => {
 
       await updateFirebaseFromTextPackItems(packItems, textPackItems, members, categories);
 
-      expectFirebaseCallsToThese(firebase.writeBatch);
+      expectFirebaseCallsToThese(firebase.initBatch);
     });
 
     it('should update existing pack items', async () => {
@@ -116,7 +116,7 @@ describe('textModeUtils', () => {
 
       await updateFirebaseFromTextPackItems(packItems, textPackItems, members, categories);
 
-      expectFirebaseCallsToThese(firebase.updatePackItemBatch, firebase.writeBatch);
+      expectFirebaseCallsToThese(firebase.updatePackItemBatch, firebase.initBatch);
     });
 
     it('should update existing pack items because category changed', async () => {
@@ -127,7 +127,7 @@ describe('textModeUtils', () => {
 
       await updateFirebaseFromTextPackItems(packItems, textPackItems, members, categories);
 
-      expectFirebaseCallsToThese(firebase.updatePackItemBatch, firebase.addCategoryBatch, firebase.writeBatch);
+      expectFirebaseCallsToThese(firebase.updatePackItemBatch, firebase.addCategoryBatch, firebase.initBatch);
     });
 
     it('should add new pack items', async () => {
@@ -138,7 +138,7 @@ describe('textModeUtils', () => {
 
       await updateFirebaseFromTextPackItems(packItems, textPackItems, members, categories);
 
-      expectFirebaseCallsToThese(firebase.addPackItemBatch, firebase.writeBatch);
+      expectFirebaseCallsToThese(firebase.addPackItemBatch, firebase.initBatch);
     });
 
     it('should add 3 new pack items, update 2 pack items, delete 5 pack items, add one new category, add 2 members', async () => {

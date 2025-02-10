@@ -141,9 +141,6 @@ export const firebase = {
       await update(CATEGORIES_KEY, categories.id, categories);
     }
   },
-  deleteCategory: async (id: string) => {
-    await del(CATEGORIES_KEY, id);
-  },
   addImage: async (type: string, typeId: string, url: string): Promise<void> => {
     await add(IMAGES_KEY, { type, typeId, url });
   },
@@ -153,7 +150,7 @@ export const firebase = {
   async deleteImage(imageId: string) {
     await del(IMAGES_KEY, imageId);
   },
-  writeBatch: () => {
+  initBatch: () => {
     return writeBatch(firestore);
   },
   deletePackItemBatch(id: string, writeBatch: WriteBatch) {
@@ -168,8 +165,18 @@ export const firebase = {
   updatePackItemBatch<K extends DocumentData>(data: WithFieldValue<K>, writeBatch: WriteBatch) {
     writeBatch.update(doc(firestore, USERS_KEY, getUserId(), PACK_ITEMS_KEY, data.id), data);
   },
-  addPackItemBatch(writeBatch: WriteBatch, name: string, members: MemberPackItem[], category: string) {
-    const id = addBatch(PACK_ITEMS_KEY, writeBatch, { name, members: members, category: category });
+  addPackItemBatch(writeBatch: WriteBatch, name: string, members: MemberPackItem[], category: string): PackItem {
+    const id = addBatch(PACK_ITEMS_KEY, writeBatch, {
+      name,
+      members: members,
+      category: category,
+    });
     return { id, checked: false, members, name, category };
+  },
+  updateCategoryBatch<K extends DocumentData>(id: string, data: WithFieldValue<K>, batch: WriteBatch) {
+    batch.update(doc(firestore, USERS_KEY, getUserId(), CATEGORIES_KEY, id), data);
+  },
+  deleteCategoryBatch(id: string, batch: WriteBatch) {
+    batch.delete(doc(firestore, USERS_KEY, getUserId(), CATEGORIES_KEY, id));
   },
 };

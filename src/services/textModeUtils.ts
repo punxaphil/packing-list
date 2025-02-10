@@ -55,7 +55,7 @@ export async function updateFirebaseFromTextPackItems(
   members: NamedEntity[],
   categories: NamedEntity[]
 ) {
-  const writeBatch = firebase.writeBatch();
+  const writeBatch = firebase.initBatch();
   deleteRemovedPackItems(textPackItems, packItems, writeBatch);
   for (const t of textPackItems) {
     const packItem = packItems.find((pi) => pi.name === t.name);

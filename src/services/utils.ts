@@ -25,7 +25,7 @@ export function groupByCategories(packItems: PackItem[]) {
       acc[category].push(packItem);
       return acc;
     },
-    { '': [] } as Record<string, PackItem[]>
+    {} as Record<string, PackItem[]>
   );
 }
 
