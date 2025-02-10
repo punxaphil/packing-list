@@ -38,8 +38,8 @@ export function PackItemRows({
 
   async function addCategory() {
     const batch = firebase.initBatch();
-    const id = firebase.addCategoryBatch('New category', batch);
-    firebase.addPackItemBatch(batch, 'New item', [], id);
+    const id = firebase.addCategoryBatch('My Category', batch);
+    firebase.addPackItemBatch(batch, 'My Item', [], id);
     firebase.updateCategoryBatch(id, { rank: 0 }, batch);
     for (const category of categories) {
       firebase.updateCategoryBatch(category.id, { rank: (category.rank ?? 0) + 1 }, batch);

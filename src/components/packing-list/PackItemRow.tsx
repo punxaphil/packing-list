@@ -1,5 +1,6 @@
-import { DeleteIcon, EditIcon } from '@chakra-ui/icons';
+import { DeleteIcon, EditIcon, Menu, MenuButton, MenuItem, MenuList } from '@chakra-ui/icons';
 import { Box, Flex, IconButton, Spacer, Text } from '@chakra-ui/react';
+import { MdLabelOutline } from '@react-icons/all-files/md/MdLabelOutline';
 import { firebase } from '../../services/api.ts';
 import { useFirebase } from '../../services/contexts.ts';
 import { getName } from '../../services/utils.ts';
@@ -19,10 +20,11 @@ export function PackItemRow({
   indent?: boolean;
 }) {
   const members = useFirebase().members;
+  const categories = useFirebase().categories;
 
   async function toggleItem() {
     packItem.checked = !packItem.checked;
-    await firebase.updatePackItem(packItem);
+    await onUpdate(packItem);
   }
 
   async function onUpdate(packItem: PackItem) {
@@ -47,7 +49,12 @@ export function PackItemRow({
 
   async function onChangeText(name: string) {
     packItem.name = name;
-    await firebase.updatePackItem(packItem);
+    await onUpdate(packItem);
+  }
+
+  async function setCategory(id: string) {
+    packItem.category = id;
+    await onUpdate(packItem);
   }
 
   return (
@@ -67,6 +74,24 @@ export function PackItemRow({
         </Flex>
         <Spacer />
         <Flex alignItems="center">
+          <Menu>
+            <MenuButton as={IconButton} aria-label="Move item to category" icon={<MdLabelOutline />} variant="ghost" />
+            <MenuList>
+              {[{ id: '', name: 'Remove from category' }, ...categories]
+                .filter((c) => {
+                  return c.id !== packItem.category;
+                })
+                .map((category) => (
+                  <MenuItem
+                    key={category.id}
+                    onClick={() => setCategory(category.id)}
+                    icon={category.id === '' ? <DeleteIcon /> : undefined}
+                  >
+                    {category.name}
+                  </MenuItem>
+                ))}
+            </MenuList>
+          </Menu>
           <IconButton onClick={deleteItem} variant="ghost" icon={<DeleteIcon />} aria-label="Delete item" />
           <IconButton
             borderRadius="full"
