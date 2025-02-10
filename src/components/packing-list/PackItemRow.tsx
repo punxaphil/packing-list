@@ -1,12 +1,12 @@
-import { DeleteIcon, EditIcon } from '@chakra-ui/icons';
-import { Box, Flex, IconButton, Spacer } from '@chakra-ui/react';
+import { DeleteIcon, EditIcon, Editable, EditableInput, EditablePreview } from '@chakra-ui/icons';
+import { Box, Flex, IconButton, Spacer, Text } from '@chakra-ui/react';
+import { ChangeEvent } from 'react';
 import { firebase } from '../../services/api.ts';
 import { useFirebase } from '../../services/contexts.ts';
 import { getName } from '../../services/utils.ts';
 import { PackItem } from '../../types/PackItem.ts';
 import { MultiCheckbox } from '../shared/MultiCheckbox.tsx';
 import { PLCheckbox } from '../shared/PLCheckbox.tsx';
-import { Span } from '../shared/Span.tsx';
 import { MemberPackItemRow } from './MemberPackItemRow.tsx';
 
 export function PackItemRow({
@@ -34,8 +34,21 @@ export function PackItemRow({
   }
 
   const multipleMembers = !!(packItem.members && packItem.members.length > 1);
-  const itemNameWithMember =
-    packItem.name + (packItem.members?.length === 1 ? ` (${getName(members, packItem.members[0].id)})` : '');
+  const memberRows = packItem.members?.map((m) => {
+    const member = members.find((t) => t.id === m.id);
+    if (!member) {
+      throw new Error(`Member with id ${m.id} not found`);
+    }
+    return {
+      memberItem: m,
+      member: member,
+    };
+  });
+
+  async function onChangeText(event: ChangeEvent<HTMLInputElement>) {
+    packItem.name = event.target.value;
+    await firebase.updatePackItem(packItem);
+  }
 
   return (
     <Box ml={indent ? '3' : '0'}>
@@ -46,7 +59,13 @@ export function PackItemRow({
           <PLCheckbox checked={packItem.checked} onClick={toggleItem} />
         )}
 
-        <Span strike={packItem.checked}>{itemNameWithMember}</Span>
+        <Editable defaultValue={packItem.name}>
+          <EditablePreview style={{ textDecoration: packItem.checked ? 'line-through' : 'none' }} />
+          <EditableInput value={packItem.name} onChange={onChangeText} />
+        </Editable>
+        <Text style={{ textDecoration: packItem.checked ? 'line-through' : 'none' }}>
+          {packItem.members?.length === 1 ? ` (${getName(members, packItem.members[0].id)})` : ''}
+        </Text>
         <Spacer />
         <IconButton
           borderRadius="full"
@@ -63,8 +82,15 @@ export function PackItemRow({
           aria-label="Edit item"
         />
       </Flex>
-      {multipleMembers &&
-        packItem.members?.map((m) => <MemberPackItemRow memberItem={m} parent={packItem} key={m.id} />)}
+      {!!memberRows &&
+        memberRows.map(({ memberItem, member }) => (
+          <MemberPackItemRow
+            memberItem={memberItem}
+            parent={packItem}
+            key={memberItem.id + member.name}
+            member={member}
+          />
+        ))}
     </Box>
   );
 }
