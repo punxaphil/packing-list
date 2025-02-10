@@ -1,10 +1,10 @@
-import { DeleteIcon, EditIcon, Editable, EditableInput, EditablePreview } from '@chakra-ui/icons';
+import { DeleteIcon, EditIcon } from '@chakra-ui/icons';
 import { Box, Flex, IconButton, Spacer, Text } from '@chakra-ui/react';
-import { ChangeEvent } from 'react';
 import { firebase } from '../../services/api.ts';
 import { useFirebase } from '../../services/contexts.ts';
 import { getName } from '../../services/utils.ts';
 import { PackItem } from '../../types/PackItem.ts';
+import { InlineEdit } from '../shared/InlineEdit.tsx';
 import { MultiCheckbox } from '../shared/MultiCheckbox.tsx';
 import { PLCheckbox } from '../shared/PLCheckbox.tsx';
 import { MemberPackItemRow } from './MemberPackItemRow.tsx';
@@ -45,8 +45,8 @@ export function PackItemRow({
     };
   });
 
-  async function onChangeText(event: ChangeEvent<HTMLInputElement>) {
-    packItem.name = event.target.value;
+  async function onChangeText(name: string) {
+    packItem.name = name;
     await firebase.updatePackItem(packItem);
   }
 
@@ -59,13 +59,12 @@ export function PackItemRow({
           <PLCheckbox checked={packItem.checked} onClick={toggleItem} />
         )}
 
-        <Editable>
-          <EditablePreview textDecoration={packItem.checked ? 'line-through' : 'none'} />
-          <EditableInput value={packItem.name} onChange={onChangeText} />
-        </Editable>
-        <Text textDecoration={packItem.checked ? 'line-through' : 'none'}>
-          {packItem.members?.length === 1 ? ` (${getName(members, packItem.members[0].id)})` : ''}
-        </Text>
+        <Flex alignItems="center">
+          <InlineEdit value={packItem.name} onUpdate={onChangeText} strike={packItem.checked} />
+          <Text textDecoration={packItem.checked ? 'line-through' : 'none'} hidden={packItem.members?.length !== 1}>
+            &nbsp;({getName(members, packItem.members?.[0]?.id)})
+          </Text>
+        </Flex>
         <Spacer />
         <IconButton
           borderRadius="full"

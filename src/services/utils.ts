@@ -1,8 +1,9 @@
+import { KeyboardEvent } from 'react';
 import { MemberPackItem } from '../types/MemberPackItem.ts';
 import { NamedEntity } from '../types/NamedEntity.ts';
 import { PackItem } from '../types/PackItem.ts';
 
-export function getName(members: NamedEntity[], memberId: string) {
+export function getName(members: NamedEntity[], memberId?: string) {
   return members.find((t) => t.id === memberId)?.name;
 }
 
@@ -60,5 +61,11 @@ export function sortPackItems(packItems: PackItem[], members: NamedEntity[], cat
     packItems.sort((a, b) => {
       return (getCategoryFromId(a)?.rank ?? 0) - (getCategoryFromId(b)?.rank ?? 0);
     });
+  }
+}
+
+export function handleEnter(e: KeyboardEvent<HTMLInputElement>, onEnter: () => void) {
+  if (e.key === 'Enter') {
+    onEnter();
   }
 }

@@ -1,9 +1,8 @@
-import { Editable, EditableInput, EditablePreview } from '@chakra-ui/icons';
 import { Box, Flex, Image } from '@chakra-ui/react';
-import { ChangeEvent } from 'react';
 import { firebase } from '../../services/api.ts';
 import { useFirebase } from '../../services/contexts.ts';
 import { PackItem } from '../../types/PackItem.ts';
+import { InlineEdit } from '../shared/InlineEdit.tsx';
 import { PackItemRow } from './PackItemRow.tsx';
 
 export function PackItemRows({
@@ -27,12 +26,12 @@ export function PackItemRows({
     return categories.find((cat) => cat.id === catId)?.name ?? '';
   }
 
-  async function onChangeCategory(event: ChangeEvent<HTMLInputElement>, catId: string) {
+  async function onChangeCategory(name: string, catId: string) {
     const category = categories.find((cat) => cat.id === catId);
     if (!category) {
       throw new Error(`Category with id ${catId} not found`);
     }
-    category.name = event.target.value;
+    category.name = name;
     await firebase.updateCategories(category);
   }
 
@@ -47,15 +46,11 @@ export function PackItemRows({
                   <Image borderRadius="full" boxSize="30px" src={getCategoryImage(groupCategory)} />
                 )}
 
-                <Box>
-                  <Editable as="b">
-                    <EditablePreview />
-                    <EditableInput
-                      value={categoryName(groupCategory)}
-                      onChange={(e) => onChangeCategory(e, groupCategory)}
-                    />
-                  </Editable>
-                </Box>
+                <InlineEdit
+                  as="b"
+                  value={categoryName(groupCategory)}
+                  onUpdate={(name) => onChangeCategory(name, groupCategory)}
+                />
               </Flex>
             )}
             {packItems.map((packItem) => (

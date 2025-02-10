@@ -1,6 +1,7 @@
 import { Button, Card, CardBody, Flex, Input, Spacer } from '@chakra-ui/react';
 import { ChangeEvent, KeyboardEvent, useState } from 'react';
 import { useError } from '../../services/contexts';
+import { handleEnter } from '../../services/utils.ts';
 import { NamedEntity } from '../../types/NamedEntity.ts';
 import { DragAndDrop } from './DragAndDrop.tsx';
 import { NamedEntityRow } from './NamedEntityRow.tsx';
@@ -34,10 +35,8 @@ export function NamedEntities({
     setNewName(event.target.value);
   }
 
-  function handleEnter(e: KeyboardEvent<HTMLInputElement>) {
-    if (e.key === 'Enter') {
-      handleAdd();
-    }
+  function onEnter(e: KeyboardEvent<HTMLInputElement>) {
+    handleEnter(e, handleAdd);
   }
 
   async function onEntitiesUpdated(entities: NamedEntity[]) {
@@ -63,7 +62,7 @@ export function NamedEntities({
             )}
           />
           <Flex mt="2" gap="3" align="center">
-            <Input placeholder="Enter a name" value={newName} onChange={handleOnChange} onKeyDown={handleEnter} />
+            <Input placeholder="Enter a name" value={newName} onChange={handleOnChange} onKeyDown={onEnter} />
             <Button onClick={handleAdd}>Add</Button>
           </Flex>
         </CardBody>

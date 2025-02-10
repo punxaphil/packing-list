@@ -9,6 +9,7 @@ import {
 import { ChangeEvent, KeyboardEvent, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router';
 import { useError } from '../../services/contexts.ts';
+import { handleEnter } from '../../services/utils.ts';
 
 export function useCurrentUser() {
   const [userId, setUserId] = useState('');
@@ -40,10 +41,8 @@ export function Login() {
     setPassword(event.target.value);
   }
 
-  function handleEnter(e: KeyboardEvent<HTMLInputElement>) {
-    if (e.key === 'Enter') {
-      handleLogin();
-    }
+  function onEnter(e: KeyboardEvent<HTMLInputElement>) {
+    handleEnter(e, handleLogin);
   }
 
   function handleLogin() {
@@ -62,14 +61,8 @@ export function Login() {
 
   return (
     <Stack w="300px" spacing={4} align="center" m="5">
-      <Input value={email} onChange={handleEmail} onKeyDown={handleEnter} placeholder="email" />
-      <Input
-        type="password"
-        value={password}
-        onChange={handlePassword}
-        onKeyDown={handleEnter}
-        placeholder="password"
-      />
+      <Input value={email} onChange={handleEmail} onKeyDown={onEnter} placeholder="email" />
+      <Input type="password" value={password} onChange={handlePassword} onKeyDown={onEnter} placeholder="password" />
       <ButtonGroup>
         <Button onClick={handleLogin}>Login</Button>
         <Button onClick={handleRegister} variant="outline">

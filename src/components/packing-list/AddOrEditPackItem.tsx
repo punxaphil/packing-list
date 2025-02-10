@@ -2,6 +2,7 @@ import { Box, Button, Flex, Heading, Input, Spacer, Text } from '@chakra-ui/reac
 import { ChangeEvent, KeyboardEvent, useState } from 'react';
 import { firebase } from '../../services/api.ts';
 import { useError, useFirebase } from '../../services/contexts.ts';
+import { handleEnter } from '../../services/utils.ts';
 import { PackItem } from '../../types/PackItem.ts';
 import { PLCheckboxGroup } from '../shared/PLCheckboxGroup.tsx';
 import { PLSelect } from '../shared/PLSelect.tsx';
@@ -38,10 +39,8 @@ export function AddOrEditPackItem({ packItem, done }: { packItem?: PackItem; don
     setName(e.target.value);
   }
 
-  function handleEnter(e: KeyboardEvent<HTMLInputElement>) {
-    if (e.key === 'Enter') {
-      saveAction();
-    }
+  function onEnter(e: KeyboardEvent<HTMLInputElement>) {
+    handleEnter(e, saveAction);
   }
 
   function onMembersSelection(selectedIds: string[]) {
@@ -59,7 +58,7 @@ export function AddOrEditPackItem({ packItem, done }: { packItem?: PackItem; don
           {packItem ? 'Edit' : 'Add new'} item
         </Heading>
         <Box maxWidth="300px">
-          <Input placeholder="Enter an item name..." value={name} onChange={handleOnChange} onKeyDown={handleEnter} />
+          <Input placeholder="Enter an item name..." value={name} onChange={handleOnChange} onKeyDown={onEnter} />
         </Box>
         {members.length > 0 && (
           <Box mt="2">

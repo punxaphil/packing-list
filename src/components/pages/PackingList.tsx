@@ -36,7 +36,7 @@ export function PackingList() {
     <Box mt="5" maxWidth="600px" mx="auto">
       <>
         {/* Move to a separate component */}
-        <Stack direction="row" justifyContent="space-between" alignItems="center">
+        <Stack direction="row" justifyContent="space-between" alignItems="center" mb="3">
           <PLSelect
             setSelection={filterOnCategory}
             selected={filterCategory}
