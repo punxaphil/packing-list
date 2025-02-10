@@ -46,8 +46,8 @@ export function MemberPackItemRow({
   return (
     <Flex pl="5" key={id} gap="2" align="center">
       <PLCheckbox checked={checked} onClick={toggleMember} />
-      <Editable defaultValue={name}>
-        <EditablePreview style={{ textDecoration: checked ? 'line-through' : 'none' }} />
+      <Editable>
+        <EditablePreview textDecoration={checked ? 'line-through' : 'none'} />
         <EditableInput value={name} onChange={onNameChange} onKeyDown={handleEnter} onBlur={onSave} />
       </Editable>
     </Flex>

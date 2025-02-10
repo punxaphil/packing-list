@@ -59,11 +59,11 @@ export function PackItemRow({
           <PLCheckbox checked={packItem.checked} onClick={toggleItem} />
         )}
 
-        <Editable defaultValue={packItem.name}>
-          <EditablePreview style={{ textDecoration: packItem.checked ? 'line-through' : 'none' }} />
+        <Editable>
+          <EditablePreview textDecoration={packItem.checked ? 'line-through' : 'none'} />
           <EditableInput value={packItem.name} onChange={onChangeText} />
         </Editable>
-        <Text style={{ textDecoration: packItem.checked ? 'line-through' : 'none' }}>
+        <Text textDecoration={packItem.checked ? 'line-through' : 'none'}>
           {packItem.members?.length === 1 ? ` (${getName(members, packItem.members[0].id)})` : ''}
         </Text>
         <Spacer />
