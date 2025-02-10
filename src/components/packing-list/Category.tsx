@@ -1,5 +1,4 @@
-import { AddIcon } from '@chakra-ui/icons';
-import { Flex, IconButton, Image } from '@chakra-ui/react';
+import { Flex, Image, Link, Spacer } from '@chakra-ui/react';
 import { firebase } from '../../services/api.ts';
 import { useFirebase } from '../../services/contexts.ts';
 import { InlineEdit } from '../shared/InlineEdit.tsx';
@@ -34,20 +33,31 @@ export function Category({
     await firebase.addPackItem(`New ${categoryName} item`, [], categoryId);
   }
 
+  async function addCategory() {
+    const batch = firebase.initBatch();
+    const id = firebase.addCategoryBatch('My Category', batch);
+    firebase.addPackItemBatch(batch, 'My Item', [], id);
+    firebase.updateCategoryBatch(id, { rank: 0 }, batch);
+    for (const category of categories) {
+      firebase.updateCategoryBatch(category.id, { rank: (category.rank ?? 0) + 1 }, batch);
+    }
+    await batch.commit();
+  }
+
   const categoryImage = getCategoryImage(categoryId);
   return (
-    <Flex gap="1" alignItems="center" mt="5">
+    <Flex gap="1" alignItems="center">
       {categoryImage && <Image borderRadius="full" boxSize="30px" src={categoryImage} mr="2" />}
-
       <InlineEdit as="b" value={categoryName} onUpdate={onChangeCategory} />
-      <IconButton
-        size="xs"
-        borderRadius="full"
-        onClick={addItem}
-        variant="ghost"
-        icon={<AddIcon />}
-        aria-label="Add item"
-      />
+      <Spacer />
+      <Flex gap="4">
+        <Link color="teal.500" onClick={addItem} variant="outline">
+          + pack item
+        </Link>
+        <Link color="teal.500" onClick={addCategory} variant="outline">
+          + category
+        </Link>
+      </Flex>
     </Flex>
   );
 }
