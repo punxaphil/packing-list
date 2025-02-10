@@ -1,5 +1,5 @@
 import { EditIcon } from '@chakra-ui/icons';
-import { Box, Button, Card, CardBody, Flex, Spacer, Stack, Text } from '@chakra-ui/react';
+import { Box, Card, CardBody, Flex, Link, Spacer, Stack, Text } from '@chakra-ui/react';
 import { useEffect, useState } from 'react';
 import { useFirebase } from '../../services/contexts.ts';
 import { groupByCategories } from '../../services/utils.ts';
@@ -45,9 +45,9 @@ export function PackingList() {
             hidden={textMode}
           />
           <Spacer />
-          <Button onClick={() => setTextMode(!textMode)} hidden={textMode}>
+          <Link color="teal.500" onClick={() => setTextMode(!textMode)} variant="outline" hidden={textMode} m="3">
             <EditIcon /> Text mode
-          </Button>
+          </Link>
         </Stack>
         {/* ---- */}
         <Card>
