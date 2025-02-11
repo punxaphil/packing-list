@@ -102,6 +102,7 @@ export function PackItemRow({
         </Flex>
       </Flex>
       {!!memberRows &&
+        memberRows?.length > 1 &&
         memberRows.map(({ memberItem, member }) => (
           <MemberPackItemRow
             memberItem={memberItem}
