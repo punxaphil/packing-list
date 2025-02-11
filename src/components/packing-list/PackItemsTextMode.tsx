@@ -1,4 +1,4 @@
-import { QuestionIcon } from '@chakra-ui/icons';
+import { Progress, QuestionIcon } from '@chakra-ui/icons';
 import {
   Button,
   ButtonGroup,
@@ -34,6 +34,7 @@ export function PackItemsTextMode({
   const members = useFirebase().members;
   const packItems = useFirebase().packItems;
   const [groupedAsText, setGroupedAsText] = useState('');
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     const text = getGroupedAsText(grouped, categories, members);
@@ -45,13 +46,16 @@ export function PackItemsTextMode({
   }
 
   async function save() {
+    setSaving(true);
     const textPackItems = createTextPackItemsFromText(groupedAsText);
     await updateFirebaseFromTextPackItems(packItems, textPackItems, members, categories);
+    setSaving(false);
     onDone();
   }
   const { onOpen } = useDisclosure();
   return (
     <Flex hidden={hidden} direction="column" gap="3">
+      <Progress size="xs" isIndeterminate hidden={!saving} />
       <Textarea
         placeholder="Paste your list here"
         value={groupedAsText}
