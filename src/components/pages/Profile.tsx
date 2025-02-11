@@ -36,7 +36,7 @@ export function Profile() {
             {currentUser.email}
             <Flex alignItems="end">
               <>
-                <ProfileAvatar shouldNavigate={false} size="full" />
+                <ProfileAvatar shouldNavigate={false} size={profileImage ? 'full' : '2xl'} />
                 <IconButton
                   size="xs"
                   icon={<DeleteIcon />}
