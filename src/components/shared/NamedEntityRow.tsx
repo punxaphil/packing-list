@@ -11,9 +11,8 @@ import {
   PopoverTrigger,
   useDisclosure,
 } from '@chakra-ui/react';
-import { AiOutlineCloudUpload } from '@react-icons/all-files/ai/AiOutlineCloudUpload';
-import { AiOutlineDelete } from '@react-icons/all-files/ai/AiOutlineDelete';
 import { ChangeEvent } from 'react';
+import { AiOutlineCloudUpload, AiOutlineDelete } from 'react-icons/ai';
 import { useError, useFirebase } from '../../services/contexts.ts';
 import { NamedEntity } from '../../types/NamedEntity.ts';
 import { UploadModal } from './UploadModal.tsx';

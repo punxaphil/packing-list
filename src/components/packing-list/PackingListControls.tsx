@@ -1,9 +1,8 @@
 import { Menu, MenuButton, MenuList } from '@chakra-ui/icons';
 import { Flex, Link, MenuItemOption, MenuOptionGroup, Spacer, Stack } from '@chakra-ui/react';
-import { AiOutlineEdit } from '@react-icons/all-files/ai/AiOutlineEdit';
-import { AiOutlineFilter } from '@react-icons/all-files/ai/AiOutlineFilter';
-import { MdLabelOutline } from '@react-icons/all-files/md/MdLabelOutline';
 import { useState } from 'react';
+import { AiOutlineEdit, AiOutlineFilter } from 'react-icons/ai';
+import { MdLabelOutline } from 'react-icons/md';
 import { firebase } from '../../services/api.ts';
 import { useFirebase } from '../../services/contexts.ts';
 import { PackItem } from '../../types/PackItem.ts';
@@ -39,9 +38,9 @@ export function PackingListControls({
   }
 
   return (
-    <Stack direction="row" justifyContent="space-between" alignItems="center">
+    <Stack direction="row" justifyContent="space-between" alignItems="center" hidden={hidden}>
       <Menu closeOnSelect={false}>
-        <MenuButton as={Link} m="3" color="teal" hidden={hidden}>
+        <MenuButton as={Link} m="3" color="teal">
           <Flex alignItems="center" gap="1">
             <AiOutlineFilter /> Filter categories {filterCategories.length < categories.length && '*'}
           </Flex>
@@ -64,7 +63,7 @@ export function PackingListControls({
         </Flex>
       </Link>
       <Spacer />
-      <Link color="teal" onClick={onClick} variant="outline" hidden={hidden} m="3">
+      <Link color="teal" onClick={onClick} variant="outline" m="3">
         <Flex alignItems="center" gap="1">
           <AiOutlineEdit /> Text mode
         </Flex>

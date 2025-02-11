@@ -1,7 +1,7 @@
 import { Menu, MenuButton, MenuItem, MenuList } from '@chakra-ui/icons';
 import { IconButton } from '@chakra-ui/react';
-import { AiOutlineDelete } from '@react-icons/all-files/ai/AiOutlineDelete';
 import { ReactElement } from 'react';
+import { AiOutlineDelete } from 'react-icons/ai';
 
 export function IconSelect({
   label,

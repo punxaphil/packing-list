@@ -179,4 +179,7 @@ export const firebase = {
   deleteCategoryBatch(id: string, batch: WriteBatch) {
     batch.delete(doc(firestore, USERS_KEY, getUserId(), CATEGORIES_KEY, id));
   },
+  deleteMemberBatch(id: string, batch: WriteBatch) {
+    batch.delete(doc(firestore, USERS_KEY, getUserId(), MEMBERS_KEY, id));
+  },
 };

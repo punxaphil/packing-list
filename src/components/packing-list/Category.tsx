@@ -1,5 +1,5 @@
 import { Flex, Image, Link, Text } from '@chakra-ui/react';
-import { IoBagAddOutline } from '@react-icons/all-files/io5/IoBagAddOutline';
+import { TbCategoryPlus } from 'react-icons/tb';
 import { firebase } from '../../services/api.ts';
 import { useFirebase } from '../../services/contexts.ts';
 import { InlineEdit } from '../shared/InlineEdit.tsx';
@@ -45,7 +45,7 @@ export function Category({
         </Text>
       )}
       <Link color="teal" onClick={addItem} variant="outline" ml="1">
-        <IoBagAddOutline />
+        <TbCategoryPlus />
       </Link>
     </Flex>
   );

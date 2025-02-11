@@ -1,7 +1,6 @@
 import { Box, Flex, IconButton, Spacer, Text } from '@chakra-ui/react';
-import { AiOutlineDelete } from '@react-icons/all-files/ai/AiOutlineDelete';
-import { AiOutlineUsergroupAdd } from '@react-icons/all-files/ai/AiOutlineUsergroupAdd';
-import { MdLabelOutline } from '@react-icons/all-files/md/MdLabelOutline';
+import { AiOutlineDelete, AiOutlineUsergroupAdd } from 'react-icons/ai';
+import { TbStatusChange } from 'react-icons/tb';
 import { firebase } from '../../services/api.ts';
 import { useFirebase } from '../../services/contexts.ts';
 import { getName } from '../../services/utils.ts';
@@ -89,7 +88,7 @@ export function PackItemRow({
         <Flex alignItems="center">
           <IconSelect
             label="Move item to category"
-            icon={<MdLabelOutline />}
+            icon={<TbStatusChange />}
             items={selectableCategories}
             onClick={setCategory}
           />
