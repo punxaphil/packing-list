@@ -1,4 +1,4 @@
-import { ArrowUpIcon, DragHandleIcon } from '@chakra-ui/icons';
+import { DragHandleIcon } from '@chakra-ui/icons';
 import {
   Box,
   Flex,
@@ -11,6 +11,7 @@ import {
   PopoverTrigger,
   useDisclosure,
 } from '@chakra-ui/react';
+import { AiOutlineCloudUpload } from '@react-icons/all-files/ai/AiOutlineCloudUpload';
 import { AiOutlineDelete } from '@react-icons/all-files/ai/AiOutlineDelete';
 import { ChangeEvent } from 'react';
 import { useError, useFirebase } from '../../services/contexts.ts';
@@ -57,7 +58,9 @@ export function NamedEntityRow({
         <DragHandleIcon color="gray" />
         <Popover trigger="hover">
           <PopoverTrigger>
-            <Link onClick={onOpen}>{imageUrl ? <Image src={imageUrl} w="30px" /> : <ArrowUpIcon />}</Link>
+            <Link onClick={onOpen}>
+              {imageUrl ? <Image src={imageUrl} w="30px" /> : <AiOutlineCloudUpload color="teal" />}
+            </Link>
           </PopoverTrigger>
           {imageUrl && (
             <PopoverContent boxShadow="dark-lg" p="6" rounded="md" bg="white" m="3">
