@@ -17,7 +17,7 @@ export function PackItemRows({
       {!hidden &&
         Object.entries(grouped).map(([groupCategory, packItems]) => (
           <Box key={groupCategory}>
-            {groupCategory && <Category categoryId={groupCategory} />}
+            <Category categoryId={groupCategory} />
             {packItems.map((packItem) => (
               <PackItemRow packItem={packItem} key={packItem.id} onEdit={setSelectedItem} indent={!!groupCategory} />
             ))}

@@ -1,4 +1,4 @@
-import { Flex, Image, Link } from '@chakra-ui/react';
+import { Flex, Image, Link, Text } from '@chakra-ui/react';
 import { IoBagAddOutline } from '@react-icons/all-files/io5/IoBagAddOutline';
 import { firebase } from '../../services/api.ts';
 import { useFirebase } from '../../services/contexts.ts';
@@ -11,10 +11,7 @@ export function Category({
 }) {
   const images = useFirebase().images;
   const categories = useFirebase().categories;
-  const categoryName = categories.find((cat) => cat.id === categoryId)?.name;
-  if (!categoryName) {
-    throw new Error(`Category with id ${categoryId} not found`);
-  }
+  const categoryName = categories.find((cat) => cat.id === categoryId)?.name || 'uncategorized';
 
   async function onChangeCategory(name: string) {
     const category = categories.find((cat) => cat.id === categoryId);
@@ -25,20 +22,28 @@ export function Category({
     await firebase.updateCategories(category);
   }
 
-  function getCategoryImage(typeId: string) {
-    const image = images.find((t) => t.type === 'categories' && t.typeId === typeId);
-    return image?.url;
+  function getCategoryImage() {
+    if (categoryId) {
+      const image = images.find((t) => t.type === 'categories' && t.typeId === categoryId);
+      return image?.url;
+    }
   }
 
   async function addItem() {
     await firebase.addPackItem(`New ${categoryName} item`, [], categoryId);
   }
 
-  const categoryImage = getCategoryImage(categoryId);
+  const categoryImage = getCategoryImage();
   return (
     <Flex gap="1" alignItems="center">
       {categoryImage && <Image borderRadius="full" boxSize="30px" src={categoryImage} mr="2" />}
-      <InlineEdit as="b" value={categoryName} onUpdate={onChangeCategory} />
+      {categoryId ? (
+        <InlineEdit as="b" value={categoryName} onUpdate={onChangeCategory} />
+      ) : (
+        <Text as="i" fontSize="sm" color="gray.500">
+          Uncategorized
+        </Text>
+      )}
       <Link color="teal" onClick={addItem} variant="outline" ml="1">
         <IoBagAddOutline />
       </Link>

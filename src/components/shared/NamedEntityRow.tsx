@@ -1,4 +1,4 @@
-import { ArrowUpIcon, DeleteIcon, DragHandleIcon } from '@chakra-ui/icons';
+import { ArrowUpIcon, DragHandleIcon } from '@chakra-ui/icons';
 import {
   Box,
   Flex,
@@ -11,6 +11,7 @@ import {
   PopoverTrigger,
   useDisclosure,
 } from '@chakra-ui/react';
+import { AiOutlineDelete } from '@react-icons/all-files/ai/AiOutlineDelete';
 import { ChangeEvent } from 'react';
 import { useError, useFirebase } from '../../services/contexts.ts';
 import { NamedEntity } from '../../types/NamedEntity.ts';
@@ -69,7 +70,7 @@ export function NamedEntityRow({
           borderRadius="full"
           onClick={handleDelete}
           variant="ghost"
-          icon={<DeleteIcon />}
+          icon={<AiOutlineDelete />}
           aria-label="Delete"
         />
       </Flex>
