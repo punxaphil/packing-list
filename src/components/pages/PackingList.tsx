@@ -8,10 +8,11 @@ import { PackingListControls } from '../packing-list/PackingListControls.tsx';
 
 export function PackingList() {
   const packItems = useFirebase().packItems;
+  const categories = useFirebase().categories;
   const [filteredPackItems, setFilteredPackItems] = useState(packItems);
   const [textMode, setTextMode] = useState(false);
 
-  const grouped = groupByCategories(filteredPackItems);
+  const grouped = groupByCategories(filteredPackItems, categories);
 
   useEffect(() => {
     setFilteredPackItems(packItems);

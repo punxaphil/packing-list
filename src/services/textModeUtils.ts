@@ -1,22 +1,19 @@
 import { WriteBatch } from 'firebase/firestore';
+import { GroupedPackItem } from '../types/GroupedPackItem.ts';
 import { MemberPackItem } from '../types/MemberPackItem.ts';
 import { NamedEntity } from '../types/NamedEntity.ts';
 import { PackItem, TextPackItem } from '../types/PackItem.ts';
 import { firebase } from './api.ts';
 
-export function getGroupedAsText(
-  grouped: Record<string, PackItem[]>,
-  categories: NamedEntity[],
-  members: NamedEntity[]
-) {
+export function getGroupedAsText(grouped: GroupedPackItem[], categories: NamedEntity[], members: NamedEntity[]) {
   let result = '';
-  for (const [category, items] of Object.entries(grouped)) {
-    const categoryName = categories.find((c) => c.id === category)?.name;
+  for (const group of grouped) {
+    const categoryName = categories.find((c) => c.id === group.categoryId)?.name;
     if (categoryName) {
       result += `${categoryName}\n`;
     }
 
-    for (const item of items) {
+    for (const item of group.packItems) {
       result += `- ${item.name}\n`;
       if (item.members) {
         for (const m of item.members) {

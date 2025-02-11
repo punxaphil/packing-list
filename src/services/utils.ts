@@ -1,4 +1,5 @@
 import { KeyboardEvent } from 'react';
+import { GroupedPackItem } from '../types/GroupedPackItem.ts';
 import { MemberPackItem } from '../types/MemberPackItem.ts';
 import { NamedEntity } from '../types/NamedEntity.ts';
 import { PackItem } from '../types/PackItem.ts';
@@ -15,18 +16,25 @@ export function allUnChecked(packItem: PackItem) {
   return !!packItem.members?.every((t) => !t.checked);
 }
 
-export function groupByCategories(packItems: PackItem[]) {
-  return packItems.reduce(
-    (acc, packItem) => {
-      const category = packItem.category ?? '';
-      if (!acc[category]) {
-        acc[category] = [];
-      }
-      acc[category].push(packItem);
-      return acc;
-    },
-    {} as Record<string, PackItem[]>
-  );
+function getCategoryRank(catId: string, categories: NamedEntity[]) {
+  const category = categories.find((c) => c.id === (catId ?? ''));
+  return category?.rank ?? -1;
+}
+
+export function groupByCategories(packItems: PackItem[], categories: NamedEntity[]) {
+  const result: GroupedPackItem[] = [];
+  for (const packItem of packItems) {
+    const find = result.find((r) => r.categoryId === packItem.category);
+    if (!find) {
+      result.push({
+        categoryId: packItem.category ?? '',
+        packItems: [packItem],
+      });
+    } else {
+      find.packItems.push(packItem);
+    }
+  }
+  return result.sort((a, b) => getCategoryRank(a.categoryId, categories) - getCategoryRank(b.categoryId, categories));
 }
 
 export function sortAll(members: NamedEntity[], categories: NamedEntity[], packItems: PackItem[]) {

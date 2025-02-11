@@ -19,14 +19,14 @@ import {
   getGroupedAsText,
   updateFirebaseFromTextPackItems,
 } from '../../services/textModeUtils.ts';
-import { PackItem } from '../../types/PackItem.ts';
+import { GroupedPackItem } from '../../types/GroupedPackItem.ts';
 
 export function PackItemsTextMode({
   grouped,
   onDone,
   hidden,
 }: {
-  grouped: Record<string, PackItem[]>;
+  grouped: GroupedPackItem[];
   onDone: () => void;
   hidden?: boolean;
 }) {
