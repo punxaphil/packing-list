@@ -1,7 +1,10 @@
-import { EditIcon, Menu, MenuButton, MenuList } from '@chakra-ui/icons';
+import { Menu, MenuButton, MenuList } from '@chakra-ui/icons';
 import { Flex, Link, MenuItemOption, MenuOptionGroup, Spacer, Stack } from '@chakra-ui/react';
-import { IoFilterOutline } from '@react-icons/all-files/io5/IoFilterOutline';
+import { AiOutlineEdit } from '@react-icons/all-files/ai/AiOutlineEdit';
+import { AiOutlineFilter } from '@react-icons/all-files/ai/AiOutlineFilter';
+import { MdLabelOutline } from '@react-icons/all-files/md/MdLabelOutline';
 import { useState } from 'react';
+import { firebase } from '../../services/api.ts';
 import { useFirebase } from '../../services/contexts.ts';
 import { PackItem } from '../../types/PackItem.ts';
 
@@ -24,12 +27,23 @@ export function PackingListControls({
     setFilterCategories(filter);
   }
 
+  async function addCategory() {
+    const batch = firebase.initBatch();
+    const id = firebase.addCategoryBatch('My Category', batch);
+    firebase.addPackItemBatch(batch, 'My Item', [], id);
+    firebase.updateCategoryBatch(id, { rank: 0 }, batch);
+    for (const category of categories) {
+      firebase.updateCategoryBatch(category.id, { rank: (category.rank ?? 0) + 1 }, batch);
+    }
+    await batch.commit();
+  }
+
   return (
     <Stack direction="row" justifyContent="space-between" alignItems="center">
       <Menu closeOnSelect={false}>
-        <MenuButton as={Link} m="3" color="teal.500" hidden={hidden}>
+        <MenuButton as={Link} m="3" color="teal" hidden={hidden}>
           <Flex alignItems="center" gap="1">
-            <IoFilterOutline /> Filter categories {filterCategories.length < categories.length && '*'}
+            <AiOutlineFilter /> Filter categories {filterCategories.length < categories.length && '*'}
           </Flex>
         </MenuButton>
         <MenuList>
@@ -43,8 +57,17 @@ export function PackingListControls({
         </MenuList>
       </Menu>
       <Spacer />
-      <Link color="teal.500" onClick={onClick} variant="outline" hidden={hidden} m="3">
-        <EditIcon /> Text mode
+
+      <Link color="teal" onClick={addCategory} variant="outline">
+        <Flex alignItems="center" gap="1">
+          <MdLabelOutline /> Add category
+        </Flex>
+      </Link>
+      <Spacer />
+      <Link color="teal" onClick={onClick} variant="outline" hidden={hidden} m="3">
+        <Flex alignItems="center" gap="1">
+          <AiOutlineEdit /> Text mode
+        </Flex>
       </Link>
     </Stack>
   );

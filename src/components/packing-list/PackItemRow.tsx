@@ -1,10 +1,13 @@
-import { DeleteIcon, EditIcon, Menu, MenuButton, MenuItem, MenuList } from '@chakra-ui/icons';
 import { Box, Flex, IconButton, Spacer, Text } from '@chakra-ui/react';
+import { AiOutlineDelete } from '@react-icons/all-files/ai/AiOutlineDelete';
+import { AiOutlineEdit } from '@react-icons/all-files/ai/AiOutlineEdit';
+import { AiOutlineUsergroupAdd } from '@react-icons/all-files/ai/AiOutlineUsergroupAdd';
 import { MdLabelOutline } from '@react-icons/all-files/md/MdLabelOutline';
 import { firebase } from '../../services/api.ts';
 import { useFirebase } from '../../services/contexts.ts';
 import { getName } from '../../services/utils.ts';
 import { PackItem } from '../../types/PackItem.ts';
+import { IconSelect } from '../shared/IconSelect.tsx';
 import { InlineEdit } from '../shared/InlineEdit.tsx';
 import { MultiCheckbox } from '../shared/MultiCheckbox.tsx';
 import { PLCheckbox } from '../shared/PLCheckbox.tsx';
@@ -57,6 +60,19 @@ export function PackItemRow({
     await onUpdate(packItem);
   }
 
+  const selectableCategories = [{ id: '', name: 'Remove from category' }, ...categories].filter((c) => {
+    return c.id !== packItem.category;
+  });
+  const selectableMembers = members.filter((m) => {
+    return !packItem.members || !packItem.members.find((t) => t.id === m.id);
+  });
+
+  async function addMember(id: string) {
+    packItem.members = packItem.members || [];
+    packItem.members.push({ id, checked: false });
+    await onUpdate(packItem);
+  }
+
   return (
     <Box ml={indent ? '3' : '0'}>
       <Flex gap="3" align="center">
@@ -74,30 +90,24 @@ export function PackItemRow({
         </Flex>
         <Spacer />
         <Flex alignItems="center">
-          <Menu>
-            <MenuButton as={IconButton} aria-label="Move item to category" icon={<MdLabelOutline />} variant="ghost" />
-            <MenuList>
-              {[{ id: '', name: 'Remove from category' }, ...categories]
-                .filter((c) => {
-                  return c.id !== packItem.category;
-                })
-                .map((category) => (
-                  <MenuItem
-                    key={category.id}
-                    onClick={() => setCategory(category.id)}
-                    icon={category.id === '' ? <DeleteIcon /> : undefined}
-                  >
-                    {category.name}
-                  </MenuItem>
-                ))}
-            </MenuList>
-          </Menu>
-          <IconButton onClick={deleteItem} variant="ghost" icon={<DeleteIcon />} aria-label="Delete item" />
+          <IconSelect
+            label="Move item to category"
+            icon={<MdLabelOutline />}
+            items={selectableCategories}
+            onClick={setCategory}
+          />
+          <IconSelect
+            label="Add members to pack item"
+            icon={<AiOutlineUsergroupAdd />}
+            items={selectableMembers}
+            onClick={addMember}
+          />
+          <IconButton onClick={deleteItem} variant="ghost" icon={<AiOutlineDelete />} aria-label="Delete item" />
           <IconButton
             borderRadius="full"
             onClick={() => onEdit(packItem)}
             variant="ghost"
-            icon={<EditIcon />}
+            icon={<AiOutlineEdit />}
             aria-label="Edit item"
           />
         </Flex>

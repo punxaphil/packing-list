@@ -1,4 +1,5 @@
-import { Flex } from '@chakra-ui/react';
+import { Flex, IconButton, Spacer } from '@chakra-ui/react';
+import { AiOutlineUserDelete } from '@react-icons/all-files/ai/AiOutlineUserDelete';
 import { firebase } from '../../services/api.ts';
 import { allChecked } from '../../services/utils.ts';
 import { MemberPackItem } from '../../types/MemberPackItem.ts';
@@ -30,10 +31,22 @@ export function MemberPackItemRow({
     await firebase.updateMembers(member);
   }
 
+  async function onDelete() {
+    parent.members = parent.members?.filter((t) => t.id !== id);
+    await firebase.updatePackItem(parent);
+  }
+
   return (
     <Flex pl="5" key={id} gap="2" align="center">
       <PLCheckbox checked={checked} onClick={toggleMember} />
       <InlineEdit value={member.name} onUpdate={onSave} strike={checked} />
+      <Spacer />
+      <IconButton
+        aria-label={`Remove ${member.name} from pack item`}
+        icon={<AiOutlineUserDelete />}
+        onClick={onDelete}
+        variant="ghost"
+      />
     </Flex>
   );
 }
