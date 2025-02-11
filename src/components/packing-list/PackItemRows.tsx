@@ -5,11 +5,9 @@ import { PackItemRow } from './PackItemRow.tsx';
 
 export function PackItemRows({
   grouped,
-  setSelectedItem,
   hidden,
 }: {
   grouped: Record<string, PackItem[]>;
-  setSelectedItem: (value: PackItem) => void;
   hidden?: boolean;
 }) {
   return (
@@ -19,7 +17,7 @@ export function PackItemRows({
           <Box key={groupCategory}>
             <Category categoryId={groupCategory} />
             {packItems.map((packItem) => (
-              <PackItemRow packItem={packItem} key={packItem.id} onEdit={setSelectedItem} indent={!!groupCategory} />
+              <PackItemRow packItem={packItem} key={packItem.id} indent={!!groupCategory} />
             ))}
           </Box>
         ))}

@@ -1,6 +1,5 @@
 import { Box, Flex, IconButton, Spacer, Text } from '@chakra-ui/react';
 import { AiOutlineDelete } from '@react-icons/all-files/ai/AiOutlineDelete';
-import { AiOutlineEdit } from '@react-icons/all-files/ai/AiOutlineEdit';
 import { AiOutlineUsergroupAdd } from '@react-icons/all-files/ai/AiOutlineUsergroupAdd';
 import { MdLabelOutline } from '@react-icons/all-files/md/MdLabelOutline';
 import { firebase } from '../../services/api.ts';
@@ -15,11 +14,9 @@ import { MemberPackItemRow } from './MemberPackItemRow.tsx';
 
 export function PackItemRow({
   packItem,
-  onEdit,
   indent,
 }: {
   packItem: PackItem;
-  onEdit: (packItem: PackItem) => void;
   indent?: boolean;
 }) {
   const members = useFirebase().members;
@@ -103,13 +100,6 @@ export function PackItemRow({
             onClick={addMember}
           />
           <IconButton onClick={deleteItem} variant="ghost" icon={<AiOutlineDelete />} aria-label="Delete item" />
-          <IconButton
-            borderRadius="full"
-            onClick={() => onEdit(packItem)}
-            variant="ghost"
-            icon={<AiOutlineEdit />}
-            aria-label="Edit item"
-          />
         </Flex>
       </Flex>
       {!!memberRows &&
