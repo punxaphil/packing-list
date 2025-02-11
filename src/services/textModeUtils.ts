@@ -117,11 +117,15 @@ function addMemberIfNew(
   return id;
 }
 
+function getMaxRank(categories: NamedEntity[]) {
+  return Math.max(...categories.map((cat) => cat.rank ?? 0), 0);
+}
+
 function addCategoryIfNew(categories: NamedEntity[], t: TextPackItem, writeBatch: WriteBatch) {
   let category = categories.find((cat) => cat.name === t.category);
   if (!category && t.category) {
     const id = firebase.addCategoryBatch(t.category, writeBatch);
-    category = { id, name: t.category };
+    category = { id, name: t.category, rank: getMaxRank(categories) + 1 };
     categories.push(category);
   }
   return category;
