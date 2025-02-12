@@ -14,9 +14,11 @@ import { MemberPackItemRow } from './MemberPackItemRow.tsx';
 export function PackItemRow({
   packItem,
   indent,
+  filteredMembers,
 }: {
   packItem: PackItem;
   indent?: boolean;
+  filteredMembers: string[];
 }) {
   const members = useFirebase().members;
   const categories = useFirebase().categories;
@@ -35,17 +37,20 @@ export function PackItemRow({
   }
 
   const multipleMembers = !!(packItem.members && packItem.members.length > 1);
-  const memberRows = packItem.members?.map((m) => {
-    const member = members.find((t) => t.id === m.id);
-    if (!member) {
-      throw new Error(`Member with id ${m.id} not found`);
-    }
-    return {
-      memberItem: m,
-      member: member,
-    };
-  });
-
+  const filtered = !filteredMembers.length
+    ? packItem.members
+    : packItem.members?.filter(({ id }) => filteredMembers.find((toShow: string) => toShow === id));
+  const memberRows =
+    filtered?.map((m) => {
+      const member = members.find((t) => t.id === m.id);
+      if (!member) {
+        throw new Error(`Member with id ${m.id} not found`);
+      }
+      return {
+        memberItem: m,
+        member: member,
+      };
+    }) ?? [];
   async function onChangeText(name: string) {
     packItem.name = name;
     await onUpdate(packItem);
@@ -101,8 +106,7 @@ export function PackItemRow({
           <IconButton onClick={deleteItem} variant="ghost" icon={<AiOutlineDelete />} aria-label="Delete item" />
         </Flex>
       </Flex>
-      {!!memberRows &&
-        memberRows?.length > 1 &&
+      {multipleMembers &&
         memberRows.map(({ memberItem, member }) => (
           <MemberPackItemRow
             memberItem={memberItem}

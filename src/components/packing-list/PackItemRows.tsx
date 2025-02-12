@@ -6,9 +6,11 @@ import { PackItemRow } from './PackItemRow.tsx';
 export function PackItemRows({
   grouped,
   hidden,
+  filteredMembers,
 }: {
   grouped: GroupedPackItem[];
   hidden?: boolean;
+  filteredMembers: string[];
 }) {
   return (
     <>
@@ -18,7 +20,12 @@ export function PackItemRows({
             <Box key={groupCategory}>
               <Category categoryId={groupCategory} />
               {packItems.map((packItem) => (
-                <PackItemRow packItem={packItem} key={packItem.id} indent={!!groupCategory} />
+                <PackItemRow
+                  packItem={packItem}
+                  key={packItem.id}
+                  indent={!!groupCategory}
+                  filteredMembers={filteredMembers}
+                />
               ))}
             </Box>
           );

@@ -1,30 +1,24 @@
-import { Menu, MenuButton, MenuList } from '@chakra-ui/icons';
-import { Flex, Link, MenuItemOption, MenuOptionGroup, Spacer, Stack } from '@chakra-ui/react';
-import { useState } from 'react';
-import { AiOutlineEdit, AiOutlineFilter } from 'react-icons/ai';
+import { Flex, Link, Stack } from '@chakra-ui/react';
+import { AiOutlineEdit } from 'react-icons/ai';
 import { MdLabelOutline } from 'react-icons/md';
 import { firebase } from '../../services/api.ts';
 import { useFirebase } from '../../services/contexts.ts';
 import { PackItem } from '../../types/PackItem.ts';
+import { Filter } from '../shared/Filter.tsx';
 
 export function PackingListControls({
   hidden,
-  onClick,
-  onFilterChanged,
+  onTextMode,
+  onFilterPackItems,
+  onMemberFilter,
 }: {
   hidden: boolean;
-  onClick: () => void;
-  onFilterChanged: (prevState: PackItem[]) => void;
+  onTextMode: () => void;
+  onFilterPackItems: (packItems: PackItem[]) => void;
+  onMemberFilter: (memberIds: string[]) => void;
 }) {
   const packItems = useFirebase().packItems;
   const categories = useFirebase().categories;
-  const [filterCategories, setFilterCategories] = useState<string | string[]>(categories.map((c) => c.id));
-
-  function filterOnCategories(filter: string | string[]) {
-    const filterArray = Array.isArray(filter) ? filter : [filter];
-    onFilterChanged(packItems.filter((packItem) => !packItem.category || filterArray.includes(packItem.category)));
-    setFilterCategories(filter);
-  }
 
   async function addCategory() {
     const batch = firebase.initBatch();
@@ -37,33 +31,33 @@ export function PackingListControls({
     await batch.commit();
   }
 
+  function onFilter(showTheseCategories: string[], showTheseMembers: string[]) {
+    let filtered = !showTheseCategories.length
+      ? packItems
+      : packItems.filter((item) => showTheseCategories.includes(item.category ?? ''));
+    filtered = !showTheseMembers.length
+      ? filtered
+      : filtered.filter((item) => {
+          if (showTheseMembers.includes('') && item.members?.length === 0) {
+            return true;
+          }
+          if (item.members?.length) {
+            return item.members.some((m) => showTheseMembers.includes(m.id));
+          }
+        });
+    onFilterPackItems(filtered);
+    onMemberFilter(showTheseMembers);
+  }
+
   return (
     <Stack direction="row" justifyContent="space-between" alignItems="center" hidden={hidden}>
-      <Menu closeOnSelect={false}>
-        <MenuButton as={Link} m="3" color="teal">
-          <Flex alignItems="center" gap="1">
-            <AiOutlineFilter /> Filter categories {filterCategories.length < categories.length && '*'}
-          </Flex>
-        </MenuButton>
-        <MenuList>
-          <MenuOptionGroup type="checkbox" value={filterCategories} onChange={filterOnCategories}>
-            {categories.map((category) => (
-              <MenuItemOption key={category.id} value={category.id}>
-                {category.name}
-              </MenuItemOption>
-            ))}
-          </MenuOptionGroup>
-        </MenuList>
-      </Menu>
-      <Spacer />
-
+      <Filter onFilter={onFilter} />
       <Link color="teal" onClick={addCategory} variant="outline">
         <Flex alignItems="center" gap="1">
           <MdLabelOutline /> Add category
         </Flex>
       </Link>
-      <Spacer />
-      <Link color="teal" onClick={onClick} variant="outline" m="3">
+      <Link color="teal" onClick={onTextMode} variant="outline" m="3">
         <Flex alignItems="center" gap="1">
           <AiOutlineEdit /> Text mode
         </Flex>
