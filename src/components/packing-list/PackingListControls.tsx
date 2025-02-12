@@ -52,12 +52,12 @@ export function PackingListControls({
   return (
     <Stack direction="row" justifyContent="space-between" alignItems="center" hidden={hidden}>
       <Filter onFilter={onFilter} />
-      <Link color="teal" onClick={addCategory} variant="outline">
+      <Link onClick={addCategory} variant="outline">
         <Flex alignItems="center" gap="1">
           <MdLabelOutline /> Add category
         </Flex>
       </Link>
-      <Link color="teal" onClick={onTextMode} variant="outline" m="3">
+      <Link onClick={onTextMode} variant="outline" m="3">
         <Flex alignItems="center" gap="1">
           <AiOutlineEdit /> Text mode
         </Flex>

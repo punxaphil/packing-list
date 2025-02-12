@@ -19,7 +19,21 @@ import { Profile } from './components/pages/Profile.tsx';
 import { Welcome } from './components/pages/Welcome.tsx';
 import { useError } from './services/contexts.ts';
 
-const customTheme = extendTheme(withDefaultColorScheme({ colorScheme: 'teal' }));
+export const THEME_COLOR = 'teal';
+const customTheme = extendTheme(withDefaultColorScheme({ colorScheme: THEME_COLOR }), {
+  components: {
+    Link: {
+      baseStyle: {
+        color: THEME_COLOR,
+      },
+    },
+    Spinner: {
+      baseStyle: {
+        color: THEME_COLOR,
+      },
+    },
+  },
+});
 const TITLE = "Pack'n'Go!";
 
 export function App() {

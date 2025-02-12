@@ -44,7 +44,7 @@ export function Category({
           Uncategorized
         </Text>
       )}
-      <Link color="teal" onClick={addItem} variant="outline" ml="1">
+      <Link onClick={addItem} variant="outline" ml="1">
         <TbCategoryPlus />
       </Link>
     </Flex>

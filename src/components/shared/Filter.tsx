@@ -30,7 +30,7 @@ export function Filter({
 
   return (
     <Menu closeOnSelect={false}>
-      <MenuButton as={Link} m="3" color="teal">
+      <MenuButton as={Link} m="3">
         <Flex alignItems="center" gap="1">
           <AiOutlineFilter /> Filter {(!!filteredCategories.length || !!filteredMembers.length) && '*'}
         </Flex>

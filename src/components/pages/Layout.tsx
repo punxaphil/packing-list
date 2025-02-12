@@ -51,7 +51,7 @@ export function Layout({ userId, title }: { userId: string; title?: string }) {
       ) : (
         <Flex>
           <Spacer />
-          <Spinner thickness="4px" speed="0.65s" emptyColor="gray.200" color="teal" size="xl" />
+          <Spinner thickness="4px" speed="0.65s" emptyColor="gray.200" size="xl" />
           <Spacer />
         </Flex>
       )}
