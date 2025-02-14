@@ -1,8 +1,8 @@
 import { Box, Flex, IconButton, Spacer, Text } from '@chakra-ui/react';
 import { AiOutlineDelete, AiOutlineUsergroupAdd } from 'react-icons/ai';
 import { TbStatusChange } from 'react-icons/tb';
-import { firebase } from '../../services/api.ts';
 import { useFirebase } from '../../services/contexts.ts';
+import { firebase } from '../../services/firebase.ts';
 import { getName } from '../../services/utils.ts';
 import { PackItem } from '../../types/PackItem.ts';
 import { IconSelect } from '../shared/IconSelect.tsx';

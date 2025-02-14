@@ -3,11 +3,11 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { MemberPackItem } from '../types/MemberPackItem.ts';
 import { NamedEntity } from '../types/NamedEntity';
 import { PackItem, TextPackItem } from '../types/PackItem';
-import { firebase } from './api';
+import { firebase } from './firebase.ts';
 import { expectFirebaseCallsToThese } from './testUtils.ts';
 import { createTextPackItemsFromText, updateFirebaseFromTextPackItems } from './textModeUtils.ts';
 
-vi.mock('./api');
+vi.mock('./firebase.ts');
 
 vi.mocked(firebase.initBatch).mockImplementation(() => {
   return { commit: () => {} } as WriteBatch;

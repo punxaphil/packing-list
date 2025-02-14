@@ -1,5 +1,6 @@
 import { expect } from 'vitest';
-import { firebase } from './api.ts';
+
+import { firebase } from './firebase.ts';
 
 export function expectFirebaseCallsToThese(...newParam: FirebaseMethod[]) {
   for (const mockFn of Object.values(firebase)) {

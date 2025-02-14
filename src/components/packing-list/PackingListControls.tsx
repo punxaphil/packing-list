@@ -1,8 +1,8 @@
 import { Flex, Link, Stack } from '@chakra-ui/react';
 import { AiOutlineEdit } from 'react-icons/ai';
 import { MdLabelOutline } from 'react-icons/md';
-import { firebase } from '../../services/api.ts';
 import { useFirebase } from '../../services/contexts.ts';
+import { firebase } from '../../services/firebase.ts';
 import { PackItem } from '../../types/PackItem.ts';
 import { Filter } from '../shared/Filter.tsx';
 

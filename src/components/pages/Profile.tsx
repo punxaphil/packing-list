@@ -1,8 +1,8 @@
 import { DeleteIcon } from '@chakra-ui/icons';
 import { Button, ButtonGroup, Card, CardBody, Flex, IconButton, Spacer, useDisclosure } from '@chakra-ui/react';
 import { getAuth, signOut } from 'firebase/auth';
-import { firebase } from '../../services/api.ts';
 import { useError, useFirebase } from '../../services/contexts';
+import { firebase } from '../../services/firebase.ts';
 import { useCurrentUser } from '../auth/Auth.tsx';
 import { ProfileAvatar } from '../auth/ProfileAvatar.tsx';
 import { UploadModal } from '../shared/UploadModal.tsx';

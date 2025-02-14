@@ -1,7 +1,7 @@
 import { Flex, Image, Link, Text } from '@chakra-ui/react';
 import { TbCategoryPlus } from 'react-icons/tb';
-import { firebase } from '../../services/api.ts';
 import { useFirebase } from '../../services/contexts.ts';
+import { firebase } from '../../services/firebase.ts';
 import { InlineEdit } from '../shared/InlineEdit.tsx';
 
 export function Category({

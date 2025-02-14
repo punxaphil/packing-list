@@ -1,14 +1,12 @@
-import { writeBatch } from 'firebase/firestore';
-import { firebase } from '../../services/api.ts';
 import { useFirebase } from '../../services/contexts';
-import { firestore } from '../../services/firebase.ts';
+import { firebase } from '../../services/firebase.ts';
 import { NamedEntities } from '../shared/NamedEntities.tsx';
 
 export function Categories() {
   const packItems = useFirebase().packItems;
 
   async function onDelete(id: string) {
-    const batch = writeBatch(firestore);
+    const batch = firebase.initBatch();
     for (const packItem of packItems) {
       if (packItem.category === id) {
         packItem.category = '';

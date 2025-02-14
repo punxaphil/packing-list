@@ -3,7 +3,8 @@ import { GroupedPackItem } from '../types/GroupedPackItem.ts';
 import { MemberPackItem } from '../types/MemberPackItem.ts';
 import { NamedEntity } from '../types/NamedEntity.ts';
 import { PackItem, TextPackItem } from '../types/PackItem.ts';
-import { firebase } from './api.ts';
+
+import { firebase } from './firebase.ts';
 
 export function getGroupedAsText(grouped: GroupedPackItem[], categories: NamedEntity[], members: NamedEntity[]) {
   let result = '';

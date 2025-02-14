@@ -2,8 +2,8 @@ import { Flex, Heading, Spacer, Spinner, Stack } from '@chakra-ui/react';
 import { getAuth } from 'firebase/auth';
 import { useEffect, useState } from 'react';
 import { Outlet } from 'react-router';
-import { getUserCollectionsAndSubscribe } from '../../services/api.ts';
 import { FirebaseContext } from '../../services/contexts.ts';
+import { firebase } from '../../services/firebase.ts';
 import { sortAll } from '../../services/utils.ts';
 import { Image } from '../../types/Image.ts';
 import { NamedEntity } from '../../types/NamedEntity.ts';
@@ -23,7 +23,7 @@ export function Layout({ userId, title }: { userId: string; title?: string }) {
       if (!userId) {
         throw new Error('No user logged in');
       }
-      await getUserCollectionsAndSubscribe(setMembers, setCategories, setPackItems, setImages);
+      await firebase.getUserCollectionsAndSubscribe(setMembers, setCategories, setPackItems, setImages);
     })().catch(console.error);
   }, []);
 

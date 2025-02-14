@@ -1,6 +1,6 @@
 import { Flex, IconButton, Spacer } from '@chakra-ui/react';
 import { AiOutlineUserDelete } from 'react-icons/ai';
-import { firebase } from '../../services/api.ts';
+import { firebase } from '../../services/firebase.ts';
 import { allChecked } from '../../services/utils.ts';
 import { MemberPackItem } from '../../types/MemberPackItem.ts';
 import { NamedEntity } from '../../types/NamedEntity.ts';
