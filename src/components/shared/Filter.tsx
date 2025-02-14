@@ -11,6 +11,9 @@ export function Filter({
 }) {
   let categories = useFirebase().categories;
   let members = useFirebase().members;
+  const packItems = useFirebase().packItems;
+  categories = categories.filter((c) => packItems.some((p) => p.category === c.id));
+  members = members.filter((m) => packItems.some((p) => p.members?.some((t) => t.id === m.id)));
   categories = [{ id: '', name: 'Uncategorized' }, ...categories];
   members = [{ id: '', name: 'Without members' }, ...members];
   const [filteredCategories, setFilteredCategories] = useState<string[]>([]);
