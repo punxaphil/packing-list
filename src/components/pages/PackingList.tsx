@@ -1,7 +1,9 @@
 import { Box, Card, CardBody, Flex, Text } from '@chakra-ui/react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useFirebase } from '../../services/contexts.ts';
 import { groupByCategories } from '../../services/utils.ts';
+import { GroupedPackItem } from '../../types/GroupedPackItem.ts';
+import { PackItem } from '../../types/PackItem.ts';
 import { PackItemRows } from '../packing-list/PackItemRows.tsx';
 import { PackItemsTextMode } from '../packing-list/PackItemsTextMode.tsx';
 import { PackingListControls } from '../packing-list/PackingListControls.tsx';
@@ -9,11 +11,16 @@ import { PackingListControls } from '../packing-list/PackingListControls.tsx';
 export function PackingList() {
   const packItems = useFirebase().packItems;
   const categories = useFirebase().categories;
-  const [filteredPackItems, setFilteredPackItems] = useState(packItems);
+  const [filteredPackItems, setFilteredPackItems] = useState<PackItem[]>([]);
   const [filteredMembers, setFilteredMembers] = useState<string[]>([]);
   const [textMode, setTextMode] = useState(false);
+  const [grouped, setGrouped] = useState<GroupedPackItem[]>([]);
 
-  const grouped = groupByCategories(filteredPackItems, categories);
+  useEffect(() => {
+    const grouped = groupByCategories(filteredPackItems, categories);
+    setFilteredPackItems(packItems);
+    setGrouped(grouped);
+  }, [categories, filteredPackItems, packItems]);
 
   return (
     <Box maxWidth="600px" mx="auto">

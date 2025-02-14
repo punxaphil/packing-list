@@ -1,5 +1,5 @@
 import { Box, Flex, IconButton, Spacer, Text } from '@chakra-ui/react';
-import { AiOutlineDelete, AiOutlineUsergroupAdd } from 'react-icons/ai';
+import { AiOutlineDelete, AiOutlineUserDelete, AiOutlineUsergroupAdd } from 'react-icons/ai';
 import { TbStatusChange } from 'react-icons/tb';
 import { useFirebase } from '../../services/contexts.ts';
 import { firebase } from '../../services/firebase.ts';
@@ -74,6 +74,11 @@ export function PackItemRow({
     await onUpdate(packItem);
   }
 
+  async function onRemoveMembers() {
+    packItem.members = [];
+    await onUpdate(packItem);
+  }
+
   return (
     <Box ml={indent ? '3' : '0'}>
       <Flex gap="3" align="center">
@@ -102,6 +107,13 @@ export function PackItemRow({
             icon={<AiOutlineUsergroupAdd />}
             items={selectableMembers}
             onClick={addMember}
+          />
+          <IconButton
+            aria-label={'Remove member from pack item'}
+            icon={<AiOutlineUserDelete />}
+            onClick={onRemoveMembers}
+            variant="ghost"
+            hidden={packItem.members?.length !== 1}
           />
           <IconButton onClick={deleteItem} variant="ghost" icon={<AiOutlineDelete />} aria-label="Delete item" />
         </Flex>
