@@ -1,9 +1,11 @@
-import { Button, Card, CardBody, Flex, Input, Spacer } from '@chakra-ui/react';
+import { Button, Card, CardBody, Flex, Input, Spacer, useToast } from '@chakra-ui/react';
 import { ChangeEvent, KeyboardEvent, useState } from 'react';
 import { handleEnter } from '../../services/utils.ts';
 import { NamedEntity } from '../../types/NamedEntity.ts';
 import { useError } from '../providers/ErrorContext.ts';
+import { useFirebase } from '../providers/FirebaseContext.ts';
 import { DragAndDrop } from './DragAndDrop.tsx';
+import { handleArrayError } from './HandleArrayError.tsx';
 import { NamedEntityRow } from './NamedEntityRow.tsx';
 
 export function NamedEntities({
@@ -16,11 +18,13 @@ export function NamedEntities({
   namedEntities: NamedEntity[];
   onAdd: (name: string) => Promise<string>;
   onUpdate: (toUpdate: NamedEntity[] | NamedEntity) => Promise<void>;
-  onDelete: (id: string) => Promise<void>;
+  onDelete: (id: string, packingLists: NamedEntity[]) => Promise<void>;
   type: string;
 }) {
   const [newName, setNewName] = useState<string>('');
   const { setError } = useError();
+  const toast = useToast();
+  const packingLists = useFirebase().packingLists;
 
   function handleAdd() {
     (async () => {
@@ -43,6 +47,14 @@ export function NamedEntities({
     await onUpdate(entities);
   }
 
+  async function handleDelete(id: string) {
+    try {
+      await onDelete(id, packingLists);
+    } catch (e) {
+      handleArrayError(e as Error, toast);
+    }
+  }
+
   return (
     <Flex m="5">
       <Spacer />
@@ -55,7 +67,7 @@ export function NamedEntities({
               <NamedEntityRow
                 namedEntity={entity}
                 onUpdate={onUpdate}
-                onDelete={onDelete}
+                onDelete={handleDelete}
                 type={type}
                 isDragging={isDragging}
               />

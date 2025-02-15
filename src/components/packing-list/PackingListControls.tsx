@@ -2,6 +2,7 @@ import { Flex, Link, Stack } from '@chakra-ui/react';
 import { AiOutlineEdit } from 'react-icons/ai';
 import { MdLabelOutline } from 'react-icons/md';
 import { firebase } from '../../services/firebase.ts';
+import { findUniqueName } from '../../services/utils.ts';
 import { PackItem } from '../../types/PackItem.ts';
 import { useFirebase } from '../providers/FirebaseContext.ts';
 import { usePackingListId } from '../providers/PackingListContext.ts';
@@ -24,8 +25,10 @@ export function PackingListControls({
 
   async function addCategory() {
     const batch = firebase.initBatch();
-    const id = firebase.addCategoryBatch('My Category', batch);
-    firebase.addPackItemBatch(batch, 'My Item', [], id, packingListId);
+    let name = findUniqueName('My Category', categories);
+    const id = firebase.addCategoryBatch(name, batch);
+    name = findUniqueName('My Item', packItems);
+    firebase.addPackItemBatch(batch, name, [], id, packingListId);
     firebase.updateCategoryBatch(id, { rank: 0 }, batch);
     for (const category of categories) {
       firebase.updateCategoryBatch(category.id, { rank: (category.rank ?? 0) + 1 }, batch);

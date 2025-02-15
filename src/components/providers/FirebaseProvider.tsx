@@ -36,7 +36,7 @@ export function FirebaseProvider({ children }: { children: ReactNode }) {
     })().catch(console.error);
   }, [packingListId]);
 
-  const isInitialized = members && categories && packItems && images && packingLists;
+  const isInitialized = members && categories && packItems && images && packingLists && packingListId;
   if (isInitialized) {
     sortAll(members, categories, packItems, packingLists);
   }

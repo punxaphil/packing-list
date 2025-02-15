@@ -19,6 +19,7 @@ import {
   where,
   writeBatch,
 } from 'firebase/firestore';
+import { ArrayError } from '../types/ArrayError.ts';
 import { Image } from '../types/Image.ts';
 import { MemberPackItem } from '../types/MemberPackItem.ts';
 import { NamedEntity } from '../types/NamedEntity.ts';
@@ -89,7 +90,7 @@ export const firebase = {
     category: string,
     packingList: string
   ): Promise<PackItem> => {
-    const docRef = await add(PACK_ITEMS_KEY, { name, members, category });
+    const docRef = await add(PACK_ITEMS_KEY, { name, members, category, packingList });
     return { id: docRef.id, checked: false, members, name, category, packingList };
   },
   updatePackItem: async (packItem: PackItem) => {
@@ -162,11 +163,40 @@ export const firebase = {
   updateCategoryBatch<K extends DocumentData>(id: string, data: WithFieldValue<K>, batch: WriteBatch) {
     batch.update(doc(firestore, USERS_KEY, getUserId(), CATEGORIES_KEY, id), data);
   },
-  deleteCategoryBatch(id: string, batch: WriteBatch) {
-    batch.delete(doc(firestore, USERS_KEY, getUserId(), CATEGORIES_KEY, id));
+  async deleteCategory(id: string, packingLists: NamedEntity[]) {
+    const packItemsQuery = query(
+      collection(firestore, USERS_KEY, getUserId(), PACK_ITEMS_KEY),
+      where('category', '==', id)
+    );
+    const packItems: PackItem[] = fromQueryResult(await getDocs(packItemsQuery));
+    if (packItems.length) {
+      throw new ArrayError([
+        "Category was not deleted. It's in use by the following pack items:",
+        ...packItems.map((t) => {
+          const packingListName = packingLists.find((pl) => pl.id === t.packingList)?.name;
+          return t.name + (packingListName ? ` (in ${packingListName})` : '');
+        }),
+      ]);
+    }
+    await del(CATEGORIES_KEY, id);
   },
-  deleteMemberBatch(id: string, batch: WriteBatch) {
-    batch.delete(doc(firestore, USERS_KEY, getUserId(), MEMBERS_KEY, id));
+  async deleteMember(id: string, packingLists: NamedEntity[]) {
+    const packItemsQuery = query(
+      collection(firestore, USERS_KEY, getUserId(), PACK_ITEMS_KEY),
+      where('members', '!=', [])
+    );
+    let packItems: PackItem[] = fromQueryResult(await getDocs(packItemsQuery));
+    packItems = packItems.filter((t) => t.members?.find((m) => m.id === id));
+    if (packItems.length) {
+      throw new ArrayError([
+        "Member was not deleted. It's in use by the following pack items:",
+        ...packItems.map((t) => {
+          const packingListName = packingLists.find((pl) => pl.id === t.packingList)?.name;
+          return t.name + (packingListName ? ` (in ${packingListName})` : '');
+        }),
+      ]);
+    }
+    await del(MEMBERS_KEY, id);
   },
   async getFirstPackingList(): Promise<NamedEntity | undefined> {
     const userId = getUserId();
@@ -187,6 +217,9 @@ export const firebase = {
   },
   updatePackingList(packingList: NamedEntity) {
     return update(PACKING_LISTS_KEY, packingList.id, packingList);
+  },
+  deletePackingList(id: string) {
+    return del(PACKING_LISTS_KEY, id);
   },
 };
 
