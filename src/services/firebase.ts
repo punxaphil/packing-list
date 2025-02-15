@@ -160,9 +160,6 @@ export const firebase = {
     });
     return { id, checked: false, members, name, category };
   },
-  updateCategoryBatch<K extends DocumentData>(id: string, data: WithFieldValue<K>, batch: WriteBatch) {
-    batch.update(doc(firestore, USERS_KEY, getUserId(), CATEGORIES_KEY, id), data);
-  },
   async deleteCategory(id: string, packingLists: NamedEntity[]) {
     const packItemsQuery = query(
       collection(firestore, USERS_KEY, getUserId(), PACK_ITEMS_KEY),

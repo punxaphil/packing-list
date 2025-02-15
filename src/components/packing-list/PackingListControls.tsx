@@ -1,11 +1,7 @@
-import { Flex, Link, Stack } from '@chakra-ui/react';
+import { Flex, HStack, Link, Spacer } from '@chakra-ui/react';
 import { AiOutlineEdit } from 'react-icons/ai';
-import { MdLabelOutline } from 'react-icons/md';
-import { firebase } from '../../services/firebase.ts';
-import { findUniqueName } from '../../services/utils.ts';
 import { PackItem } from '../../types/PackItem.ts';
 import { useFirebase } from '../providers/FirebaseContext.ts';
-import { usePackingListId } from '../providers/PackingListContext.ts';
 import { Filter } from '../shared/Filter.tsx';
 
 export function PackingListControls({
@@ -20,21 +16,6 @@ export function PackingListControls({
   onMemberFilter: (memberIds: string[]) => void;
 }) {
   const packItems = useFirebase().packItems;
-  const categories = useFirebase().categories;
-  const { packingListId } = usePackingListId();
-
-  async function addCategory() {
-    const batch = firebase.initBatch();
-    let name = findUniqueName('My Category', categories);
-    const id = firebase.addCategoryBatch(name, batch);
-    name = findUniqueName('My Item', packItems);
-    firebase.addPackItemBatch(batch, name, [], id, packingListId);
-    firebase.updateCategoryBatch(id, { rank: 0 }, batch);
-    for (const category of categories) {
-      firebase.updateCategoryBatch(category.id, { rank: (category.rank ?? 0) + 1 }, batch);
-    }
-    await batch.commit();
-  }
 
   function onFilter(showTheseCategories: string[], showTheseMembers: string[]) {
     let filtered = !showTheseCategories.length
@@ -55,18 +36,14 @@ export function PackingListControls({
   }
 
   return (
-    <Stack direction="row" justifyContent="space-between" alignItems="center" hidden={hidden}>
+    <HStack justifyContent="space-between" alignItems="center" hidden={hidden}>
       <Filter onFilter={onFilter} />
-      <Link onClick={addCategory} variant="outline">
-        <Flex alignItems="center" gap="1">
-          <MdLabelOutline /> Add category
-        </Flex>
-      </Link>
+      <Spacer />
       <Link onClick={onTextMode} variant="outline" m="3">
         <Flex alignItems="center" gap="1">
           <AiOutlineEdit /> Text mode
         </Flex>
       </Link>
-    </Stack>
+    </HStack>
   );
 }
