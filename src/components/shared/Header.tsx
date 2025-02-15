@@ -1,6 +1,6 @@
 import { Flex, Heading, IconButton, Spacer, Stack, useToast } from '@chakra-ui/react';
 import { useEffect, useState } from 'react';
-import { AiFillCaretDown, AiOutlineDelete } from 'react-icons/ai';
+import { AiFillCaretDown, AiOutlineCopy, AiOutlineDelete } from 'react-icons/ai';
 import { IoMdAdd } from 'react-icons/io';
 import { firebase } from '../../services/firebase.ts';
 import { findUniqueName } from '../../services/utils.ts';
@@ -64,6 +64,16 @@ export function Header() {
     });
   }
 
+  async function onCopy() {
+    const name = findUniqueName(`${packingList?.name} - Copy`, packingLists);
+    const batch = firebase.initBatch();
+    const packingListId = firebase.addPackingListBatch(name, batch);
+    for (const packItem of packItems) {
+      firebase.addPackItemBatch(batch, packItem.name, packItem.members ?? [], packItem.category ?? '', packingListId);
+    }
+    await batch.commit();
+  }
+
   return (
     <>
       {packingList && (
@@ -84,7 +94,13 @@ export function Header() {
               onClick={onSelectPackingList}
               emptyIcon={<IoMdAdd />}
             />
-            <IconButton onClick={onDelete} variant="ghost" icon={<AiOutlineDelete />} aria-label="Delete item" />
+            <IconButton
+              onClick={onDelete}
+              variant="ghost"
+              icon={<AiOutlineDelete />}
+              aria-label="Delete packing list"
+            />
+            <IconButton onClick={onCopy} variant="ghost" icon={<AiOutlineCopy />} aria-label="Copy packing list" />
             <Spacer />
             <ProfileAvatar size="sm" />
           </Flex>

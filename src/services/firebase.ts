@@ -221,6 +221,9 @@ export const firebase = {
   deletePackingList(id: string) {
     return del(PACKING_LISTS_KEY, id);
   },
+  addPackingListBatch(name: string, writeBatch: WriteBatch) {
+    return addBatch(PACKING_LISTS_KEY, writeBatch, { name });
+  },
 };
 
 function getUserId() {
