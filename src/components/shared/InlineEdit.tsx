@@ -7,11 +7,13 @@ export function InlineEdit({
   onUpdate,
   strike,
   as,
+  onEnter,
 }: {
   value: string;
   onUpdate: (value: string) => void;
   strike?: boolean;
   as?: ElementType;
+  onEnter?: () => void;
 }) {
   const [text, setText] = useState(value);
 
@@ -19,13 +21,16 @@ export function InlineEdit({
     setText(e.target.value);
   }
 
-  function onEnter(e: KeyboardEvent<HTMLInputElement>) {
-    handleEnter(e, () => onUpdate(text));
+  function onKeyDown(e: KeyboardEvent<HTMLInputElement>) {
+    handleEnter(e, () => {
+      onUpdate(text);
+      onEnter?.();
+    });
   }
   return (
     <Editable defaultValue={text} as={as}>
       <EditablePreview textDecoration={strike ? 'line-through' : 'none'} />
-      <EditableInput value={text} onChange={onChange} onKeyDown={onEnter} onBlur={() => onUpdate(text)} />
+      <EditableInput value={text} onChange={onChange} onKeyDown={onKeyDown} onBlur={() => onUpdate(text)} />
     </Editable>
   );
 }

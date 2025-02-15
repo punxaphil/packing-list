@@ -1,4 +1,4 @@
-import { Box, Flex, IconButton, Spacer, Text } from '@chakra-ui/react';
+import { Flex, IconButton, Spacer, Text } from '@chakra-ui/react';
 import { AiOutlineDelete, AiOutlineUserDelete, AiOutlineUsergroupAdd } from 'react-icons/ai';
 import { TbStatusChange } from 'react-icons/tb';
 import { firebase } from '../../services/firebase.ts';
@@ -10,15 +10,18 @@ import { InlineEdit } from '../shared/InlineEdit.tsx';
 import { MultiCheckbox } from '../shared/MultiCheckbox.tsx';
 import { PLCheckbox } from '../shared/PLCheckbox.tsx';
 import { MemberPackItemRow } from './MemberPackItemRow.tsx';
+import { PackItemRowWrapper } from './PackItemRowWrapper.tsx';
 
 export function PackItemRow({
   packItem,
   indent,
   filteredMembers,
+  onEnter,
 }: {
   packItem: PackItem;
-  indent?: boolean;
+  indent: boolean;
   filteredMembers: string[];
+  onEnter: (id: string) => void;
 }) {
   const members = useFirebase().members;
   const categories = useFirebase().categories;
@@ -80,7 +83,7 @@ export function PackItemRow({
   }
 
   return (
-    <Box ml={indent ? '3' : '0'}>
+    <PackItemRowWrapper indent={indent}>
       <Flex gap="3" align="center">
         {multipleMembers ? (
           <MultiCheckbox packItem={packItem} onUpdate={onUpdate} />
@@ -89,7 +92,12 @@ export function PackItemRow({
         )}
 
         <Flex alignItems="center">
-          <InlineEdit value={packItem.name} onUpdate={onChangeText} strike={packItem.checked} />
+          <InlineEdit
+            value={packItem.name}
+            onUpdate={onChangeText}
+            strike={packItem.checked}
+            onEnter={() => onEnter(packItem.id)}
+          />
           <Text textDecoration={packItem.checked ? 'line-through' : 'none'} hidden={packItem.members?.length !== 1}>
             &nbsp;({getName(members, packItem.members?.[0]?.id)})
           </Text>
@@ -127,6 +135,6 @@ export function PackItemRow({
             member={member}
           />
         ))}
-    </Box>
+    </PackItemRowWrapper>
   );
 }
