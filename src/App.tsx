@@ -12,12 +12,12 @@ import {
 import { Route, Routes } from 'react-router';
 import { useCurrentUser } from './components/auth/Auth.tsx';
 import { Categories } from './components/pages/Categories.tsx';
-import { Layout } from './components/pages/Layout.tsx';
+import { LoggedInLayout } from './components/pages/LoggedInLayout.tsx';
 import { Members } from './components/pages/Members.tsx';
 import { PackingList } from './components/pages/PackingList.tsx';
 import { Profile } from './components/pages/Profile.tsx';
 import { Welcome } from './components/pages/Welcome.tsx';
-import { useError } from './services/contexts.ts';
+import { useError } from './components/providers/ErrorContext.ts';
 
 export const THEME_COLOR = 'teal';
 const customTheme = extendTheme(withDefaultColorScheme({ colorScheme: THEME_COLOR }), {
@@ -34,7 +34,6 @@ const customTheme = extendTheme(withDefaultColorScheme({ colorScheme: THEME_COLO
     },
   },
 });
-const TITLE = "Pack'n'Go!";
 
 export function App() {
   const { userId, loggingIn } = useCurrentUser();
@@ -44,7 +43,7 @@ export function App() {
     <ChakraProvider theme={customTheme}>
       <Routes>
         {isLoggedIn ? (
-          <Route element={<Layout userId={userId} title={TITLE} />}>
+          <Route element={<LoggedInLayout />}>
             <Route index element={<PackingList />} />
             <Route path="members" element={<Members />} />
             <Route path="categories" element={<Categories />} />
@@ -53,7 +52,7 @@ export function App() {
         ) : loggingIn ? (
           <Route path="*" element={<Heading as="h3">Logging in...</Heading>} />
         ) : (
-          <Route path="*" element={<Welcome title={TITLE} />} />
+          <Route path="*" element={<Welcome />} />
         )}
       </Routes>
       {error && (

@@ -1,8 +1,8 @@
 import { Button, Card, CardBody, Flex, Input, Spacer } from '@chakra-ui/react';
 import { ChangeEvent, KeyboardEvent, useState } from 'react';
-import { useError } from '../../services/contexts';
 import { handleEnter } from '../../services/utils.ts';
 import { NamedEntity } from '../../types/NamedEntity.ts';
+import { useError } from '../providers/ErrorContext.ts';
 import { DragAndDrop } from './DragAndDrop.tsx';
 import { NamedEntityRow } from './NamedEntityRow.tsx';
 

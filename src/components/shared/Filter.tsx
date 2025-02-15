@@ -2,7 +2,7 @@ import { Menu, MenuButton, MenuDivider, MenuList } from '@chakra-ui/icons';
 import { Flex, Link, MenuItemOption, MenuOptionGroup } from '@chakra-ui/react';
 import { useState } from 'react';
 import { AiOutlineFilter } from 'react-icons/ai';
-import { useFirebase } from '../../services/contexts.ts';
+import { useFirebase } from '../providers/FirebaseContext.ts';
 
 export function Filter({
   onFilter,

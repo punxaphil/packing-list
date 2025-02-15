@@ -6,6 +6,7 @@ export interface PackItem {
   checked: boolean;
   members?: MemberPackItem[];
   category?: string;
+  packingList?: string;
 }
 
 export interface TextPackItem {

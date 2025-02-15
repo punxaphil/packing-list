@@ -13,13 +13,14 @@ import {
   useDisclosure,
 } from '@chakra-ui/react';
 import { ChangeEvent, useEffect, useState } from 'react';
-import { useFirebase } from '../../services/contexts.ts';
 import {
   createTextPackItemsFromText,
   getGroupedAsText,
   updateFirebaseFromTextPackItems,
 } from '../../services/textModeUtils.ts';
 import { GroupedPackItem } from '../../types/GroupedPackItem.ts';
+import { useFirebase } from '../providers/FirebaseContext.ts';
+import { usePackingListId } from '../providers/PackingListContext.ts';
 
 export function PackItemsTextMode({
   grouped,
@@ -35,6 +36,7 @@ export function PackItemsTextMode({
   const packItems = useFirebase().packItems;
   const [groupedAsText, setGroupedAsText] = useState('');
   const [saving, setSaving] = useState(false);
+  const packingListId = usePackingListId().packingListId;
 
   useEffect(() => {
     const text = getGroupedAsText(grouped, categories, members);
@@ -48,7 +50,7 @@ export function PackItemsTextMode({
   async function save() {
     setSaving(true);
     const textPackItems = createTextPackItemsFromText(groupedAsText);
-    await updateFirebaseFromTextPackItems(packItems, textPackItems, members, categories);
+    await updateFirebaseFromTextPackItems(packItems, textPackItems, members, categories, packingListId);
     setSaving(false);
     onDone();
   }
@@ -57,7 +59,7 @@ export function PackItemsTextMode({
     <Flex hidden={hidden} direction="column" gap="3">
       <Progress size="xs" isIndeterminate hidden={!saving} />
       <Textarea
-        placeholder="Paste your list here"
+        placeholder="Paste your packing list here"
         value={groupedAsText}
         rows={20}
         fontFamily="monospace"

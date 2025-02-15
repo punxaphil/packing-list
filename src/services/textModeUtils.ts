@@ -51,7 +51,8 @@ export async function updateFirebaseFromTextPackItems(
   packItems: PackItem[],
   textPackItems: TextPackItem[],
   members: NamedEntity[],
-  categories: NamedEntity[]
+  categories: NamedEntity[],
+  packingListId: string
 ) {
   const writeBatch = firebase.initBatch();
   deleteRemovedPackItems(textPackItems, packItems, writeBatch);
@@ -60,7 +61,7 @@ export async function updateFirebaseFromTextPackItems(
     if (packItem) {
       updateExistingPackItem(t, members, packItem, categories, writeBatch);
     } else {
-      const newPackItem = addNewPackItem(t, members, categories, writeBatch);
+      const newPackItem = addNewPackItem(t, members, categories, writeBatch, packingListId);
       packItems.push(newPackItem);
     }
   }
@@ -146,7 +147,13 @@ function updatePackItemIfChanged(
   }
 }
 
-function addNewPackItem(t: TextPackItem, members: NamedEntity[], categories: NamedEntity[], writeBatch: WriteBatch) {
+function addNewPackItem(
+  t: TextPackItem,
+  members: NamedEntity[],
+  categories: NamedEntity[],
+  writeBatch: WriteBatch,
+  packingListId: string
+) {
   const memberPackItems = [];
   if (t.members) {
     for (const textPackItemMember of t.members) {
@@ -165,5 +172,5 @@ function addNewPackItem(t: TextPackItem, members: NamedEntity[], categories: Nam
       categories.push(category);
     }
   }
-  return firebase.addPackItemBatch(writeBatch, t.name, memberPackItems, category?.id ?? '');
+  return firebase.addPackItemBatch(writeBatch, t.name, memberPackItems, category?.id ?? '', packingListId);
 }

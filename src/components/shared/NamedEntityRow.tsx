@@ -13,8 +13,9 @@ import {
 } from '@chakra-ui/react';
 import { ChangeEvent } from 'react';
 import { AiOutlineCloudUpload, AiOutlineDelete } from 'react-icons/ai';
-import { useError, useFirebase } from '../../services/contexts.ts';
 import { NamedEntity } from '../../types/NamedEntity.ts';
+import { useError } from '../providers/ErrorContext.ts';
+import { useFirebase } from '../providers/FirebaseContext.ts';
 import { UploadModal } from './UploadModal.tsx';
 
 export function NamedEntityRow({

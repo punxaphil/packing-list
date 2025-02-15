@@ -7,6 +7,8 @@ import { firebase } from './firebase.ts';
 import { expectFirebaseCallsToThese } from './testUtils.ts';
 import { createTextPackItemsFromText, updateFirebaseFromTextPackItems } from './textModeUtils.ts';
 
+const PACKING_LIST_ID = 'packingListId';
+
 vi.mock('./firebase.ts');
 
 vi.mocked(firebase.initBatch).mockImplementation(() => {
@@ -92,7 +94,7 @@ describe('textModeUtils', () => {
       const members: NamedEntity[] = [];
       const categories: NamedEntity[] = [];
 
-      await updateFirebaseFromTextPackItems(packItems, textPackItems, members, categories);
+      await updateFirebaseFromTextPackItems(packItems, textPackItems, members, categories, PACKING_LIST_ID);
 
       expectFirebaseCallsToThese(firebase.deletePackItemBatch, firebase.initBatch);
     });
@@ -103,7 +105,7 @@ describe('textModeUtils', () => {
       const members: NamedEntity[] = [];
       const categories: NamedEntity[] = [];
 
-      await updateFirebaseFromTextPackItems(packItems, textPackItems, members, categories);
+      await updateFirebaseFromTextPackItems(packItems, textPackItems, members, categories, PACKING_LIST_ID);
 
       expectFirebaseCallsToThese(firebase.initBatch);
     });
@@ -114,7 +116,7 @@ describe('textModeUtils', () => {
       const members: NamedEntity[] = [{ id: '2', name: 'Member 1' }];
       const categories: NamedEntity[] = [];
 
-      await updateFirebaseFromTextPackItems(packItems, textPackItems, members, categories);
+      await updateFirebaseFromTextPackItems(packItems, textPackItems, members, categories, PACKING_LIST_ID);
 
       expectFirebaseCallsToThese(firebase.updatePackItemBatch, firebase.initBatch);
     });
@@ -125,7 +127,7 @@ describe('textModeUtils', () => {
       const members: NamedEntity[] = [];
       const categories: NamedEntity[] = [{ id: '2', name: 'Category 2' }];
 
-      await updateFirebaseFromTextPackItems(packItems, textPackItems, members, categories);
+      await updateFirebaseFromTextPackItems(packItems, textPackItems, members, categories, PACKING_LIST_ID);
 
       expectFirebaseCallsToThese(firebase.updatePackItemBatch, firebase.addCategoryBatch, firebase.initBatch);
     });
@@ -136,7 +138,7 @@ describe('textModeUtils', () => {
       const members: NamedEntity[] = [];
       const categories: NamedEntity[] = [];
 
-      await updateFirebaseFromTextPackItems(packItems, textPackItems, members, categories);
+      await updateFirebaseFromTextPackItems(packItems, textPackItems, members, categories, PACKING_LIST_ID);
 
       expectFirebaseCallsToThese(firebase.addPackItemBatch, firebase.initBatch);
     });
@@ -221,7 +223,7 @@ describe('textModeUtils', () => {
       vi.mocked(firebase.addMemberBatch).mockImplementation((name: string) => `added${name}`);
       vi.mocked(firebase.addCategoryBatch).mockImplementation((name: string) => `added${name}`);
 
-      await updateFirebaseFromTextPackItems(packItems, textPackItems, members, categories);
+      await updateFirebaseFromTextPackItems(packItems, textPackItems, members, categories, PACKING_LIST_ID);
       expect(firebase.addPackItemBatch).toHaveBeenCalledTimes(3);
       expect(firebase.updatePackItemBatch).toHaveBeenCalledTimes(2);
       expect(firebase.addCategoryBatch).toHaveBeenCalledTimes(1);

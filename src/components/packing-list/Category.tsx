@@ -1,7 +1,8 @@
 import { Flex, Image, Link, Text } from '@chakra-ui/react';
 import { TbCategoryPlus } from 'react-icons/tb';
-import { useFirebase } from '../../services/contexts.ts';
 import { firebase } from '../../services/firebase.ts';
+import { useFirebase } from '../providers/FirebaseContext.ts';
+import { usePackingListId } from '../providers/PackingListContext.ts';
 import { InlineEdit } from '../shared/InlineEdit.tsx';
 
 export function Category({
@@ -11,6 +12,7 @@ export function Category({
 }) {
   const images = useFirebase().images;
   const categories = useFirebase().categories;
+  const { packingListId } = usePackingListId();
   const categoryName = categories.find((cat) => cat.id === categoryId)?.name || 'uncategorized';
 
   async function onChangeCategory(name: string) {
@@ -30,7 +32,7 @@ export function Category({
   }
 
   async function addItem() {
-    await firebase.addPackItem(`New ${categoryName} item`, [], categoryId);
+    await firebase.addPackItem(`New ${categoryName} item`, [], categoryId, packingListId);
   }
 
   const categoryImage = getCategoryImage();

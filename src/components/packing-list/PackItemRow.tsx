@@ -1,10 +1,10 @@
 import { Box, Flex, IconButton, Spacer, Text } from '@chakra-ui/react';
 import { AiOutlineDelete, AiOutlineUserDelete, AiOutlineUsergroupAdd } from 'react-icons/ai';
 import { TbStatusChange } from 'react-icons/tb';
-import { useFirebase } from '../../services/contexts.ts';
 import { firebase } from '../../services/firebase.ts';
 import { getName } from '../../services/utils.ts';
 import { PackItem } from '../../types/PackItem.ts';
+import { useFirebase } from '../providers/FirebaseContext.ts';
 import { IconSelect } from '../shared/IconSelect.tsx';
 import { InlineEdit } from '../shared/InlineEdit.tsx';
 import { MultiCheckbox } from '../shared/MultiCheckbox.tsx';

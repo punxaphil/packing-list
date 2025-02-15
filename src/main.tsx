@@ -3,7 +3,7 @@ import { App } from './App.tsx';
 import './index.css';
 import { StrictMode } from 'react';
 import { BrowserRouter } from 'react-router';
-import { ErrorProvider } from './components/shared/ErrorProvider.tsx';
+import { ErrorProvider } from './components/providers/ErrorProvider.tsx';
 
 const elementById = document.getElementById('root');
 if (elementById) {

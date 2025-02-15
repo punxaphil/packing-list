@@ -10,10 +10,13 @@ import {
   collection,
   deleteDoc,
   doc,
+  getDoc,
   getDocs,
   getFirestore,
   onSnapshot,
+  query,
   updateDoc,
+  where,
   writeBatch,
 } from 'firebase/firestore';
 import { Image } from '../types/Image.ts';
@@ -39,31 +42,36 @@ const MEMBERS_KEY = 'members';
 const PACK_ITEMS_KEY = 'packItems';
 const USERS_KEY = 'users';
 const IMAGES_KEY = 'images';
+const PACKING_LISTS_KEY = 'packingLists';
 
 export const firebase = {
   getUserCollectionsAndSubscribe: async (
     setMembers: (members: NamedEntity[]) => void,
     setCategories: (categories: NamedEntity[]) => void,
     setPackItems: (packItems: PackItem[]) => void,
-    setImages: (images: Image[]) => void
+    setImages: (images: Image[]) => void,
+    setPackingLists: (packingLists: NamedEntity[]) => void,
+    packingListId: string
   ) => {
     const userId = getUserId();
     const memberQuery = collection(firestore, USERS_KEY, userId, MEMBERS_KEY);
-    const itemsQuery = collection(firestore, USERS_KEY, userId, PACK_ITEMS_KEY);
+    const itemsQuery = query(
+      collection(firestore, USERS_KEY, userId, PACK_ITEMS_KEY),
+      where('packingList', '==', packingListId)
+    );
     const categoriesQuery = collection(firestore, USERS_KEY, userId, CATEGORIES_KEY);
     const imagesQuery = collection(firestore, USERS_KEY, userId, IMAGES_KEY);
+    const packingListsQuery = collection(firestore, USERS_KEY, userId, PACKING_LISTS_KEY);
 
     await getInitialData();
     createSubscriptions();
 
     async function getInitialData() {
-      const members: NamedEntity[] = fromQueryResult(await getDocs(memberQuery));
-      const categories: NamedEntity[] = fromQueryResult(await getDocs(categoriesQuery));
-      const packItems: PackItem[] = fromQueryResult(await getDocs(itemsQuery));
-      setMembers(members);
-      setCategories(categories);
-      setPackItems(packItems);
+      setMembers(fromQueryResult(await getDocs(memberQuery)));
+      setCategories(fromQueryResult(await getDocs(categoriesQuery)));
+      setPackItems(fromQueryResult(await getDocs(itemsQuery)));
       setImages(fromQueryResult(await getDocs(imagesQuery)));
+      setPackingLists(fromQueryResult(await getDocs(packingListsQuery)));
     }
 
     function createSubscriptions() {
@@ -71,12 +79,18 @@ export const firebase = {
       onSnapshot(categoriesQuery, (res) => setCategories(fromQueryResult(res)));
       onSnapshot(itemsQuery, (res) => setPackItems(fromQueryResult(res)));
       onSnapshot(imagesQuery, (res) => setImages(fromQueryResult(res)));
+      onSnapshot(packingListsQuery, (res) => setPackingLists(fromQueryResult(res)));
     }
   },
 
-  addPackItem: async (name: string, members: MemberPackItem[], category: string): Promise<PackItem> => {
+  addPackItem: async (
+    name: string,
+    members: MemberPackItem[],
+    category: string,
+    packingList: string
+  ): Promise<PackItem> => {
     const docRef = await add(PACK_ITEMS_KEY, { name, members, category });
-    return { id: docRef.id, checked: false, members, name, category };
+    return { id: docRef.id, checked: false, members, name, category, packingList };
   },
   updatePackItem: async (packItem: PackItem) => {
     await update(PACK_ITEMS_KEY, packItem.id, packItem);
@@ -130,11 +144,18 @@ export const firebase = {
   updatePackItemBatch<K extends DocumentData>(data: WithFieldValue<K>, writeBatch: WriteBatch) {
     writeBatch.update(doc(firestore, USERS_KEY, getUserId(), PACK_ITEMS_KEY, data.id), data);
   },
-  addPackItemBatch(writeBatch: WriteBatch, name: string, members: MemberPackItem[], category: string): PackItem {
+  addPackItemBatch(
+    writeBatch: WriteBatch,
+    name: string,
+    members: MemberPackItem[],
+    category: string,
+    packingList: string
+  ): PackItem {
     const id = addBatch(PACK_ITEMS_KEY, writeBatch, {
       name,
       members: members,
       category: category,
+      packingList: packingList,
     });
     return { id, checked: false, members, name, category };
   },
@@ -146,6 +167,26 @@ export const firebase = {
   },
   deleteMemberBatch(id: string, batch: WriteBatch) {
     batch.delete(doc(firestore, USERS_KEY, getUserId(), MEMBERS_KEY, id));
+  },
+  async getFirstPackingList(): Promise<NamedEntity | undefined> {
+    const userId = getUserId();
+    const query = collection(firestore, USERS_KEY, userId, PACKING_LISTS_KEY);
+    const packingLists = fromQueryResult(await getDocs(query)) as NamedEntity[];
+    return packingLists.length ? packingLists[0] : undefined;
+  },
+  async addPackingList(name: string) {
+    const docRef = await add(PACKING_LISTS_KEY, { name: name });
+    return docRef.id;
+  },
+  async getPackingList(id: string) {
+    const res = await getDoc(doc(firestore, USERS_KEY, getUserId(), PACKING_LISTS_KEY, id));
+    if (res.exists()) {
+      return { id: res.id, ...res.data() } as NamedEntity;
+    }
+    return undefined;
+  },
+  updatePackingList(packingList: NamedEntity) {
+    return update(PACKING_LISTS_KEY, packingList.id, packingList);
   },
 };
 

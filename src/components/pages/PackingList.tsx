@@ -1,12 +1,12 @@
 import { Box, Card, CardBody, Flex, Text } from '@chakra-ui/react';
 import { useEffect, useState } from 'react';
-import { useFirebase } from '../../services/contexts.ts';
 import { groupByCategories } from '../../services/utils.ts';
 import { GroupedPackItem } from '../../types/GroupedPackItem.ts';
 import { PackItem } from '../../types/PackItem.ts';
 import { PackItemRows } from '../packing-list/PackItemRows.tsx';
 import { PackItemsTextMode } from '../packing-list/PackItemsTextMode.tsx';
 import { PackingListControls } from '../packing-list/PackingListControls.tsx';
+import { useFirebase } from '../providers/FirebaseContext.ts';
 
 export function PackingList() {
   const packItems = useFirebase().packItems;

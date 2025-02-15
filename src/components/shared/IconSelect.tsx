@@ -8,11 +8,13 @@ export function IconSelect({
   icon,
   items,
   onClick,
+  emptyIcon,
 }: {
   label: string;
   icon: ReactElement;
   items: MultiSelectItem[];
   onClick: (id: string) => void;
+  emptyIcon?: ReactElement;
 }) {
   return (
     <Menu>
@@ -22,7 +24,7 @@ export function IconSelect({
           <MenuItem
             key={item.id}
             onClick={() => onClick(item.id)}
-            icon={item.id === '' ? <AiOutlineDelete /> : undefined}
+            icon={item.id === '' ? emptyIcon ? emptyIcon : <AiOutlineDelete /> : undefined}
           >
             {item.name}
           </MenuItem>

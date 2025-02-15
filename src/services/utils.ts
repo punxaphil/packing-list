@@ -37,12 +37,20 @@ export function groupByCategories(packItems: PackItem[], categories: NamedEntity
   return result.sort((a, b) => getCategoryRank(a.categoryId, categories) - getCategoryRank(b.categoryId, categories));
 }
 
-export function sortAll(members: NamedEntity[], categories: NamedEntity[], packItems: PackItem[]) {
+export function sortAll(
+  members: NamedEntity[],
+  categories: NamedEntity[],
+  packItems: PackItem[],
+  packingLists: NamedEntity[]
+) {
   if (members.length) {
     sortEntities(members);
   }
   if (categories.length) {
     sortEntities(categories);
+  }
+  if (packingLists.length) {
+    sortEntities(packingLists);
   }
   if (packItems.length) {
     sortPackItems(packItems, members, categories);

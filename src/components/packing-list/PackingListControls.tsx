@@ -1,9 +1,10 @@
 import { Flex, Link, Stack } from '@chakra-ui/react';
 import { AiOutlineEdit } from 'react-icons/ai';
 import { MdLabelOutline } from 'react-icons/md';
-import { useFirebase } from '../../services/contexts.ts';
 import { firebase } from '../../services/firebase.ts';
 import { PackItem } from '../../types/PackItem.ts';
+import { useFirebase } from '../providers/FirebaseContext.ts';
+import { usePackingListId } from '../providers/PackingListContext.ts';
 import { Filter } from '../shared/Filter.tsx';
 
 export function PackingListControls({
@@ -19,11 +20,12 @@ export function PackingListControls({
 }) {
   const packItems = useFirebase().packItems;
   const categories = useFirebase().categories;
+  const { packingListId } = usePackingListId();
 
   async function addCategory() {
     const batch = firebase.initBatch();
     const id = firebase.addCategoryBatch('My Category', batch);
-    firebase.addPackItemBatch(batch, 'My Item', [], id);
+    firebase.addPackItemBatch(batch, 'My Item', [], id, packingListId);
     firebase.updateCategoryBatch(id, { rank: 0 }, batch);
     for (const category of categories) {
       firebase.updateCategoryBatch(category.id, { rank: (category.rank ?? 0) + 1 }, batch);

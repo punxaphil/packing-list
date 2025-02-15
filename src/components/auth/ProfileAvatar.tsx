@@ -1,7 +1,7 @@
 import { Avatar } from '@chakra-ui/react';
 import { NavLink } from 'react-router';
 import { THEME_COLOR } from '../../App.tsx';
-import { useFirebase } from '../../services/contexts.ts';
+import { useFirebase } from '../providers/FirebaseContext.ts';
 import { useCurrentUser } from './Auth.tsx';
 
 export function ProfileAvatar({ shouldNavigate = true, size }: { shouldNavigate?: boolean; size: string }) {
