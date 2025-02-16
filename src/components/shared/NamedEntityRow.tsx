@@ -1,4 +1,3 @@
-import { DragHandleIcon } from '@chakra-ui/icons';
 import {
   Box,
   Flex,
@@ -11,7 +10,7 @@ import {
   PopoverTrigger,
   useDisclosure,
 } from '@chakra-ui/react';
-import { ChangeEvent } from 'react';
+import { ChangeEvent, ReactElement } from 'react';
 import { AiOutlineCloudUpload, AiOutlineDelete } from 'react-icons/ai';
 import { NamedEntity } from '../../types/NamedEntity.ts';
 import { useError } from '../providers/ErrorContext.ts';
@@ -23,13 +22,13 @@ export function NamedEntityRow({
   onUpdate,
   onDelete,
   type,
-  isDragging = false,
+  dragHandle,
 }: {
   namedEntity: NamedEntity;
   onUpdate: (namedEntity: NamedEntity) => Promise<void>;
   onDelete: (id: string) => Promise<void>;
   type: string;
-  isDragging: boolean;
+  dragHandle: ReactElement;
 }) {
   const { setError } = useError();
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -53,9 +52,9 @@ export function NamedEntityRow({
   const image = images.find((t) => t.type === type && t.typeId === namedEntity.id);
   const imageUrl = image?.url;
   return (
-    <Box border={isDragging ? '1px solid black' : 'none'} borderRadius="md" bg={isDragging ? 'gray.200' : ''}>
+    <Box p="2">
       <Flex gap="3" align="center">
-        <DragHandleIcon color="gray.300" />
+        {dragHandle}
         <Popover trigger="hover">
           <PopoverTrigger>
             <Link onClick={onOpen}>{imageUrl ? <Image src={imageUrl} w="30px" /> : <AiOutlineCloudUpload />}</Link>

@@ -63,13 +63,13 @@ export function NamedEntities({
           <DragAndDrop
             entities={namedEntities}
             onEntitiesUpdated={onEntitiesUpdated}
-            renderEntity={(entity, isDragging) => (
+            renderEntity={(entity, dragHandle) => (
               <NamedEntityRow
                 namedEntity={entity}
                 onUpdate={onUpdate}
                 onDelete={handleDelete}
                 type={type}
-                isDragging={isDragging}
+                dragHandle={dragHandle}
               />
             )}
           />

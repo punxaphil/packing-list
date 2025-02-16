@@ -1,6 +1,7 @@
+import { DragHandleIcon } from '@chakra-ui/icons';
 import { Box } from '@chakra-ui/react';
 import { DragDropContext, DragUpdate, Draggable, Droppable } from '@hello-pangea/dnd';
-import { ReactNode, useEffect, useState } from 'react';
+import { ReactElement, ReactNode, useEffect, useState } from 'react';
 import { Rankable } from '../../types/Rankable.ts';
 
 export function DragAndDrop<K extends Rankable>({
@@ -9,7 +10,7 @@ export function DragAndDrop<K extends Rankable>({
   onEntitiesUpdated,
 }: {
   entities: K[];
-  renderEntity: (entity: K, isDragging: boolean) => ReactNode;
+  renderEntity: (entity: K, dragHandle: ReactElement) => ReactNode;
   onEntitiesUpdated: (value: K[]) => void;
 }) {
   const [reordered, setReordered] = useState(entities);
@@ -45,17 +46,24 @@ export function DragAndDrop<K extends Rankable>({
             {reordered.map((entity, index) => (
               <Draggable key={entity.id} draggableId={entity.id} index={index}>
                 {(provided, snapshot) => {
+                  const dragHandle = (
+                    <div {...provided.dragHandleProps}>
+                      <DragHandleIcon color="gray.300" mr="2" />
+                    </div>
+                  );
                   return (
                     <Box
                       ref={provided.innerRef}
                       {...provided.draggableProps}
-                      {...provided.dragHandleProps}
                       style={{
                         ...provided.draggableProps.style,
                         padding: '1px',
                       }}
+                      border={snapshot.isDragging ? '1px solid black' : 'none'}
+                      borderRadius="md"
+                      bg={snapshot.isDragging ? 'gray.100' : ''}
                     >
-                      {renderEntity(entity, snapshot.isDragging)}
+                      {renderEntity(entity, dragHandle)}
                     </Box>
                   );
                 }}

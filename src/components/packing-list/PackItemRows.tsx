@@ -60,17 +60,14 @@ export function PackItemRows({
           <DragAndDrop
             entities={flattened}
             onEntitiesUpdated={saveReorderedList}
-            renderEntity={(entity, isDragging) => {
+            renderEntity={(entity, dragHandle) => {
               const { category, packItem } = getCategoryAndPackItem(entity);
               return (
-                <Box
-                  key={category?.id ?? packItem?.id}
-                  border={isDragging ? '1px solid black' : 'none'}
-                  borderRadius="md"
-                  bg={isDragging ? 'gray.200' : ''}
-                >
-                  {category && <Category category={category} />}
-                  {packItem && <PackItemRow packItem={packItem} filteredMembers={filteredMembers} />}
+                <Box>
+                  {category && <Category category={category} dragHandle={dragHandle} />}
+                  {packItem && (
+                    <PackItemRow packItem={packItem} filteredMembers={filteredMembers} dragHandle={dragHandle} />
+                  )}
                 </Box>
               );
             }}

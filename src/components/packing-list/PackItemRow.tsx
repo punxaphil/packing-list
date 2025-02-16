@@ -1,6 +1,5 @@
-import { DragHandleIcon } from '@chakra-ui/icons';
 import { Flex, IconButton, Spacer, Text } from '@chakra-ui/react';
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { AiOutlineDelete, AiOutlineUserDelete, AiOutlineUsergroupAdd } from 'react-icons/ai';
 import { TbStatusChange } from 'react-icons/tb';
 import { firebase } from '../../services/firebase.ts';
@@ -19,9 +18,11 @@ import { PackItemRowWrapper } from './PackItemRowWrapper.tsx';
 export function PackItemRow({
   packItem,
   filteredMembers,
+  dragHandle,
 }: {
   packItem: PackItem;
   filteredMembers: string[];
+  dragHandle?: ReactElement;
 }) {
   const members = useFirebase().members;
   const categories = useFirebase().categories;
@@ -94,7 +95,7 @@ export function PackItemRow({
     <>
       <PackItemRowWrapper indent={!!packItem.category}>
         <Flex gap="3" align="center">
-          <DragHandleIcon color="gray.300" />
+          {dragHandle}
           {multipleMembers ? (
             <MultiCheckbox packItem={packItem} onUpdate={onUpdate} />
           ) : (

@@ -1,6 +1,5 @@
-import { DragHandleIcon } from '@chakra-ui/icons';
 import { Flex, Image, Link, Text } from '@chakra-ui/react';
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { TbCategoryPlus } from 'react-icons/tb';
 import { firebase } from '../../services/firebase.ts';
 import { NamedEntity } from '../../types/NamedEntity.ts';
@@ -10,8 +9,10 @@ import { NewPackItemRow } from './NewPackItemRow.tsx';
 
 export function Category({
   category,
+  dragHandle,
 }: {
   category: NamedEntity;
+  dragHandle?: ReactElement;
 }) {
   const images = useFirebase().images;
   const [addNewPackItem, setAddNewPackItem] = useState(false);
@@ -32,7 +33,7 @@ export function Category({
   return (
     <>
       <Flex gap="1" alignItems="center">
-        {!!category.id && <DragHandleIcon color="gray.300" mr="2" />}
+        {dragHandle}
         {categoryImage && <Image borderRadius="full" boxSize="30px" src={categoryImage} mr="2" />}
         {category.id ? (
           <InlineEdit as="b" value={category.name} onUpdate={onChangeCategory} />
