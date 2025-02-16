@@ -89,7 +89,7 @@ export function Header() {
           <Flex align="center" justifyContent="space-between" m="3" key={packingListId}>
             <img src="/squirrel_icon.png" alt="squirrel icon" />
             <Spacer />
-            <Heading as="h1" mr="2">
+            <Heading as="h1" mr="2" size={['md', 'xl']}>
               <InlineEdit key={packingList.id} value={packingList.name} onUpdate={savePackingListName} />
             </Heading>
             <IconSelect
