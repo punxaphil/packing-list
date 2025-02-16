@@ -79,6 +79,7 @@ export function Header() {
       );
     }
     await batch.commit();
+    setPackingListId(packingListId);
   }
 
   return (

@@ -17,10 +17,10 @@ export function NewPackItemRow({ categoryId, onHide }: { categoryId?: string; on
   }
 
   async function save() {
-    onHide();
     if (newRowText) {
       const nextRank = rankOnTop(packItems);
       await firebase.addPackItem(newRowText, [], categoryId ?? '', packingListId, nextRank);
+      setNewRowText('');
     }
   }
 
@@ -28,6 +28,9 @@ export function NewPackItemRow({ categoryId, onHide }: { categoryId?: string; on
     handleEnter(e, async () => {
       await save();
     });
+    if (e.key === 'Escape' || e.key === 'Tab') {
+      onHide();
+    }
   }
 
   return (
@@ -39,7 +42,7 @@ export function NewPackItemRow({ categoryId, onHide }: { categoryId?: string; on
           onChange={onChange}
           autoFocus
           placeholder="What to pack?"
-          onBlur={save}
+          onBlur={onHide}
           onKeyDown={onKeyDown}
         />
       </Flex>
