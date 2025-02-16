@@ -18,7 +18,7 @@ export function MemberPackItemRow({
   member: NamedEntity;
 }) {
   async function toggleMember() {
-    const find = parent.members?.find((t) => t.id === id);
+    const find = parent.members.find((t) => t.id === id);
     if (find) {
       find.checked = !find.checked;
       parent.checked = allChecked(parent);
@@ -32,7 +32,7 @@ export function MemberPackItemRow({
   }
 
   async function onDelete() {
-    parent.members = parent.members?.filter((t) => t.id !== id);
+    parent.members = parent.members.filter((t) => t.id !== id);
     await firebase.updatePackItem(parent);
   }
 

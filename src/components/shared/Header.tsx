@@ -69,7 +69,14 @@ export function Header() {
     const batch = firebase.initBatch();
     const packingListId = firebase.addPackingListBatch(name, batch);
     for (const packItem of packItems) {
-      firebase.addPackItemBatch(batch, packItem.name, packItem.members ?? [], packItem.category ?? '', packingListId);
+      firebase.addPackItemBatch(
+        batch,
+        packItem.name,
+        packItem.members,
+        packItem.category ?? '',
+        packItem.rank,
+        packingListId
+      );
     }
     await batch.commit();
   }

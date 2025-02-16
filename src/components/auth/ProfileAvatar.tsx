@@ -1,13 +1,14 @@
 import { Avatar } from '@chakra-ui/react';
 import { NavLink } from 'react-router';
 import { THEME_COLOR } from '../../App.tsx';
+import { getProfileImage } from '../../services/utils.ts';
 import { useFirebase } from '../providers/FirebaseContext.ts';
 import { useCurrentUser } from './Auth.tsx';
 
 export function ProfileAvatar({ shouldNavigate = true, size }: { shouldNavigate?: boolean; size: string }) {
   const currentUser = useCurrentUser();
   const images = useFirebase().images;
-  const profileImage = images.find((image) => image.type === 'profile');
+  const profileImage = getProfileImage(images);
 
   return (
     <NavLink to={shouldNavigate ? '/profile' : ''}>

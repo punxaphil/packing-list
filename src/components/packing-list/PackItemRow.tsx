@@ -2,7 +2,8 @@ import { Flex, IconButton, Spacer, Text } from '@chakra-ui/react';
 import { AiOutlineDelete, AiOutlineUserDelete, AiOutlineUsergroupAdd } from 'react-icons/ai';
 import { TbStatusChange } from 'react-icons/tb';
 import { firebase } from '../../services/firebase.ts';
-import { getName } from '../../services/utils.ts';
+import { getMemberName } from '../../services/utils.ts';
+import { MemberPackItem } from '../../types/MemberPackItem.ts';
 import { PackItem } from '../../types/PackItem.ts';
 import { useFirebase } from '../providers/FirebaseContext.ts';
 import { IconSelect } from '../shared/IconSelect.tsx';
@@ -39,21 +40,27 @@ export function PackItemRow({
     await firebase.deletePackItem(packItem.id);
   }
 
-  const multipleMembers = !!(packItem.members && packItem.members.length > 1);
-  const filtered = !filteredMembers.length
-    ? packItem.members
-    : packItem.members?.filter(({ id }) => filteredMembers.find((toShow: string) => toShow === id));
-  const memberRows =
-    filtered?.map((m) => {
-      const member = members.find((t) => t.id === m.id);
-      if (!member) {
-        throw new Error(`Member with id ${m.id} not found`);
-      }
-      return {
-        memberItem: m,
-        member: member,
-      };
-    }) ?? [];
+  function getMemberRows() {
+    let filtered: MemberPackItem[];
+    if (!filteredMembers.length) {
+      filtered = packItem.members;
+    } else {
+      filtered = packItem.members.filter(({ id }) => filteredMembers.includes(id));
+    }
+    return (
+      filtered.map((m) => {
+        const member = members.find((t) => t.id === m.id);
+        if (!member) {
+          throw new Error(`Member with id ${m.id} not found`);
+        }
+        return {
+          memberItem: m,
+          member: member,
+        };
+      }) ?? []
+    );
+  }
+
   async function onChangeText(name: string) {
     packItem.name = name;
     await onUpdate(packItem);
@@ -68,11 +75,10 @@ export function PackItemRow({
     return c.id !== packItem.category;
   });
   const selectableMembers = members.filter((m) => {
-    return !packItem.members || !packItem.members.find((t) => t.id === m.id);
+    return !packItem.members.find((t) => t.id === m.id);
   });
 
   async function addMember(id: string) {
-    packItem.members = packItem.members || [];
     packItem.members.push({ id, checked: false });
     await onUpdate(packItem);
   }
@@ -81,6 +87,8 @@ export function PackItemRow({
     packItem.members = [];
     await onUpdate(packItem);
   }
+  const multipleMembers = packItem.members.length > 1;
+  const memberRows = getMemberRows();
 
   return (
     <PackItemRowWrapper indent={indent}>
@@ -98,8 +106,8 @@ export function PackItemRow({
             strike={packItem.checked}
             onEnter={() => onEnter(packItem.id)}
           />
-          <Text textDecoration={packItem.checked ? 'line-through' : 'none'} hidden={packItem.members?.length !== 1}>
-            &nbsp;({getName(members, packItem.members?.[0]?.id)})
+          <Text textDecoration={packItem.checked ? 'line-through' : 'none'} hidden={packItem.members.length !== 1}>
+            &nbsp;({getMemberName(members, packItem.members[0]?.id)})
           </Text>
         </Flex>
         <Spacer />
@@ -121,7 +129,7 @@ export function PackItemRow({
             icon={<AiOutlineUserDelete />}
             onClick={onRemoveMembers}
             variant="ghost"
-            hidden={packItem.members?.length !== 1}
+            hidden={packItem.members.length !== 1}
           />
           <IconButton onClick={deleteItem} variant="ghost" icon={<AiOutlineDelete />} aria-label="Delete item" />
         </Flex>

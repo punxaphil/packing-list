@@ -2,6 +2,7 @@ import { DeleteIcon } from '@chakra-ui/icons';
 import { Button, ButtonGroup, Card, CardBody, Flex, IconButton, Spacer, useDisclosure } from '@chakra-ui/react';
 import { getAuth, signOut } from 'firebase/auth';
 import { firebase } from '../../services/firebase.ts';
+import { getProfileImage } from '../../services/utils.ts';
 import { useCurrentUser } from '../auth/Auth.tsx';
 import { ProfileAvatar } from '../auth/ProfileAvatar.tsx';
 import { useError } from '../providers/ErrorContext.ts';
@@ -10,7 +11,7 @@ import { UploadModal } from '../shared/UploadModal.tsx';
 
 export function Profile() {
   const images = useFirebase().images;
-  const profileImage = images.find((image) => image.type === 'profile');
+  const profileImage = getProfileImage(images);
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   const { setError } = useError();

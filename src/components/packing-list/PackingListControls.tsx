@@ -24,10 +24,10 @@ export function PackingListControls({
     filtered = !showTheseMembers.length
       ? filtered
       : filtered.filter((item) => {
-          if (showTheseMembers.includes('') && item.members?.length === 0) {
+          if (showTheseMembers.includes('') && item.members.length === 0) {
             return true;
           }
-          if (item.members?.length) {
+          if (item.members.length) {
             return item.members.some((m) => showTheseMembers.includes(m.id));
           }
         });

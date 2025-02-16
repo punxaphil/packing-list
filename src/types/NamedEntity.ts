@@ -2,5 +2,5 @@ export interface NamedEntity {
   id: string;
   name: string;
   image?: string;
-  rank?: number;
+  rank: number;
 }

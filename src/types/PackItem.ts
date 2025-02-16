@@ -4,9 +4,10 @@ export interface PackItem {
   id: string;
   name: string;
   checked: boolean;
-  members?: MemberPackItem[];
+  members: MemberPackItem[];
   category?: string;
-  packingList?: string;
+  packingList: string;
+  rank: number;
 }
 
 export interface TextPackItem {

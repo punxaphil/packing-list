@@ -6,10 +6,8 @@ export function MultiCheckbox({ packItem, onUpdate }: { packItem: PackItem; onUp
   function checkAll(checked: boolean) {
     packItem.checked = checked;
     const members = packItem.members;
-    if (members) {
-      for (const t of members) {
-        t.checked = checked;
-      }
+    for (const t of members) {
+      t.checked = checked;
     }
     onUpdate(packItem);
   }

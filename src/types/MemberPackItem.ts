@@ -1,4 +1,4 @@
-export class MemberPackItem {
-  id!: string;
-  checked!: boolean;
+export interface MemberPackItem {
+  id: string;
+  checked: boolean;
 }

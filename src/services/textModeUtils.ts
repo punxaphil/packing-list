@@ -5,21 +5,20 @@ import { NamedEntity } from '../types/NamedEntity.ts';
 import { PackItem, TextPackItem } from '../types/PackItem.ts';
 
 import { firebase } from './firebase.ts';
+import { getCategoryName, getMemberName } from './utils.ts';
 
 export function getGroupedAsText(grouped: GroupedPackItem[], categories: NamedEntity[], members: NamedEntity[]) {
   let result = '';
   for (const group of grouped) {
-    const categoryName = categories.find((c) => c.id === group.categoryId)?.name;
+    const categoryName = getCategoryName(categories, group.categoryId);
     if (categoryName) {
       result += `${categoryName}\n`;
     }
 
     for (const item of group.packItems) {
       result += `- ${item.name}\n`;
-      if (item.members) {
-        for (const m of item.members) {
-          result += `-- ${members.find((t) => t.id === m.id)?.name}\n`;
-        }
+      for (const m of item.members) {
+        result += `-- ${getMemberName(members, m.id)}\n`;
       }
     }
   }
@@ -56,14 +55,15 @@ export async function updateFirebaseFromTextPackItems(
 ) {
   const writeBatch = firebase.initBatch();
   deleteRemovedPackItems(textPackItems, packItems, writeBatch);
+  let rank = textPackItems.length;
   for (const t of textPackItems) {
     const packItem = packItems.find((pi) => pi.name === t.name);
     if (packItem) {
-      updateExistingPackItem(t, members, packItem, categories, writeBatch);
+      updateExistingPackItem(t, members, packItem, categories, writeBatch, rank);
     } else {
-      const newPackItem = addNewPackItem(t, members, categories, writeBatch, packingListId);
-      packItems.push(newPackItem);
+      addNewPackItem(t, members, categories, writeBatch, packingListId, rank);
     }
+    rank--;
   }
   await writeBatch.commit();
 }
@@ -82,20 +82,21 @@ function updateExistingPackItem(
   members: NamedEntity[],
   packItem: PackItem,
   categories: NamedEntity[],
-  writeBatch: WriteBatch
+  writeBatch: WriteBatch,
+  rank: number
 ) {
   const memberPackItems = getMemberPackItems(t, members, packItem, writeBatch);
   const category = addCategoryIfNew(categories, t, writeBatch);
-  updatePackItemIfChanged(packItem, category, memberPackItems, writeBatch);
+  updatePackItemIfChanged(packItem, category, memberPackItems, rank, writeBatch);
 }
 
 function getMemberPackItems(t: TextPackItem, members: NamedEntity[], packItem: PackItem, writeBatch: WriteBatch) {
-  let memberPackItems: MemberPackItem[] | undefined;
+  let memberPackItems: MemberPackItem[] = [];
   if (t.members) {
     memberPackItems = [];
     for (const textPackItemMember of t.members) {
       const member = members.find((member) => member.name === textPackItemMember);
-      const checked = packItem.members?.find((mpi) => mpi.id === member?.id)?.checked ?? false;
+      const checked = packItem.members.find((mpi) => mpi.id === member?.id)?.checked ?? false;
       const id = addMemberIfNew(textPackItemMember, members, member, writeBatch);
       memberPackItems.push({ id, checked });
     }
@@ -114,7 +115,7 @@ function addMemberIfNew(
     id = member.id;
   } else {
     id = firebase.addMemberBatch(textPackItemMember, writeBatch);
-    members.push({ id, name: textPackItemMember });
+    members.push({ id, name: textPackItemMember, rank: members.length });
   }
   return id;
 }
@@ -136,14 +137,17 @@ function addCategoryIfNew(categories: NamedEntity[], t: TextPackItem, writeBatch
 function updatePackItemIfChanged(
   packItem: PackItem,
   category: NamedEntity | undefined,
-  memberPackItems: MemberPackItem[] | undefined,
+  memberPackItems: MemberPackItem[],
+  rank: number,
   writeBatch: WriteBatch
 ) {
   const memberPackItemsChanged = JSON.stringify(memberPackItems) !== JSON.stringify(packItem.members);
-  if (category?.id !== packItem.category || memberPackItemsChanged) {
-    packItem.category = category?.id ?? '';
-    packItem.members = memberPackItems;
-    firebase.updatePackItemBatch(packItem, writeBatch);
+  if (category?.id !== packItem.category || memberPackItemsChanged || rank !== packItem.rank) {
+    const updated = { ...packItem };
+    updated.category = category?.id ?? '';
+    updated.members = memberPackItems;
+    updated.rank = rank;
+    firebase.updatePackItemBatch(updated, writeBatch);
   }
 }
 
@@ -152,7 +156,8 @@ function addNewPackItem(
   members: NamedEntity[],
   categories: NamedEntity[],
   writeBatch: WriteBatch,
-  packingListId: string
+  packingListId: string,
+  rank: number
 ) {
   const memberPackItems = [];
   if (t.members) {
@@ -164,13 +169,12 @@ function addNewPackItem(
   }
   let category: NamedEntity | undefined;
   if (t.category) {
-    // find or create category
     category = categories.find((cat) => cat.name === t.category);
     if (!category) {
       const newId = firebase.addCategoryBatch(t.category, writeBatch);
-      category = { id: newId, name: t.category };
+      category = { id: newId, name: t.category, rank: getMaxRank(categories) + 1 };
       categories.push(category);
     }
   }
-  return firebase.addPackItemBatch(writeBatch, t.name, memberPackItems, category?.id ?? '', packingListId);
+  firebase.addPackItemBatch(writeBatch, t.name, memberPackItems, category?.id ?? '', rank, packingListId);
 }

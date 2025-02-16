@@ -31,7 +31,7 @@ export function DragAndDrop({
     }
     const updated = reorder(result.source.index, result.destination.index);
     updated.forEach((entity, index) => {
-      entity.rank = index;
+      entity.rank = updated.length - index;
     });
     onEntitiesUpdated(updated);
     setReordered(updated);
