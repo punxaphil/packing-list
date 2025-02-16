@@ -39,9 +39,9 @@ export function PackItemsTextMode({
   const packingListId = usePackingListId().packingListId;
 
   useEffect(() => {
-    const text = getGroupedAsText(grouped, categories, members);
+    const text = getGroupedAsText(grouped, members);
     setGroupedAsText(text);
-  }, [grouped, categories, members]);
+  }, [grouped, members]);
 
   function onChange(e: ChangeEvent<HTMLTextAreaElement>) {
     setGroupedAsText(e.target.value);

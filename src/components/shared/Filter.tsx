@@ -2,6 +2,7 @@ import { Menu, MenuButton, MenuDivider, MenuList } from '@chakra-ui/icons';
 import { Flex, Link, MenuItemOption, MenuOptionGroup } from '@chakra-ui/react';
 import { useState } from 'react';
 import { AiOutlineFilter } from 'react-icons/ai';
+import { UNCATEGORIZED } from '../../services/utils.ts';
 import { useFirebase } from '../providers/FirebaseContext.ts';
 
 export function Filter({
@@ -14,7 +15,7 @@ export function Filter({
   const packItems = useFirebase().packItems;
   categories = categories.filter((c) => packItems.some((p) => p.category === c.id));
   members = members.filter((m) => packItems.some((p) => p.members.some((t) => t.id === m.id)));
-  categories = [{ id: '', name: 'Uncategorized', rank: 0 }, ...categories];
+  categories = [UNCATEGORIZED, ...categories];
   members = [{ id: '', name: 'Without members', rank: 0 }, ...members];
   const [filteredCategories, setFilteredCategories] = useState<string[]>([]);
   const [filteredMembers, setFilteredMembers] = useState<string[]>([]);

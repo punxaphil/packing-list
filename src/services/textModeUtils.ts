@@ -5,14 +5,13 @@ import { NamedEntity } from '../types/NamedEntity.ts';
 import { PackItem, TextPackItem } from '../types/PackItem.ts';
 
 import { firebase } from './firebase.ts';
-import { getCategoryName, getMemberName } from './utils.ts';
+import { getMemberName, rankOnTop } from './utils.ts';
 
-export function getGroupedAsText(grouped: GroupedPackItem[], categories: NamedEntity[], members: NamedEntity[]) {
+export function getGroupedAsText(grouped: GroupedPackItem[], members: NamedEntity[]) {
   let result = '';
   for (const group of grouped) {
-    const categoryName = getCategoryName(categories, group.categoryId);
-    if (categoryName) {
-      result += `${categoryName}\n`;
+    if (group.category?.id) {
+      result += `${group.category.name}\n`;
     }
 
     for (const item of group.packItems) {
@@ -120,15 +119,11 @@ function addMemberIfNew(
   return id;
 }
 
-function getMaxRank(categories: NamedEntity[]) {
-  return Math.max(...categories.map((cat) => cat.rank ?? 0), 0);
-}
-
 function addCategoryIfNew(categories: NamedEntity[], t: TextPackItem, writeBatch: WriteBatch) {
   let category = categories.find((cat) => cat.name === t.category);
   if (!category && t.category) {
     const id = firebase.addCategoryBatch(t.category, writeBatch);
-    category = { id, name: t.category, rank: getMaxRank(categories) + 1 };
+    category = { id, name: t.category, rank: rankOnTop(categories) };
     categories.push(category);
   }
   return category;
@@ -172,7 +167,7 @@ function addNewPackItem(
     category = categories.find((cat) => cat.name === t.category);
     if (!category) {
       const newId = firebase.addCategoryBatch(t.category, writeBatch);
-      category = { id: newId, name: t.category, rank: getMaxRank(categories) + 1 };
+      category = { id: newId, name: t.category, rank: rankOnTop(categories) };
       categories.push(category);
     }
   }

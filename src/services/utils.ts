@@ -5,6 +5,8 @@ import { MemberPackItem } from '../types/MemberPackItem.ts';
 import { NamedEntity } from '../types/NamedEntity.ts';
 import { PackItem } from '../types/PackItem.ts';
 
+export const UNCATEGORIZED = { id: '', name: 'Uncategorized', rank: 0 };
+
 export function getMemberName(members: NamedEntity[], memberId?: string) {
   return members.find((t) => t.id === memberId)?.name;
 }
@@ -17,26 +19,22 @@ export function allUnChecked(packItem: PackItem) {
   return packItem.members.every((t) => !t.checked);
 }
 
-function getCategoryRank(catId: string, categories: NamedEntity[]) {
-  const category = categories.find((c) => c.id === (catId ?? ''));
-  return category?.rank ?? -1;
-}
-
 export function groupByCategories(packItems: PackItem[], categories: NamedEntity[]) {
   packItems.sort((a, b) => sortByRank(a, b));
   const result: GroupedPackItem[] = [];
   for (const packItem of packItems) {
-    const find = result.find((r) => r.categoryId === packItem.category);
+    const find = result.find((r) => r.category?.id === packItem.category);
     if (!find) {
+      const category = categories.find((c) => c.id === packItem.category);
       result.push({
-        categoryId: packItem.category ?? '',
+        category: category,
         packItems: [packItem],
       });
     } else {
       find.packItems.push(packItem);
     }
   }
-  return result.sort((a, b) => getCategoryRank(a.categoryId, categories) - getCategoryRank(b.categoryId, categories));
+  return result.sort((a, b) => sortByRank(a.category, b.category));
 }
 
 export function sortAll(
@@ -60,6 +58,12 @@ export function sortAll(
 }
 
 function sortByRank(a?: NamedEntity, b?: NamedEntity) {
+  if (!a && b) {
+    return -1;
+  }
+  if (!b) {
+    return 1;
+  }
   return (b?.rank ?? 0) - (a?.rank ?? 0);
 }
 
@@ -113,4 +117,8 @@ export function getProfileImage(images: Image[]) {
 
 export function getCategoryName(categories: NamedEntity[], categoryId: string) {
   return categories.find((c) => c.id === categoryId)?.name;
+}
+
+export function rankOnTop(entities: NamedEntity[]) {
+  return Math.max(...entities.map((cat) => cat.rank), 0) + 1;
 }

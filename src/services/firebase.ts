@@ -153,7 +153,7 @@ export const firebase = {
     category: string,
     rank: number,
     packingList: string
-  ): PackItem {
+  ) {
     addBatch(PACK_ITEMS_KEY, writeBatch, {
       name,
       members,
@@ -210,6 +210,9 @@ export const firebase = {
   },
   addPackingListBatch(name: string, writeBatch: WriteBatch) {
     return addBatch(PACKING_LISTS_KEY, writeBatch, { name });
+  },
+  updateCategoryBatch<K extends DocumentData>(data: WithFieldValue<K>, batch: WriteBatch) {
+    batch.update(doc(firestore, USERS_KEY, getUserId(), CATEGORIES_KEY, data.id), data);
   },
 };
 

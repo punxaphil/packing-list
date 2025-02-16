@@ -1,4 +1,6 @@
+import { DragHandleIcon } from '@chakra-ui/icons';
 import { Flex, IconButton, Spacer, Text } from '@chakra-ui/react';
+import { useState } from 'react';
 import { AiOutlineDelete, AiOutlineUserDelete, AiOutlineUsergroupAdd } from 'react-icons/ai';
 import { TbStatusChange } from 'react-icons/tb';
 import { firebase } from '../../services/firebase.ts';
@@ -11,21 +13,19 @@ import { InlineEdit } from '../shared/InlineEdit.tsx';
 import { MultiCheckbox } from '../shared/MultiCheckbox.tsx';
 import { PLCheckbox } from '../shared/PLCheckbox.tsx';
 import { MemberPackItemRow } from './MemberPackItemRow.tsx';
+import { NewPackItemRow } from './NewPackItemRow.tsx';
 import { PackItemRowWrapper } from './PackItemRowWrapper.tsx';
 
 export function PackItemRow({
   packItem,
-  indent,
   filteredMembers,
-  onEnter,
 }: {
   packItem: PackItem;
-  indent: boolean;
   filteredMembers: string[];
-  onEnter: (id: string) => void;
 }) {
   const members = useFirebase().members;
   const categories = useFirebase().categories;
+  const [addNewPackItem, setAddNewPackItem] = useState(false);
 
   async function toggleItem() {
     packItem.checked = !packItem.checked;
@@ -91,58 +91,62 @@ export function PackItemRow({
   const memberRows = getMemberRows();
 
   return (
-    <PackItemRowWrapper indent={indent}>
-      <Flex gap="3" align="center">
-        {multipleMembers ? (
-          <MultiCheckbox packItem={packItem} onUpdate={onUpdate} />
-        ) : (
-          <PLCheckbox checked={packItem.checked} onClick={toggleItem} />
-        )}
+    <>
+      <PackItemRowWrapper indent={!!packItem.category}>
+        <Flex gap="3" align="center">
+          <DragHandleIcon color="gray.300" />
+          {multipleMembers ? (
+            <MultiCheckbox packItem={packItem} onUpdate={onUpdate} />
+          ) : (
+            <PLCheckbox checked={packItem.checked} onClick={toggleItem} />
+          )}
 
-        <Flex alignItems="center">
-          <InlineEdit
-            value={packItem.name}
-            onUpdate={onChangeText}
-            strike={packItem.checked}
-            onEnter={() => onEnter(packItem.id)}
-          />
-          <Text textDecoration={packItem.checked ? 'line-through' : 'none'} hidden={packItem.members.length !== 1}>
-            &nbsp;({getMemberName(members, packItem.members[0]?.id)})
-          </Text>
+          <Flex alignItems="center">
+            <InlineEdit
+              value={packItem.name}
+              onUpdate={onChangeText}
+              strike={packItem.checked}
+              onEnter={() => setAddNewPackItem(true)}
+            />
+            <Text textDecoration={packItem.checked ? 'line-through' : 'none'} hidden={packItem.members.length !== 1}>
+              &nbsp;({getMemberName(members, packItem.members[0]?.id)})
+            </Text>
+          </Flex>
+          <Spacer />
+          <Flex alignItems="center">
+            <IconSelect
+              label="Move item to category"
+              icon={<TbStatusChange />}
+              items={selectableCategories}
+              onClick={setCategory}
+            />
+            <IconSelect
+              label="Add members to pack item"
+              icon={<AiOutlineUsergroupAdd />}
+              items={selectableMembers}
+              onClick={addMember}
+            />
+            <IconButton
+              aria-label={'Remove member from pack item'}
+              icon={<AiOutlineUserDelete />}
+              onClick={onRemoveMembers}
+              variant="ghost"
+              hidden={packItem.members.length !== 1}
+            />
+            <IconButton onClick={deleteItem} variant="ghost" icon={<AiOutlineDelete />} aria-label="Delete item" />
+          </Flex>
         </Flex>
-        <Spacer />
-        <Flex alignItems="center">
-          <IconSelect
-            label="Move item to category"
-            icon={<TbStatusChange />}
-            items={selectableCategories}
-            onClick={setCategory}
-          />
-          <IconSelect
-            label="Add members to pack item"
-            icon={<AiOutlineUsergroupAdd />}
-            items={selectableMembers}
-            onClick={addMember}
-          />
-          <IconButton
-            aria-label={'Remove member from pack item'}
-            icon={<AiOutlineUserDelete />}
-            onClick={onRemoveMembers}
-            variant="ghost"
-            hidden={packItem.members.length !== 1}
-          />
-          <IconButton onClick={deleteItem} variant="ghost" icon={<AiOutlineDelete />} aria-label="Delete item" />
-        </Flex>
-      </Flex>
-      {multipleMembers &&
-        memberRows.map(({ memberItem, member }) => (
-          <MemberPackItemRow
-            memberItem={memberItem}
-            parent={packItem}
-            key={memberItem.id + member.name}
-            member={member}
-          />
-        ))}
-    </PackItemRowWrapper>
+        {multipleMembers &&
+          memberRows.map(({ memberItem, member }) => (
+            <MemberPackItemRow
+              memberItem={memberItem}
+              parent={packItem}
+              key={memberItem.id + member.name}
+              member={member}
+            />
+          ))}
+      </PackItemRowWrapper>
+      {addNewPackItem && <NewPackItemRow categoryId={packItem.category} onHide={() => setAddNewPackItem(false)} />}
+    </>
   );
 }

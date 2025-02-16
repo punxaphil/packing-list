@@ -37,7 +37,7 @@ export function MemberPackItemRow({
   }
 
   return (
-    <Flex pl="5" key={id} gap="2" align="center">
+    <Flex pl="12" key={id} gap="2" align="center">
       <PLCheckbox checked={checked} onClick={toggleMember} />
       <InlineEdit value={member.name} onUpdate={onSave} strike={checked} />
       <Spacer />

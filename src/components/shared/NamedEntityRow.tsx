@@ -55,7 +55,7 @@ export function NamedEntityRow({
   return (
     <Box border={isDragging ? '1px solid black' : 'none'} borderRadius="md" bg={isDragging ? 'gray.200' : ''}>
       <Flex gap="3" align="center">
-        <DragHandleIcon color="gray" />
+        <DragHandleIcon color="gray.300" />
         <Popover trigger="hover">
           <PopoverTrigger>
             <Link onClick={onOpen}>{imageUrl ? <Image src={imageUrl} w="30px" /> : <AiOutlineCloudUpload />}</Link>

@@ -1,16 +1,16 @@
 import { Box } from '@chakra-ui/react';
 import { DragDropContext, DragUpdate, Draggable, Droppable } from '@hello-pangea/dnd';
 import { ReactNode, useEffect, useState } from 'react';
-import { NamedEntity } from '../../types/NamedEntity.ts';
+import { Rankable } from '../../types/Rankable.ts';
 
-export function DragAndDrop({
+export function DragAndDrop<K extends Rankable>({
   entities,
   renderEntity,
   onEntitiesUpdated,
 }: {
-  entities: NamedEntity[];
-  renderEntity: (namedEntity: NamedEntity, isDragging: boolean) => ReactNode;
-  onEntitiesUpdated: (value: NamedEntity[]) => void;
+  entities: K[];
+  renderEntity: (entity: K, isDragging: boolean) => ReactNode;
+  onEntitiesUpdated: (value: K[]) => void;
 }) {
   const [reordered, setReordered] = useState(entities);
 

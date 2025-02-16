@@ -1,9 +1,19 @@
 import { Box } from '@chakra-ui/react';
-import { useState } from 'react';
+import { firebase } from '../../services/firebase.ts';
+import { UNCATEGORIZED } from '../../services/utils.ts';
 import { GroupedPackItem } from '../../types/GroupedPackItem.ts';
+import { NamedEntity } from '../../types/NamedEntity.ts';
+import { PackItem } from '../../types/PackItem.ts';
+import { DragAndDrop } from '../shared/DragAndDrop.tsx';
 import { Category } from './Category.tsx';
-import { NewPackItemRow } from './NewPackItemRow.tsx';
 import { PackItemRow } from './PackItemRow.tsx';
+
+function getCategoryAndPackItem(entity: NamedEntity | PackItem) {
+  const isPackItem = 'members' in entity;
+  const category = isPackItem ? undefined : (entity as NamedEntity);
+  const packItem = isPackItem ? (entity as PackItem) : undefined;
+  return { category, packItem };
+}
 
 export function PackItemRows({
   grouped,
@@ -14,35 +24,59 @@ export function PackItemRows({
   hidden?: boolean;
   filteredMembers: string[];
 }) {
-  const [newRowAfterId, setNewRowAfterId] = useState<string | null>(null);
-  const [addAfterCategory, setAddAfterCategory] = useState<string | undefined>(undefined);
+  const flattened: (PackItem | NamedEntity)[] = [];
+  for (const group of grouped) {
+    if (group.category) {
+      flattened.push(group.category);
+    }
+    for (const item of group.packItems) {
+      flattened.push(item);
+    }
+  }
+
+  async function saveReorderedList(orderedList: (NamedEntity | PackItem)[]) {
+    const batch = firebase.initBatch();
+    let currentCategory = '';
+    for (const item of orderedList) {
+      const { category, packItem } = getCategoryAndPackItem(item);
+      if (packItem) {
+        packItem.category = currentCategory;
+        firebase.updatePackItemBatch(packItem, batch);
+      } else if (category) {
+        if (category.id) {
+          firebase.updateCategoryBatch(category, batch);
+        }
+        currentCategory = category.id;
+      }
+    }
+    await batch.commit();
+  }
 
   return (
     <>
-      {!hidden &&
-        grouped.map(({ categoryId: groupCategory, packItems }) => {
-          return (
-            <Box key={groupCategory}>
-              <Category categoryId={groupCategory} onAddPackItem={setAddAfterCategory} />
-              {addAfterCategory === groupCategory && (
-                <NewPackItemRow categoryId={groupCategory} onHide={() => setAddAfterCategory(undefined)} />
-              )}
-              {packItems.map((packItem) => (
-                <Box key={packItem.id}>
-                  <PackItemRow
-                    packItem={packItem}
-                    indent={!!groupCategory}
-                    filteredMembers={filteredMembers}
-                    onEnter={setNewRowAfterId}
-                  />
-                  {packItem.id === newRowAfterId && (
-                    <NewPackItemRow categoryId={groupCategory} onHide={() => setNewRowAfterId(null)} />
-                  )}
+      {!hidden && (
+        <>
+          <Category category={UNCATEGORIZED} />
+          <DragAndDrop
+            entities={flattened}
+            onEntitiesUpdated={saveReorderedList}
+            renderEntity={(entity, isDragging) => {
+              const { category, packItem } = getCategoryAndPackItem(entity);
+              return (
+                <Box
+                  key={category?.id ?? packItem?.id}
+                  border={isDragging ? '1px solid black' : 'none'}
+                  borderRadius="md"
+                  bg={isDragging ? 'gray.200' : ''}
+                >
+                  {category && <Category category={category} />}
+                  {packItem && <PackItemRow packItem={packItem} filteredMembers={filteredMembers} />}
                 </Box>
-              ))}
-            </Box>
-          );
-        })}
+              );
+            }}
+          />
+        </>
+      )}
     </>
   );
 }
