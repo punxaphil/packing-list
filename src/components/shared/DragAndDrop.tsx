@@ -59,8 +59,6 @@ export function DragAndDrop<K extends Rankable>({
                         ...provided.draggableProps.style,
                         padding: '1px',
                       }}
-                      border={snapshot.isDragging ? '1px solid black' : 'none'}
-                      borderRadius="md"
                       bg={snapshot.isDragging ? 'gray.100' : ''}
                     >
                       {renderEntity(entity, dragHandle)}

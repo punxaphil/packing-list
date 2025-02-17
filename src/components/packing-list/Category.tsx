@@ -38,7 +38,7 @@ export function Category({
   const categoryImage = getCategoryImage();
   return (
     <>
-      <Flex gap="1" alignItems="center" bgColor={selected ? 'gray.100' : 'white'}>
+      <Flex gap="1" alignItems="center" bgColor={selected ? 'gray.100' : ''}>
         {dragHandle}
         {categoryImage && <Image borderRadius="full" boxSize="30px" src={categoryImage} mr="2" />}
         {category.id ? (

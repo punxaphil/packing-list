@@ -111,7 +111,7 @@ export function PackItemRow({
 
   return (
     <>
-      <PackItemRowWrapper indent={!!packItem.category} bgColor={showControls ? 'gray.100' : 'white'}>
+      <PackItemRowWrapper indent={!!packItem.category} bgColor={showControls ? 'gray.100' : ''}>
         <Flex gap="3" align="center">
           {dragHandle}
           {multipleMembers ? (
