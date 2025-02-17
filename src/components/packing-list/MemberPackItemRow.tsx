@@ -12,10 +12,12 @@ export function MemberPackItemRow({
   memberItem: { checked, id },
   parent,
   member,
+  showControls,
 }: {
   memberItem: MemberPackItem;
   parent: PackItem;
   member: NamedEntity;
+  showControls?: boolean;
 }) {
   async function toggleMember() {
     const find = parent.members.find((t) => t.id === id);
@@ -39,13 +41,14 @@ export function MemberPackItemRow({
   return (
     <Flex pl="12" key={id} gap="2" align="center">
       <PLCheckbox checked={checked} onClick={toggleMember} />
-      <InlineEdit value={member.name} onUpdate={onSave} strike={checked} />
+      <InlineEdit value={member.name} onUpdate={onSave} strike={checked} grow={true} />
       <Spacer />
       <IconButton
         aria-label={`Remove ${member.name} from pack item`}
         icon={<AiOutlineUserDelete />}
         onClick={onDelete}
         variant="ghost"
+        hidden={!showControls}
       />
     </Flex>
   );

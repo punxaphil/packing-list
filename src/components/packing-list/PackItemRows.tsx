@@ -1,4 +1,5 @@
 import { Box } from '@chakra-ui/react';
+import { useState } from 'react';
 import { firebase } from '../../services/firebase.ts';
 import { UNCATEGORIZED } from '../../services/utils.ts';
 import { GroupedPackItem } from '../../types/GroupedPackItem.ts';
@@ -7,13 +8,6 @@ import { PackItem } from '../../types/PackItem.ts';
 import { DragAndDrop } from '../shared/DragAndDrop.tsx';
 import { Category } from './Category.tsx';
 import { PackItemRow } from './PackItemRow.tsx';
-
-function getCategoryAndPackItem(entity: NamedEntity | PackItem) {
-  const isPackItem = 'members' in entity;
-  const category = isPackItem ? undefined : (entity as NamedEntity);
-  const packItem = isPackItem ? (entity as PackItem) : undefined;
-  return { category, packItem };
-}
 
 export function PackItemRows({
   grouped,
@@ -24,6 +18,8 @@ export function PackItemRows({
   hidden?: boolean;
   filteredMembers: string[];
 }) {
+  const [selectedRow, setSelectedRow] = useState('');
+
   const flattened: (PackItem | NamedEntity)[] = [];
   for (const group of grouped) {
     if (group.category) {
@@ -52,6 +48,13 @@ export function PackItemRows({
     await batch.commit();
   }
 
+  function getCategoryAndPackItem(entity: NamedEntity | PackItem) {
+    const isPackItem = 'members' in entity;
+    const category = isPackItem ? undefined : (entity as NamedEntity);
+    const packItem = isPackItem ? (entity as PackItem) : undefined;
+    return { category, packItem };
+  }
+
   return (
     <>
       {!hidden && (
@@ -64,9 +67,22 @@ export function PackItemRows({
               const { category, packItem } = getCategoryAndPackItem(entity);
               return (
                 <Box>
-                  {category && <Category category={category} dragHandle={dragHandle} />}
+                  {category && (
+                    <Category
+                      category={category}
+                      dragHandle={dragHandle}
+                      onFocus={() => setSelectedRow(category.id)}
+                      selected={selectedRow === category.id}
+                    />
+                  )}
                   {packItem && (
-                    <PackItemRow packItem={packItem} filteredMembers={filteredMembers} dragHandle={dragHandle} />
+                    <PackItemRow
+                      packItem={packItem}
+                      filteredMembers={filteredMembers}
+                      dragHandle={dragHandle}
+                      onFocus={() => setSelectedRow(packItem.id)}
+                      showControls={selectedRow === packItem.id}
+                    />
                   )}
                 </Box>
               );

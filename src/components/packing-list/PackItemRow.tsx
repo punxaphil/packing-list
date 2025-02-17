@@ -1,12 +1,12 @@
-import { Flex, IconButton, Spacer, Text } from '@chakra-ui/react';
+import { Flex, IconButton, useToast } from '@chakra-ui/react';
 import { ReactElement, useState } from 'react';
-import { AiOutlineDelete, AiOutlineUserDelete, AiOutlineUsergroupAdd } from 'react-icons/ai';
+import { AiOutlineCopy, AiOutlineDelete, AiOutlineUserDelete, AiOutlineUsergroupAdd } from 'react-icons/ai';
 import { TbStatusChange } from 'react-icons/tb';
 import { firebase } from '../../services/firebase.ts';
-import { getMemberName } from '../../services/utils.ts';
 import { MemberPackItem } from '../../types/MemberPackItem.ts';
 import { PackItem } from '../../types/PackItem.ts';
 import { useFirebase } from '../providers/FirebaseContext.ts';
+import { usePackingListId } from '../providers/PackingListContext.ts';
 import { IconSelect } from '../shared/IconSelect.tsx';
 import { InlineEdit } from '../shared/InlineEdit.tsx';
 import { MultiCheckbox } from '../shared/MultiCheckbox.tsx';
@@ -19,14 +19,21 @@ export function PackItemRow({
   packItem,
   filteredMembers,
   dragHandle,
+  onFocus,
+  showControls,
 }: {
   packItem: PackItem;
   filteredMembers: string[];
-  dragHandle?: ReactElement;
+  dragHandle: ReactElement;
+  onFocus: () => void;
+  showControls: boolean;
 }) {
   const members = useFirebase().members;
   const categories = useFirebase().categories;
   const [addNewPackItem, setAddNewPackItem] = useState(false);
+  const packingLists = useFirebase().packingLists;
+  const toast = useToast();
+  const { packingListId, setPackingListId } = usePackingListId();
 
   async function toggleItem() {
     packItem.checked = !packItem.checked;
@@ -88,12 +95,23 @@ export function PackItemRow({
     packItem.members = [];
     await onUpdate(packItem);
   }
+
+  async function copyToOtherList(id: string, name: string) {
+    await firebase.addPackItem(packItem.name, packItem.members, packItem.category ?? '', id, packItem.rank);
+    toast({
+      title: `${packItem.name} copied to ${name}`,
+      status: 'success',
+    });
+    setPackingListId(packingListId);
+  }
+
   const multipleMembers = packItem.members.length > 1;
+
   const memberRows = getMemberRows();
 
   return (
     <>
-      <PackItemRowWrapper indent={!!packItem.category}>
+      <PackItemRowWrapper indent={!!packItem.category} bgColor={showControls ? 'gray.100' : 'white'}>
         <Flex gap="3" align="center">
           {dragHandle}
           {multipleMembers ? (
@@ -102,19 +120,17 @@ export function PackItemRow({
             <PLCheckbox checked={packItem.checked} onClick={toggleItem} />
           )}
 
-          <Flex alignItems="center">
+          <Flex alignItems="center" grow="1">
             <InlineEdit
               value={packItem.name}
               onUpdate={onChangeText}
               strike={packItem.checked}
+              onFocus={onFocus}
               onEnter={() => setAddNewPackItem(true)}
+              grow={true}
             />
-            <Text textDecoration={packItem.checked ? 'line-through' : 'none'} hidden={packItem.members.length !== 1}>
-              &nbsp;({getMemberName(members, packItem.members[0]?.id)})
-            </Text>
           </Flex>
-          <Spacer />
-          <Flex alignItems="center">
+          <Flex alignItems="center" hidden={!showControls}>
             <IconSelect
               label="Move item to category"
               icon={<TbStatusChange />}
@@ -127,6 +143,12 @@ export function PackItemRow({
               items={selectableMembers}
               onClick={addMember}
             />
+            <IconSelect
+              label="Copy to other list"
+              icon={<AiOutlineCopy />}
+              items={packingLists.filter((l) => l.id !== packItem.packingList)}
+              onClick={copyToOtherList}
+            />
             <IconButton
               aria-label={'Remove member from pack item'}
               icon={<AiOutlineUserDelete />}
@@ -137,15 +159,15 @@ export function PackItemRow({
             <IconButton onClick={deleteItem} variant="ghost" icon={<AiOutlineDelete />} aria-label="Delete item" />
           </Flex>
         </Flex>
-        {multipleMembers &&
-          memberRows.map(({ memberItem, member }) => (
-            <MemberPackItemRow
-              memberItem={memberItem}
-              parent={packItem}
-              key={memberItem.id + member.name}
-              member={member}
-            />
-          ))}
+        {memberRows.map(({ memberItem, member }) => (
+          <MemberPackItemRow
+            memberItem={memberItem}
+            parent={packItem}
+            key={memberItem.id + member.name}
+            member={member}
+            showControls={showControls}
+          />
+        ))}
       </PackItemRowWrapper>
       {addNewPackItem && <NewPackItemRow categoryId={packItem.category} onHide={() => setAddNewPackItem(false)} />}
     </>

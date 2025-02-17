@@ -18,7 +18,6 @@ export function Header() {
   const packItems = useFirebase().packItems;
   const [packingList, setPackingList] = useState<NamedEntity>();
   const toast = useToast();
-
   useEffect(() => {
     const initialPackingList = packingLists.find((packingList) => packingList.id === packingListId) as NamedEntity;
     setPackingList(initialPackingList);

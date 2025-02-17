@@ -10,14 +10,20 @@ import { NewPackItemRow } from './NewPackItemRow.tsx';
 export function Category({
   category,
   dragHandle,
+  onFocus,
+  selected,
 }: {
   category: NamedEntity;
   dragHandle?: ReactElement;
+  onFocus?: () => void;
+  selected?: boolean;
 }) {
   const images = useFirebase().images;
   const [addNewPackItem, setAddNewPackItem] = useState(false);
+  const [hideIcon, setHideIcon] = useState(false);
 
   async function onChangeCategory(name: string) {
+    setHideIcon(false);
     category.name = name;
     await firebase.updateCategories(category);
   }
@@ -32,17 +38,25 @@ export function Category({
   const categoryImage = getCategoryImage();
   return (
     <>
-      <Flex gap="1" alignItems="center">
+      <Flex gap="1" alignItems="center" bgColor={selected ? 'gray.100' : 'white'}>
         {dragHandle}
         {categoryImage && <Image borderRadius="full" boxSize="30px" src={categoryImage} mr="2" />}
         {category.id ? (
-          <InlineEdit as="b" value={category.name} onUpdate={onChangeCategory} />
+          <InlineEdit
+            as="b"
+            value={category.name}
+            onUpdate={onChangeCategory}
+            onFocus={() => {
+              setHideIcon(true);
+              onFocus?.();
+            }}
+          />
         ) : (
           <Text as="i" fontSize="sm" color="gray.500">
             Uncategorized
           </Text>
         )}
-        <Link onClick={() => setAddNewPackItem(true)} variant="outline" ml="1">
+        <Link onClick={() => setAddNewPackItem(true)} variant="outline" ml="1" hidden={hideIcon}>
           <TbCategoryPlus />
         </Link>
       </Flex>

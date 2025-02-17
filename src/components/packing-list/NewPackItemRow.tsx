@@ -1,4 +1,4 @@
-import { Checkbox, Flex, Input } from '@chakra-ui/react';
+import { Input } from '@chakra-ui/react';
 import { ChangeEvent, useState } from 'react';
 import { KeyboardEvent } from 'react';
 import { firebase } from '../../services/firebase.ts';
@@ -35,17 +35,15 @@ export function NewPackItemRow({ categoryId, onHide }: { categoryId?: string; on
 
   return (
     <PackItemRowWrapper indent={!!categoryId}>
-      <Flex gap="3" align="center">
-        <Checkbox disabled />
-        <Input
-          value={newRowText}
-          onChange={onChange}
-          autoFocus
-          placeholder="What to pack?"
-          onBlur={onHide}
-          onKeyDown={onKeyDown}
-        />
-      </Flex>
+      <Input
+        value={newRowText}
+        onChange={onChange}
+        autoFocus
+        placeholder="What to pack?"
+        onBlur={onHide}
+        onKeyDown={onKeyDown}
+        mt="1"
+      />
     </PackItemRowWrapper>
   );
 }
