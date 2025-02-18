@@ -10,13 +10,13 @@ export function Filter({
 }: {
   onFilter: (filterCategories: string[], filterMembers: string[]) => void;
 }) {
-  let categories = useFirebase().categories;
-  let members = useFirebase().members;
+  let usedCategories = useFirebase().categories;
+  let usedMembers = useFirebase().members;
   const packItems = useFirebase().packItems;
-  categories = categories.filter((c) => packItems.some((p) => p.category === c.id));
-  members = members.filter((m) => packItems.some((p) => p.members.some((t) => t.id === m.id)));
-  categories = [UNCATEGORIZED, ...categories];
-  members = [{ id: '', name: 'Without members', rank: 0 }, ...members];
+  usedCategories = usedCategories.filter((c) => packItems.some((p) => p.category === c.id));
+  usedMembers = usedMembers.filter((m) => packItems.some((p) => p.members.some((t) => t.id === m.id)));
+  usedCategories = [UNCATEGORIZED, ...usedCategories];
+  usedMembers = [{ id: '', name: 'Without members', rank: 0 }, ...usedMembers];
   const [filteredCategories, setFilteredCategories] = useState<string[]>([]);
   const [filteredMembers, setFilteredMembers] = useState<string[]>([]);
 
@@ -33,7 +33,7 @@ export function Filter({
   }
 
   return (
-    <Menu closeOnSelect={false}>
+    <Menu>
       <MenuButton as={Link} m="3">
         <Flex alignItems="center" gap="1">
           <AiOutlineFilter /> Filter {(!!filteredCategories.length || !!filteredMembers.length) && '*'}
@@ -41,7 +41,7 @@ export function Filter({
       </MenuButton>
       <MenuList>
         <MenuOptionGroup type="checkbox" value={filteredCategories} onChange={onChangeCategories} title="Categories">
-          {categories.map((entity) => (
+          {usedCategories.map((entity) => (
             <MenuItemOption key={entity.id} value={entity.id}>
               {entity.name}
             </MenuItemOption>
@@ -49,7 +49,7 @@ export function Filter({
         </MenuOptionGroup>
         <MenuDivider />
         <MenuOptionGroup type="checkbox" value={filteredMembers} onChange={onChangeMembers} title="Members">
-          {members.map((entity) => (
+          {usedMembers.map((entity) => (
             <MenuItemOption key={entity.id} value={entity.id}>
               {entity.name}
             </MenuItemOption>

@@ -7,12 +7,12 @@ import { Filter } from '../shared/Filter.tsx';
 export function PackingListControls({
   hidden,
   onTextMode,
-  onFilterPackItems,
+  onPackItemsFilter,
   onMemberFilter,
 }: {
   hidden: boolean;
   onTextMode: () => void;
-  onFilterPackItems: (packItems: PackItem[]) => void;
+  onPackItemsFilter: (packItems: PackItem[]) => void;
   onMemberFilter: (memberIds: string[]) => void;
 }) {
   const packItems = useFirebase().packItems;
@@ -31,7 +31,7 @@ export function PackingListControls({
             return item.members.some((m) => showTheseMembers.includes(m.id));
           }
         });
-    onFilterPackItems(filtered);
+    onPackItemsFilter(filtered);
     onMemberFilter(showTheseMembers);
   }
 

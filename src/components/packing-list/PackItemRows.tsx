@@ -1,5 +1,5 @@
 import { Box } from '@chakra-ui/react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { firebase } from '../../services/firebase.ts';
 import { UNCATEGORIZED } from '../../services/utils.ts';
 import { GroupedPackItem } from '../../types/GroupedPackItem.ts';
@@ -19,16 +19,20 @@ export function PackItemRows({
   filteredMembers: string[];
 }) {
   const [selectedRow, setSelectedRow] = useState('');
+  const [flattened, setFlattened] = useState<(PackItem | NamedEntity)[]>([]);
 
-  const flattened: (PackItem | NamedEntity)[] = [];
-  for (const group of grouped) {
-    if (group.category) {
-      flattened.push(group.category);
+  useEffect(() => {
+    const flattened: (PackItem | NamedEntity)[] = [];
+    for (const group of grouped) {
+      if (group.category) {
+        flattened.push(group.category);
+      }
+      for (const item of group.packItems) {
+        flattened.push(item);
+      }
     }
-    for (const item of group.packItems) {
-      flattened.push(item);
-    }
-  }
+    setFlattened(flattened);
+  }, [grouped]);
 
   async function saveReorderedList(orderedList: (NamedEntity | PackItem)[]) {
     const batch = firebase.initBatch();
