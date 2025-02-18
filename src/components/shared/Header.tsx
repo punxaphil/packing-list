@@ -79,6 +79,12 @@ export function Header() {
     }
     await batch.commit();
     setPackingListId(packingListId);
+    toast({
+      title: 'Packing list copied',
+      description: `'${name}' created from '${packingList?.name}'`,
+      status: 'success',
+      duration: 9000,
+    });
   }
 
   return (
