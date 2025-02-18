@@ -57,37 +57,44 @@ export function PackItemRows({
     return { category, packItem };
   }
 
+  function styleOnDomNodeChange(isOverflow: boolean) {
+    return {
+      columnCount: [1, isOverflow ? 3 : 1],
+    };
+  }
+
   return (
-          <DragAndDrop
-            entities={flattened}
-            onEntitiesUpdated={saveReorderedList}
-            renderEntity={(entity, dragHandle) => {
-              const { category, packItem } = getCategoryAndPackItem(entity);
-              return (
-                <Box>
-                  {category && (
-                    <Category
-                      category={category}
-                      dragHandle={dragHandle}
-                      onFocus={() => setSelectedRow(category.id)}
-                      selected={selectedRow === category.id}
-                    />
-                  )}
-                  {packItem && (
-                    <PackItemRow
-                      packItem={packItem}
-                      filteredMembers={filteredMembers}
-                      dragHandle={dragHandle}
-                      onFocus={() => setSelectedRow(packItem.id)}
-                      showControls={selectedRow === packItem.id}
-                    />
-                  )}
-                </Box>
-              );
-            }}
-          />
     <Box>
       {!grouped[0].category?.id && <Category category={UNCATEGORIZED} />}
+      <DragAndDrop
+        entities={flattened}
+        onEntitiesUpdated={saveReorderedList}
+        styleOnDomNodeChange={styleOnDomNodeChange}
+        renderEntity={(entity, dragHandle) => {
+          const { category, packItem } = getCategoryAndPackItem(entity);
+          return (
+            <Box>
+              {category && (
+                <Category
+                  category={category}
+                  dragHandle={dragHandle}
+                  onFocus={() => setSelectedRow(category.id)}
+                  selected={selectedRow === category.id}
+                />
+              )}
+              {packItem && (
+                <PackItemRow
+                  packItem={packItem}
+                  filteredMembers={filteredMembers}
+                  dragHandle={dragHandle}
+                  onFocus={() => setSelectedRow(packItem.id)}
+                  showControls={selectedRow === packItem.id}
+                />
+              )}
+            </Box>
+          );
+        }}
+      />
     </Box>
   );
 }

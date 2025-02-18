@@ -1,5 +1,5 @@
 import { DragHandleIcon } from '@chakra-ui/icons';
-import { Box } from '@chakra-ui/react';
+import { Box, SystemStyleObject } from '@chakra-ui/react';
 import { DragDropContext, DragUpdate, Draggable, Droppable } from '@hello-pangea/dnd';
 import { ReactElement, ReactNode, useEffect, useState } from 'react';
 import { Rankable } from '../../types/Rankable.ts';
@@ -8,12 +8,15 @@ export function DragAndDrop<K extends Rankable>({
   entities,
   renderEntity,
   onEntitiesUpdated,
+  styleOnDomNodeChange,
 }: {
   entities: K[];
   renderEntity: (entity: K, dragHandle: ReactElement) => ReactNode;
   onEntitiesUpdated: (value: K[]) => void;
+  styleOnDomNodeChange?: (isOverflow: boolean) => SystemStyleObject;
 }) {
   const [reordered, setReordered] = useState(entities);
+  const [isOverflow, setIsOverflow] = useState(false);
 
   useEffect(() => {
     setReordered(entities);
@@ -38,37 +41,45 @@ export function DragAndDrop<K extends Rankable>({
     setReordered(updated);
   }
 
+  const handleDomNodeChange = (domNode: HTMLDivElement | null) => {
+    if (domNode) {
+      setIsOverflow(domNode?.scrollHeight > document.documentElement.clientHeight);
+    }
+  };
+
   return (
     <DragDropContext onDragEnd={onDragEnd}>
       <Droppable droppableId="droppable">
         {(provided) => (
-          <div {...provided.droppableProps} ref={provided.innerRef}>
-            {reordered.map((entity, index) => (
-              <Draggable key={entity.id} draggableId={entity.id} index={index}>
-                {(provided, snapshot) => {
-                  const dragHandle = (
-                    <div {...provided.dragHandleProps}>
-                      <DragHandleIcon color="gray.300" mr="2" />
-                    </div>
-                  );
-                  return (
-                    <Box
-                      ref={provided.innerRef}
-                      {...provided.draggableProps}
-                      style={{
-                        ...provided.draggableProps.style,
-                        padding: '1px',
-                      }}
-                      bg={snapshot.isDragging ? 'gray.100' : ''}
-                    >
-                      {renderEntity(entity, dragHandle)}
-                    </Box>
-                  );
-                }}
-              </Draggable>
-            ))}
-            {provided.placeholder}
-          </div>
+          <Box {...provided.droppableProps} ref={provided.innerRef} sx={styleOnDomNodeChange?.(isOverflow)}>
+            <Box ref={handleDomNodeChange}>
+              {reordered.map((entity, index) => (
+                <Draggable key={entity.id} draggableId={entity.id} index={index}>
+                  {(provided, snapshot) => {
+                    const dragHandle = (
+                      <div {...provided.dragHandleProps}>
+                        <DragHandleIcon color="gray.300" mr="2" />
+                      </div>
+                    );
+                    return (
+                      <Box
+                        ref={provided.innerRef}
+                        {...provided.draggableProps}
+                        style={{
+                          ...provided.draggableProps.style,
+                          padding: '1px',
+                        }}
+                        bg={snapshot.isDragging ? 'gray.100' : ''}
+                      >
+                        {renderEntity(entity, dragHandle)}
+                      </Box>
+                    );
+                  }}
+                </Draggable>
+              ))}
+              {provided.placeholder}
+            </Box>
+          </Box>
         )}
       </Droppable>
     </DragDropContext>

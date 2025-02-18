@@ -33,7 +33,7 @@ export function PackingList() {
   }
 
   return (
-    <Box maxWidth="600px" mx="auto">
+    <Box maxWidth="90%" mx="auto">
       {!textMode && (
         <PackingListControls
           onPackItemsFilter={(p) => onUpdate(p, categories)}
