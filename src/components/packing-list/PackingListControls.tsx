@@ -5,12 +5,10 @@ import { useFirebase } from '../providers/FirebaseContext.ts';
 import { Filter } from '../shared/Filter.tsx';
 
 export function PackingListControls({
-  hidden,
   onTextMode,
   onPackItemsFilter,
   onMemberFilter,
 }: {
-  hidden: boolean;
   onTextMode: () => void;
   onPackItemsFilter: (packItems: PackItem[]) => void;
   onMemberFilter: (memberIds: string[]) => void;
@@ -36,7 +34,7 @@ export function PackingListControls({
   }
 
   return (
-    <HStack justifyContent="space-between" alignItems="center" hidden={hidden}>
+    <HStack justifyContent="space-between" alignItems="center">
       <Filter onFilter={onFilter} />
       <Spacer />
       <Link onClick={onTextMode} variant="outline" m="3">

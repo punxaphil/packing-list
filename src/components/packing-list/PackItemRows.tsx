@@ -11,11 +11,9 @@ import { PackItemRow } from './PackItemRow.tsx';
 
 export function PackItemRows({
   grouped,
-  hidden,
   filteredMembers,
 }: {
   grouped: GroupedPackItem[];
-  hidden?: boolean;
   filteredMembers: string[];
 }) {
   const [selectedRow, setSelectedRow] = useState('');
@@ -60,10 +58,6 @@ export function PackItemRows({
   }
 
   return (
-    <>
-      {!hidden && (
-        <>
-          <Category category={UNCATEGORIZED} hidden={!!grouped[0].category?.id} />
           <DragAndDrop
             entities={flattened}
             onEntitiesUpdated={saveReorderedList}
@@ -92,8 +86,8 @@ export function PackItemRows({
               );
             }}
           />
-        </>
-      )}
-    </>
+    <Box>
+      {!grouped[0].category?.id && <Category category={UNCATEGORIZED} />}
+    </Box>
   );
 }

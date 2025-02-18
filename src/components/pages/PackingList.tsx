@@ -34,21 +34,28 @@ export function PackingList() {
 
   return (
     <Box maxWidth="600px" mx="auto">
-      <PackingListControls
-        hidden={textMode}
-        onPackItemsFilter={(p) => onUpdate(p, categories)}
-        onTextMode={() => setTextMode(!textMode)}
-        onMemberFilter={setFilteredMembers}
-      />
+      {!textMode && (
+        <PackingListControls
+          onPackItemsFilter={(p) => onUpdate(p, categories)}
+          onTextMode={() => setTextMode(!textMode)}
+          onMemberFilter={setFilteredMembers}
+        />
+      )}
       <Card mb="5">
         <CardBody>
-          <PackItemsTextMode grouped={grouped} onDone={() => setTextMode(false)} hidden={!textMode} />
-          <PackItemRows grouped={grouped} filteredMembers={filteredMembers} hidden={textMode || !grouped.length} />
-          <Flex justifyContent="center" minWidth="max-content" hidden={textMode || !!grouped.length}>
-            <Text>
-              No items yet. <Link onClick={addFirstPackItem}>Click here to add one!</Link>
-            </Text>
-          </Flex>
+          {textMode && <PackItemsTextMode grouped={grouped} onDone={() => setTextMode(false)} />}
+          {!textMode && (
+            <>
+              {grouped.length && <PackItemRows grouped={grouped} filteredMembers={filteredMembers} />}
+              {!grouped.length && (
+                <Flex justifyContent="center" minWidth="max-content">
+                  <Text>
+                    No items yet. <Link onClick={addFirstPackItem}>Click here to add one!</Link>
+                  </Text>
+                </Flex>
+              )}
+            </>
+          )}
         </CardBody>
       </Card>
     </Box>

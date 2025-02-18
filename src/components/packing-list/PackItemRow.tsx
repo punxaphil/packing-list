@@ -130,34 +130,37 @@ export function PackItemRow({
               grow={true}
             />
           </Flex>
-          <Flex alignItems="center" hidden={!showControls}>
-            <IconSelect
-              label="Move item to category"
-              icon={<TbStatusChange />}
-              items={selectableCategories}
-              onClick={setCategory}
-            />
-            <IconSelect
-              label="Add members to pack item"
-              icon={<AiOutlineUsergroupAdd />}
-              items={selectableMembers}
-              onClick={addMember}
-            />
-            <IconSelect
-              label="Copy to other list"
-              icon={<AiOutlineCopy />}
-              items={packingLists.filter((l) => l.id !== packItem.packingList)}
-              onClick={copyToOtherList}
-            />
-            <IconButton
-              aria-label={'Remove member from pack item'}
-              icon={<AiOutlineUserDelete />}
-              onClick={onRemoveMembers}
-              variant="ghost"
-              hidden={packItem.members.length !== 1}
-            />
-            <IconButton onClick={deleteItem} variant="ghost" icon={<AiOutlineDelete />} aria-label="Delete item" />
-          </Flex>
+          {showControls && (
+            <Flex alignItems="center">
+              <IconSelect
+                label="Move item to category"
+                icon={<TbStatusChange />}
+                items={selectableCategories}
+                onClick={setCategory}
+              />
+              <IconSelect
+                label="Add members to pack item"
+                icon={<AiOutlineUsergroupAdd />}
+                items={selectableMembers}
+                onClick={addMember}
+              />
+              <IconSelect
+                label="Copy to other list"
+                icon={<AiOutlineCopy />}
+                items={packingLists.filter((l) => l.id !== packItem.packingList)}
+                onClick={copyToOtherList}
+              />
+              {packItem.members.length === 1 && (
+                <IconButton
+                  aria-label={'Remove member from pack item'}
+                  icon={<AiOutlineUserDelete />}
+                  onClick={onRemoveMembers}
+                  variant="ghost"
+                />
+              )}
+              <IconButton onClick={deleteItem} variant="ghost" icon={<AiOutlineDelete />} aria-label="Delete item" />
+            </Flex>
+          )}
         </Flex>
         {memberRows.map(({ memberItem, member }) => (
           <MemberPackItemRow

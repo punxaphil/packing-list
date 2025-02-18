@@ -43,13 +43,14 @@ export function MemberPackItemRow({
       <PLCheckbox checked={checked} onClick={toggleMember} />
       <InlineEdit value={member.name} onUpdate={onSave} strike={checked} grow={true} />
       <Spacer />
-      <IconButton
-        aria-label={`Remove ${member.name} from pack item`}
-        icon={<AiOutlineUserDelete />}
-        onClick={onDelete}
-        variant="ghost"
-        hidden={!showControls}
-      />
+      {showControls && (
+        <IconButton
+          aria-label={`Remove ${member.name} from pack item`}
+          icon={<AiOutlineUserDelete />}
+          onClick={onDelete}
+          variant="ghost"
+        />
+      )}
     </Flex>
   );
 }

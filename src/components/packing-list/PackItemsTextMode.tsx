@@ -25,11 +25,9 @@ import { usePackingListId } from '../providers/PackingListContext.ts';
 export function PackItemsTextMode({
   grouped,
   onDone,
-  hidden,
 }: {
   grouped: GroupedPackItem[];
   onDone: () => void;
-  hidden?: boolean;
 }) {
   const categories = useFirebase().categories;
   const members = useFirebase().members;
@@ -56,8 +54,8 @@ export function PackItemsTextMode({
   }
   const { onOpen } = useDisclosure();
   return (
-    <Flex hidden={hidden} direction="column" gap="3">
-      <Progress size="xs" isIndeterminate hidden={!saving} />
+    <Flex direction="column" gap="3">
+      {saving && <Progress size="xs" isIndeterminate />}
       <Textarea
         placeholder="Paste your packing list here"
         value={groupedAsText}

@@ -39,13 +39,9 @@ export function Profile() {
             <Flex alignItems="end">
               <>
                 <ProfileAvatar shouldNavigate={false} size={profileImage ? 'full' : '2xl'} />
-                <IconButton
-                  size="xs"
-                  icon={<DeleteIcon />}
-                  aria-label="Delete profile picture"
-                  onClick={onDelete}
-                  hidden={!profileImage}
-                />
+                {profileImage && (
+                  <IconButton size="xs" icon={<DeleteIcon />} aria-label="Delete profile picture" onClick={onDelete} />
+                )}
               </>
             </Flex>
             <Spacer />

@@ -107,23 +107,26 @@ export function UploadModal({
           <ModalCloseButton />
           <ModalBody pb={6}>
             <Stack m="5" spacing={4} align="center">
-              <Switch onChange={onSwitch} isChecked={pasteImage} hidden={fileUrl !== undefined}>
-                Paste image?
-              </Switch>
+              {fileUrl === undefined && (
+                <Switch onChange={onSwitch} isChecked={pasteImage}>
+                  Paste image?
+                </Switch>
+              )}
               {pasteImage ? (
                 <HStack>
-                  <Input
-                    placeholder="Paste image here"
-                    onPaste={onPaste}
-                    autoFocus
-                    readOnly
-                    width="200px"
-                    height="200px"
-                    hidden={fileUrl !== undefined}
-                  />
+                  {fileUrl === undefined && (
+                    <Input
+                      placeholder="Paste image here"
+                      onPaste={onPaste}
+                      autoFocus
+                      readOnly
+                      width="200px"
+                      height="200px"
+                    />
+                  )}
                 </HStack>
               ) : (
-                <Input type="file" onChange={onFileSelected} accept="/image/*" p="1" hidden={fileUrl !== undefined} />
+                fileUrl === undefined && <Input type="file" onChange={onFileSelected} accept="/image/*" p="1" />
               )}
               {fileUrl && <img src={fileUrl} alt="firebase" />}
             </Stack>
