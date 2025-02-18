@@ -95,13 +95,8 @@ export function handleEnter(e: KeyboardEvent<HTMLInputElement>, onEnter: () => v
   }
 }
 
-export function findUniqueName(
-  baseName: string,
-  namedList: {
-    name: string;
-  }[]
-) {
-  const existingNames = namedList.map((n) => n.name);
+export function findUniqueName(baseName: string, packingLists: NamedEntity[]) {
+  const existingNames = packingLists.map((n) => n.name);
   let name = baseName;
   let i = 1;
   while (existingNames.includes(name)) {
