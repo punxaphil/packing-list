@@ -63,7 +63,7 @@ export function PackItemRows({
     <>
       {!hidden && (
         <>
-          <Category category={UNCATEGORIZED} />
+          <Category category={UNCATEGORIZED} hidden={!!grouped[0].category?.id} />
           <DragAndDrop
             entities={flattened}
             onEntitiesUpdated={saveReorderedList}

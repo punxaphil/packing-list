@@ -12,11 +12,13 @@ export function Category({
   dragHandle,
   onFocus,
   selected,
+  hidden,
 }: {
   category: NamedEntity;
   dragHandle?: ReactElement;
   onFocus?: () => void;
   selected?: boolean;
+  hidden?: boolean;
 }) {
   const images = useFirebase().images;
   const [addNewPackItem, setAddNewPackItem] = useState(false);
@@ -38,7 +40,7 @@ export function Category({
   const categoryImage = getCategoryImage();
   return (
     <>
-      <Flex gap="1" alignItems="center" bgColor={selected ? 'gray.100' : ''}>
+      <Flex gap="1" alignItems="center" bgColor={selected ? 'gray.100' : ''} hidden={hidden}>
         {dragHandle}
         {categoryImage && <Image borderRadius="full" boxSize="30px" src={categoryImage} mr="2" />}
         {category.id ? (
