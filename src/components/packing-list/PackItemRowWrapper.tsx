@@ -3,15 +3,13 @@ import { ReactNode } from 'react';
 
 export function PackItemRowWrapper({
   children,
-  indent,
   bgColor,
 }: {
   children: ReactNode;
-  indent: boolean;
   bgColor?: string;
 }) {
   return (
-    <Box ml={indent ? '3' : '0'} bgColor={bgColor}>
+    <Box mx="2" bgColor={bgColor} width="350px">
       {children}
     </Box>
   );

@@ -9,16 +9,25 @@ export function IconSelect({
   items,
   onClick,
   emptyIcon,
+  size,
 }: {
   label: string;
   icon: ReactElement;
   items: MultiSelectItem[];
   onClick: (id: string, name: string) => void;
   emptyIcon?: ReactElement;
+  size?: string;
 }) {
   return (
     <Menu>
-      <MenuButton as={IconButton} aria-label={label} icon={icon} variant="ghost" disabled={items.length === 0} />
+      <MenuButton
+        as={IconButton}
+        aria-label={label}
+        icon={icon}
+        variant="ghost"
+        disabled={items.length === 0}
+        size={size}
+      />
       <MenuList>
         {items.map((item) => (
           <MenuItem

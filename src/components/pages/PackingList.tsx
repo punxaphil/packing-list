@@ -1,13 +1,14 @@
-import { Box, Card, CardBody, Flex, Link, Text } from '@chakra-ui/react';
-import { useEffect, useState } from 'react';
+import { Box, Card, CardBody, Flex, Link, Text, useMediaQuery } from '@chakra-ui/react';
+import { useMemo, useState } from 'react';
 import { firebase } from '../../services/firebase.ts';
 import { groupByCategories } from '../../services/utils.ts';
 import { GroupedPackItem } from '../../types/GroupedPackItem.ts';
 import { NamedEntity } from '../../types/NamedEntity.ts';
 import { PackItem } from '../../types/PackItem.ts';
-import { PackItemRows } from '../packing-list/PackItemRows.tsx';
 import { PackItemsTextMode } from '../packing-list/PackItemsTextMode.tsx';
+import { PackingListColumns } from '../packing-list/PackingListColumns.tsx';
 import { PackingListControls } from '../packing-list/PackingListControls.tsx';
+import { MEDIA_QUERIES } from '../packing-list/packingListUtils.ts';
 import { useFirebase } from '../providers/FirebaseContext.ts';
 import { usePackingListId } from '../providers/PackingListContext.ts';
 
@@ -19,7 +20,7 @@ export function PackingList() {
   const [grouped, setGrouped] = useState<GroupedPackItem[]>([]);
   const { packingListId } = usePackingListId();
 
-  useEffect(() => {
+  useMemo(() => {
     onUpdate(packItems, categories);
   }, [packItems, categories]);
 
@@ -31,9 +32,10 @@ export function PackingList() {
   async function addFirstPackItem() {
     await firebase.addPackItem('Toothbrush', [], '', packingListId, 0);
   }
+  const [isMin800px, isMin1200px] = useMediaQuery(MEDIA_QUERIES);
 
   return (
-    <Box maxWidth="90%" mx="auto">
+    <Box mx="auto" width={isMin1200px ? '1200px' : isMin800px ? '800px' : '400px'}>
       {!textMode && (
         <PackingListControls
           onPackItemsFilter={(p) => onUpdate(p, categories)}
@@ -46,7 +48,7 @@ export function PackingList() {
           {textMode && <PackItemsTextMode grouped={grouped} onDone={() => setTextMode(false)} />}
           {!textMode && (
             <>
-              {grouped.length && <PackItemRows grouped={grouped} filteredMembers={filteredMembers} />}
+              {grouped.length && <PackingListColumns grouped={grouped} filteredMembers={filteredMembers} />}
               {!grouped.length && (
                 <Flex justifyContent="center" minWidth="max-content">
                   <Text>

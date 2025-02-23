@@ -33,8 +33,15 @@ export function InlineEdit({
     });
   }
   return (
-    <Editable defaultValue={text} as={as} flexGrow={grow ? 1 : 0} display="flex">
-      <EditablePreview textDecoration={strike ? 'line-through' : 'none'} flexGrow={grow ? 1 : 0} />
+    <Editable defaultValue={text} as={as} flexGrow={grow ? 1 : 0} display="flex" overflow="hidden">
+      <EditablePreview
+        textDecoration={strike ? 'line-through' : 'none'}
+        flexGrow={grow ? 1 : 0}
+        textOverflow="ellipsis"
+        overflow="hidden"
+        whiteSpace="nowrap"
+        display="inline-block"
+      />
       <Input
         p="0"
         m="0"
@@ -46,6 +53,7 @@ export function InlineEdit({
         onFocus={onFocus}
         focusBorderColor="transparent"
         borderColor="transparent"
+        maxHeight="20px"
       />
     </Editable>
   );

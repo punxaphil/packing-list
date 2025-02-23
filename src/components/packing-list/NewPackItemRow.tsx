@@ -34,7 +34,7 @@ export function NewPackItemRow({ categoryId, onHide }: { categoryId?: string; on
   }
 
   return (
-    <PackItemRowWrapper indent={!!categoryId}>
+    <PackItemRowWrapper>
       <Input
         value={newRowText}
         onChange={onChange}

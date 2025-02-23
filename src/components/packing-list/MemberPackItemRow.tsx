@@ -13,11 +13,13 @@ export function MemberPackItemRow({
   parent,
   member,
   showControls,
+  onFocus,
 }: {
   memberItem: MemberPackItem;
   parent: PackItem;
   member: NamedEntity;
   showControls?: boolean;
+  onFocus?: () => void;
 }) {
   async function toggleMember() {
     const find = parent.members.find((t) => t.id === id);
@@ -41,7 +43,7 @@ export function MemberPackItemRow({
   return (
     <Flex pl="12" key={id} gap="2" align="center">
       <PLCheckbox checked={checked} onClick={toggleMember} />
-      <InlineEdit value={member.name} onUpdate={onSave} strike={checked} grow={true} />
+      <InlineEdit value={member.name} onUpdate={onSave} strike={checked} grow={true} onFocus={onFocus} />
       <Spacer />
       {showControls && (
         <IconButton
@@ -49,6 +51,7 @@ export function MemberPackItemRow({
           icon={<AiOutlineUserDelete />}
           onClick={onDelete}
           variant="ghost"
+          size="sm"
         />
       )}
     </Flex>

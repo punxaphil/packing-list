@@ -10,11 +10,13 @@ import {
   PopoverTrigger,
   useDisclosure,
 } from '@chakra-ui/react';
-import { ChangeEvent, ReactElement } from 'react';
+import { DraggableProvidedDragHandleProps } from '@hello-pangea/dnd';
+import { ChangeEvent } from 'react';
 import { AiOutlineCloudUpload, AiOutlineDelete } from 'react-icons/ai';
 import { NamedEntity } from '../../types/NamedEntity.ts';
 import { useError } from '../providers/ErrorContext.ts';
 import { useFirebase } from '../providers/FirebaseContext.ts';
+import { DragHandle } from './DragHandle.tsx';
 import { UploadModal } from './UploadModal.tsx';
 
 export function NamedEntityRow({
@@ -22,13 +24,13 @@ export function NamedEntityRow({
   onUpdate,
   onDelete,
   type,
-  dragHandle,
+  dragHandleProps,
 }: {
   namedEntity: NamedEntity;
   onUpdate: (namedEntity: NamedEntity) => Promise<void>;
   onDelete: (id: string) => Promise<void>;
   type: string;
-  dragHandle: ReactElement;
+  dragHandleProps: DraggableProvidedDragHandleProps | null;
 }) {
   const { setError } = useError();
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -54,7 +56,7 @@ export function NamedEntityRow({
   return (
     <Box p="2">
       <Flex gap="3" align="center">
-        {dragHandle}
+        <DragHandle dragHandleProps={dragHandleProps} />
         <Popover trigger="hover">
           <PopoverTrigger>
             <Link onClick={onOpen}>{imageUrl ? <Image src={imageUrl} w="30px" /> : <AiOutlineCloudUpload />}</Link>

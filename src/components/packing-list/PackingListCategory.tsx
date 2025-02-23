@@ -1,22 +1,25 @@
-import { Flex, Image, Link, Text } from '@chakra-ui/react';
-import { ReactElement, useState } from 'react';
+import { Flex, IconButton, Image, Text } from '@chakra-ui/react';
+import type { SystemStyleObject } from '@chakra-ui/styled-system';
+import { DraggableProvidedDragHandleProps } from '@hello-pangea/dnd';
+import { useState } from 'react';
 import { TbCategoryPlus } from 'react-icons/tb';
 import { firebase } from '../../services/firebase.ts';
 import { NamedEntity } from '../../types/NamedEntity.ts';
 import { useFirebase } from '../providers/FirebaseContext.ts';
+import { DragHandle } from '../shared/DragHandle.tsx';
 import { InlineEdit } from '../shared/InlineEdit.tsx';
 import { NewPackItemRow } from './NewPackItemRow.tsx';
 
-export function Category({
+export function PackingListCategory({
   category,
-  dragHandle,
+  dragHandleProps,
   onFocus,
-  selected,
+  sx,
 }: {
   category: NamedEntity;
-  dragHandle?: ReactElement;
+  dragHandleProps?: DraggableProvidedDragHandleProps | null;
   onFocus?: () => void;
-  selected?: boolean;
+  sx?: SystemStyleObject;
 }) {
   const images = useFirebase().images;
   const [addNewPackItem, setAddNewPackItem] = useState(false);
@@ -38,8 +41,8 @@ export function Category({
   const categoryImage = getCategoryImage();
   return (
     <>
-      <Flex gap="1" alignItems="center" bgColor={selected ? 'gray.100' : ''}>
-        {dragHandle}
+      <Flex gap="1" alignItems="center" borderTopRadius="2xl" pt="1" sx={sx} px="2" h="32px">
+        <DragHandle dragHandleProps={dragHandleProps} />
         {categoryImage && <Image borderRadius="full" boxSize="30px" src={categoryImage} mr="2" />}
         {category.id ? (
           <InlineEdit
@@ -57,9 +60,14 @@ export function Category({
           </Text>
         )}
         {!hideIcon && (
-          <Link onClick={() => setAddNewPackItem(true)} variant="outline" ml="1">
-            <TbCategoryPlus />
-          </Link>
+          <IconButton
+            aria-label="Add new pack item to category"
+            icon={<TbCategoryPlus />}
+            onClick={() => setAddNewPackItem(true)}
+            size="sm"
+            variant="ghost"
+            ml="1"
+          />
         )}
       </Flex>
       {addNewPackItem && <NewPackItemRow categoryId={category.id} onHide={() => setAddNewPackItem(false)} />}
