@@ -7,7 +7,7 @@ import { firebase } from '../../services/firebase.ts';
 import { NamedEntity } from '../../types/NamedEntity.ts';
 import { useFirebase } from '../providers/FirebaseContext.ts';
 import { DragHandle } from '../shared/DragHandle.tsx';
-import { InlineEdit } from '../shared/InlineEdit.tsx';
+import { PLInput } from '../shared/PLInput.tsx';
 import { NewPackItemRow } from './NewPackItemRow.tsx';
 
 export function PackingListCategory({
@@ -45,8 +45,9 @@ export function PackingListCategory({
         <DragHandle dragHandleProps={dragHandleProps} />
         {categoryImage && <Image borderRadius="full" boxSize="30px" src={categoryImage} mr="2" />}
         {category.id ? (
-          <InlineEdit
-            as="b"
+          <PLInput
+            bold={true}
+            grow={false}
             value={category.name}
             onUpdate={onChangeCategory}
             onFocus={() => {

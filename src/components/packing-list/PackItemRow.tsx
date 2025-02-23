@@ -6,9 +6,9 @@ import { firebase } from '../../services/firebase.ts';
 import { PackItem } from '../../types/PackItem.ts';
 import { useFirebase } from '../providers/FirebaseContext.ts';
 import { DragHandle } from '../shared/DragHandle.tsx';
-import { InlineEdit } from '../shared/InlineEdit.tsx';
 import { MultiCheckbox } from '../shared/MultiCheckbox.tsx';
 import { PLCheckbox } from '../shared/PLCheckbox.tsx';
+import { PLInput } from '../shared/PLInput.tsx';
 import { MemberPackItemRow } from './MemberPackItemRow.tsx';
 import { NewPackItemRow } from './NewPackItemRow.tsx';
 import { PackItemRowControls } from './PackItemRowControls.tsx';
@@ -65,7 +65,7 @@ export function PackItemRow({
           )}
 
           <Flex alignItems="center" grow="1" overflow="hidden">
-            <InlineEdit
+            <PLInput
               value={packItem.name}
               onUpdate={onChangeText}
               strike={packItem.checked}
