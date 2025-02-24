@@ -80,6 +80,7 @@ export function PackingListColumns({
                 selectedRow={selectedRow}
                 filteredMembers={filteredMembers}
                 usedCategories={usedCategories}
+                grouped={grouped}
               />
             </Box>
           );

@@ -1,4 +1,4 @@
-import { Box, Flex } from '@chakra-ui/react';
+import { Box, Checkbox, Flex } from '@chakra-ui/react';
 import type { SystemStyleObject } from '@chakra-ui/styled-system';
 import { DraggableProvidedDragHandleProps } from '@hello-pangea/dnd';
 import { useMemo, useState } from 'react';
@@ -7,7 +7,6 @@ import { PackItem } from '../../types/PackItem.ts';
 import { useFirebase } from '../providers/FirebaseContext.ts';
 import { DragHandle } from '../shared/DragHandle.tsx';
 import { MultiCheckbox } from '../shared/MultiCheckbox.tsx';
-import { PLCheckbox } from '../shared/PLCheckbox.tsx';
 import { PLInput } from '../shared/PLInput.tsx';
 import { MemberPackItemRow } from './MemberPackItemRow.tsx';
 import { NewPackItemRow } from './NewPackItemRow.tsx';
@@ -61,7 +60,7 @@ export function PackItemRow({
           {packItem.members.length > 1 ? (
             <MultiCheckbox packItem={packItem} onUpdate={onUpdate} />
           ) : (
-            <PLCheckbox checked={packItem.checked} onClick={toggleItem} />
+            <Checkbox isChecked={packItem.checked} onChange={toggleItem} />
           )}
 
           <Flex alignItems="center" grow="1" overflow="hidden">

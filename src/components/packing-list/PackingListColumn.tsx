@@ -1,6 +1,7 @@
 import { Box } from '@chakra-ui/react';
 import { Draggable, Droppable } from '@hello-pangea/dnd';
 import { PackingListRow } from '../../types/Column.ts';
+import { GroupedPackItem } from '../../types/GroupedPackItem.ts';
 import { useFirebase } from '../providers/FirebaseContext.ts';
 import { PackItemRow } from './PackItemRow.tsx';
 import { PackingListCategory } from './PackingListCategory.tsx';
@@ -12,6 +13,7 @@ export function PackingListColumn({
   selectedRow,
   filteredMembers,
   usedCategories,
+  grouped,
 }: {
   rows: PackingListRow[];
   id: string;
@@ -19,6 +21,7 @@ export function PackingListColumn({
   selectedRow?: string;
   filteredMembers: string[];
   usedCategories: string[];
+  grouped: GroupedPackItem[];
 }) {
   const categories = useFirebase().categories;
   return (
@@ -42,6 +45,7 @@ export function PackingListColumn({
                         category={row.category}
                         dragHandleProps={provided.dragHandleProps}
                         onFocus={() => setSelectedRow(row.id)}
+                        grouped={grouped}
                         sx={{ ...rowStyle, marginTop: index === 0 ? '0' : '1' }}
                       />
                     )}
