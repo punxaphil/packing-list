@@ -3,4 +3,5 @@ export interface NamedEntity {
   name: string;
   image?: string;
   rank: number;
+  color?: string;
 }

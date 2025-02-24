@@ -5,7 +5,7 @@ import { MemberPackItem } from '../types/MemberPackItem.ts';
 import { NamedEntity } from '../types/NamedEntity.ts';
 import { PackItem } from '../types/PackItem.ts';
 
-export const UNCATEGORIZED = { id: '', name: 'Uncategorized', rank: 0 };
+export const UNCATEGORIZED = { id: '', name: 'Uncategorized', rank: 0, color: 'gray.50' };
 
 export function getMemberName(members: NamedEntity[], memberId?: string) {
   return members.find((t) => t.id === memberId)?.name;

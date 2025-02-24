@@ -3,7 +3,7 @@ import { DragDropContext, DragUpdate } from '@hello-pangea/dnd';
 import { useMemo, useState } from 'react';
 import { firebase } from '../../services/firebase.ts';
 import { UNCATEGORIZED } from '../../services/utils.ts';
-import { COLUMN_COLORS, ColumnList, PackingListRow } from '../../types/Column.ts';
+import { ColumnList, PackingListRow } from '../../types/Column.ts';
 import { GroupedPackItem } from '../../types/GroupedPackItem.ts';
 import { useFirebase } from '../providers/FirebaseContext.ts';
 import { PackingListCategory } from './PackingListCategory.tsx';
@@ -71,7 +71,7 @@ export function PackingListColumns({
           return (
             <Box key={key}>
               {key === columns[0].key && packItem && !packItem.category && (
-                <PackingListCategory category={UNCATEGORIZED} sx={{ background: COLUMN_COLORS[0] }} />
+                <PackingListCategory category={UNCATEGORIZED} sx={{ background: UNCATEGORIZED.color }} />
               )}
               <PackingListColumn
                 id={key}

@@ -1,6 +1,7 @@
 import { Box } from '@chakra-ui/react';
 import { Draggable, Droppable } from '@hello-pangea/dnd';
 import { PackingListRow } from '../../types/Column.ts';
+import { useFirebase } from '../providers/FirebaseContext.ts';
 import { PackItemRow } from './PackItemRow.tsx';
 import { PackingListCategory } from './PackingListCategory.tsx';
 
@@ -19,6 +20,7 @@ export function PackingListColumn({
   filteredMembers: string[];
   usedCategories: string[];
 }) {
+  const categories = useFirebase().categories;
   return (
     <Droppable droppableId={id}>
       {(provided) => (
@@ -26,7 +28,7 @@ export function PackingListColumn({
           {rows.map((row, index) => (
             <Draggable key={row.id} draggableId={row.id} index={index}>
               {(provided) => {
-                const rowStyle = { background: row.color(usedCategories) };
+                const rowStyle = { background: row.getColor(usedCategories, categories) };
                 return (
                   <Box
                     ref={provided.innerRef}

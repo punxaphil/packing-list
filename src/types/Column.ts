@@ -1,3 +1,4 @@
+import { UNCATEGORIZED } from '../services/utils.ts';
 import { NamedEntity } from './NamedEntity.ts';
 import { PackItem } from './PackItem.ts';
 
@@ -37,10 +38,16 @@ export class PackingListRow {
     return 0;
   }
 
-  color(categories: string[]) {
+  getColor(categoriesInPackingList: string[], categories: NamedEntity[]) {
     const categoryId = this.category?.id ?? this.packItem?.category;
-
-    const index = !categoryId ? 0 : categories.findIndex((c) => c === categoryId) + 1;
+    if (!categoryId) {
+      return UNCATEGORIZED.color;
+    }
+    const category = categories.find((c) => c.id === categoryId);
+    if (category?.color) {
+      return category.color;
+    }
+    const index = categoriesInPackingList.findIndex((c) => c === categoryId);
     return COLUMN_COLORS[index % COLUMN_COLORS.length];
   }
 }

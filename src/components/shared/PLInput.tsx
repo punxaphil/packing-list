@@ -9,6 +9,7 @@ export function PLInput({
   bold,
   onEnter,
   onFocus,
+  disabled,
 }: {
   value: string;
   onUpdate: (value: string) => void;
@@ -16,6 +17,7 @@ export function PLInput({
   bold?: boolean;
   onEnter?: () => void;
   onFocus?: () => void;
+  disabled?: boolean;
 }) {
   const [text, setText] = useState(value);
   const [overflowActive, setOverflowActive] = useState(false);
@@ -61,6 +63,9 @@ export function PLInput({
         height="32px"
         onFocus={onFocus}
         ref={textRef}
+        disabled={disabled}
+        fontStyle={disabled ? 'italic' : 'normal'}
+        color={disabled ? 'gray.500' : 'inherit'}
       />
     </Tooltip>
   );
