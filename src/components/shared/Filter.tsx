@@ -74,7 +74,14 @@ export function Filter({
         </MenuList>
       </Menu>
       {allFilters.map((c) => (
-        <Button key={c?.id} onClick={() => removeFilter(c)} rightIcon={<SmallCloseIcon />} size="xs" m="1">
+        <Button
+          key={c?.id}
+          onClick={() => removeFilter(c)}
+          rightIcon={<SmallCloseIcon />}
+          size="xs"
+          m="1"
+          borderRadius="full"
+        >
           {c?.name}
         </Button>
       ))}

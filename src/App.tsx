@@ -19,7 +19,7 @@ import { Profile } from './components/pages/Profile.tsx';
 import { Welcome } from './components/pages/Welcome.tsx';
 import { useError } from './components/providers/ErrorContext.ts';
 
-export const THEME_COLOR = 'teal';
+export const THEME_COLOR = 'gray';
 const customTheme = extendTheme(withDefaultColorScheme({ colorScheme: THEME_COLOR }), {
   components: {
     Link: {
