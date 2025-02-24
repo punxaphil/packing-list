@@ -47,7 +47,6 @@ export function PackingListCategory({
         {category.id ? (
           <PLInput
             bold={true}
-            grow={false}
             value={category.name}
             onUpdate={onChangeCategory}
             onFocus={() => {

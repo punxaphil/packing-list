@@ -71,7 +71,6 @@ export function PackItemRow({
               strike={packItem.checked}
               onFocus={onFocus}
               onEnter={() => setAddNewPackItem(true)}
-              grow={true}
             />
           </Flex>
           {showControls && <PackItemRowControls packItem={packItem} onUpdate={onUpdate} />}

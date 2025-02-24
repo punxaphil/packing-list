@@ -43,7 +43,7 @@ export function MemberPackItemRow({
   return (
     <Flex pl="12" key={id} gap="2" align="center">
       <PLCheckbox checked={checked} onClick={toggleMember} />
-      <PLInput value={member.name} onUpdate={onSave} strike={checked} grow={true} onFocus={onFocus} />
+      <PLInput value={member.name} onUpdate={onSave} strike={checked} onFocus={onFocus} />
       <Spacer />
       {showControls && (
         <IconButton
