@@ -1,8 +1,9 @@
-import { Menu, MenuButton, MenuDivider, MenuList } from '@chakra-ui/icons';
-import { Flex, Link, MenuItemOption, MenuOptionGroup } from '@chakra-ui/react';
+import { Menu, MenuButton, MenuDivider, MenuList, SmallCloseIcon } from '@chakra-ui/icons';
+import { Button, Link, MenuItemOption, MenuOptionGroup } from '@chakra-ui/react';
 import { useState } from 'react';
 import { AiOutlineFilter } from 'react-icons/ai';
 import { UNCATEGORIZED } from '../../services/utils.ts';
+import { NamedEntity } from '../../types/NamedEntity.ts';
 import { useFirebase } from '../providers/FirebaseContext.ts';
 
 export function Filter({
@@ -32,30 +33,51 @@ export function Filter({
     setFilteredMembers(arr);
   }
 
+  function removeFilter(filterToRemove: NamedEntity) {
+    if (filteredCategories.includes(filterToRemove.id)) {
+      const arr = filteredCategories.filter((f) => f !== filterToRemove.id);
+      onFilter(arr, filteredMembers);
+      setFilteredCategories(arr);
+    } else {
+      const arr = filteredMembers.filter((f) => f !== filterToRemove.id);
+      onFilter(filteredCategories, arr);
+      setFilteredMembers(arr);
+    }
+  }
+
+  const allFilters = [
+    ...filteredCategories.map((c) => usedCategories.find((e) => e.id === c)),
+    ...filteredMembers.map((m) => usedMembers.find((e) => e.id === m)),
+  ].filter((e) => !!e);
   return (
-    <Menu>
-      <MenuButton as={Link} m="3">
-        <Flex alignItems="center" gap="1">
-          <AiOutlineFilter /> Filter {(!!filteredCategories.length || !!filteredMembers.length) && '*'}
-        </Flex>
-      </MenuButton>
-      <MenuList>
-        <MenuOptionGroup type="checkbox" value={filteredCategories} onChange={onChangeCategories} title="Categories">
-          {usedCategories.map((entity) => (
-            <MenuItemOption key={entity.id} value={entity.id}>
-              {entity.name}
-            </MenuItemOption>
-          ))}
-        </MenuOptionGroup>
-        <MenuDivider />
-        <MenuOptionGroup type="checkbox" value={filteredMembers} onChange={onChangeMembers} title="Members">
-          {usedMembers.map((entity) => (
-            <MenuItemOption key={entity.id} value={entity.id}>
-              {entity.name}
-            </MenuItemOption>
-          ))}
-        </MenuOptionGroup>
-      </MenuList>
-    </Menu>
+    <>
+      <Menu>
+        <MenuButton as={Link} m="3">
+          <AiOutlineFilter />
+        </MenuButton>
+        <MenuList>
+          <MenuOptionGroup type="checkbox" value={filteredCategories} onChange={onChangeCategories} title="Categories">
+            {usedCategories.map((entity) => (
+              <MenuItemOption key={entity.id} value={entity.id}>
+                {entity.name}
+              </MenuItemOption>
+            ))}
+          </MenuOptionGroup>
+          <MenuDivider />
+          <MenuOptionGroup type="checkbox" value={filteredMembers} onChange={onChangeMembers} title="Members">
+            {usedMembers.map((entity) => (
+              <MenuItemOption key={entity.id} value={entity.id}>
+                {entity.name}
+              </MenuItemOption>
+            ))}
+          </MenuOptionGroup>
+        </MenuList>
+      </Menu>
+      {allFilters.map((c) => (
+        <Button key={c?.id} onClick={() => removeFilter(c)} rightIcon={<SmallCloseIcon />} size="xs" m="1">
+          {c?.name}
+        </Button>
+      ))}
+    </>
   );
 }
