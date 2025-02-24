@@ -91,7 +91,7 @@ export const firebase = {
     packingList: string,
     rank: number
   ): Promise<PackItem> => {
-    const docRef = await add(PACK_ITEMS_KEY, { name, members, category, packingList, rank });
+    const docRef = await add(PACK_ITEMS_KEY, { name, members, checked: false, category, packingList, rank });
     return { id: docRef.id, checked: false, members, name, category, packingList, rank };
   },
   updatePackItem: async (packItem: PackItem) => {
@@ -157,6 +157,7 @@ export const firebase = {
     addBatch(PACK_ITEMS_KEY, writeBatch, {
       name,
       members,
+      checked: false,
       category,
       packingList,
       rank,

@@ -20,7 +20,6 @@ export function allUnChecked(packItem: PackItem) {
 }
 
 export function groupByCategories(packItems: PackItem[], categories: NamedEntity[]) {
-  packItems.sort((a, b) => sortByRank(a, b));
   const result: GroupedPackItem[] = [];
   for (const packItem of packItems) {
     const find = result.find((r) => r.category?.id === packItem.category);
@@ -73,19 +72,32 @@ export function sortEntities(entities: NamedEntity[]) {
 
 export function sortPackItems(packItems: PackItem[], members: NamedEntity[], categories: NamedEntity[]) {
   for (const packItem of packItems) {
-    sortPackItemMembersAccordingToMemberRank(members, packItem.members);
+    sortPackItemMembersAccordingToMemberRank(packItem.members);
   }
-  sortPackItemsBasedOnCategoryRank(packItems, categories);
-
-  function sortPackItemMembersAccordingToMemberRank(members: NamedEntity[], itemMembers: MemberPackItem[]) {
+  sortPackItemsBasedOnCategoryRank();
+  function sortPackItemMembersAccordingToMemberRank(itemMembers: MemberPackItem[]) {
     const getMemberFromId = (mi: MemberPackItem) => members.find((m) => m.id === mi.id);
     itemMembers.sort((a, b) => sortByRank(getMemberFromId(a), getMemberFromId(b)));
   }
 
-  function sortPackItemsBasedOnCategoryRank(packItems: PackItem[], categories: NamedEntity[]) {
+  function sortPackItemsBasedOnCategoryRank() {
     const getCategoryFromId = (pi: PackItem) =>
       pi.category ? categories.find((cat) => cat.id === pi.category) : undefined;
-    packItems.sort((a, b) => sortByRank(getCategoryFromId(a), getCategoryFromId(b)));
+
+    packItems.sort((a, b) => {
+      const categoryA = getCategoryFromId(a);
+      const categoryB = getCategoryFromId(b);
+
+      if ((categoryA?.rank ?? 0) !== (categoryB?.rank ?? 0)) {
+        return (categoryB?.rank ?? 0) - (categoryA?.rank ?? 0);
+      }
+
+      if (a.checked !== b.checked) {
+        return a.checked ? 1 : -1;
+      }
+
+      return (b.rank ?? 0) - (a.rank ?? 0);
+    });
   }
 }
 
@@ -108,10 +120,6 @@ export function findUniqueName(baseName: string, packingLists: NamedEntity[]) {
 
 export function getProfileImage(images: Image[]) {
   return images.find((image) => image.type === 'profile');
-}
-
-export function getCategoryName(categories: NamedEntity[], categoryId: string) {
-  return categories.find((c) => c.id === categoryId)?.name;
 }
 
 export function rankOnTop(entities: NamedEntity[]) {
