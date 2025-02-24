@@ -2,7 +2,8 @@ import { Flex, Spacer, Spinner } from '@chakra-ui/react';
 import { getAuth } from 'firebase/auth';
 import { ReactNode, useEffect, useState } from 'react';
 import { firebase } from '../../services/firebase.ts';
-import { sortAll } from '../../services/utils.ts';
+import { groupByCategories, sortAll } from '../../services/utils.ts';
+import { GroupedPackItem } from '../../types/GroupedPackItem.ts';
 import { Image } from '../../types/Image.ts';
 import { NamedEntity } from '../../types/NamedEntity.ts';
 import { PackItem } from '../../types/PackItem.ts';
@@ -36,14 +37,16 @@ export function FirebaseProvider({ children }: { children: ReactNode }) {
     })().catch(console.error);
   }, [packingListId]);
 
+  let groupedPackItems: GroupedPackItem[] = [];
   const isInitialized = members && categories && packItems && images && packingLists && packingListId;
   if (isInitialized) {
     sortAll(members, categories, packItems, packingLists);
+    groupedPackItems = groupByCategories(packItems, categories);
   }
   return (
     <>
       {isInitialized ? (
-        <FirebaseContext.Provider value={{ members, categories, packItems, images, packingLists }}>
+        <FirebaseContext.Provider value={{ members, categories, packItems, images, packingLists, groupedPackItems }}>
           {children}
         </FirebaseContext.Provider>
       ) : (

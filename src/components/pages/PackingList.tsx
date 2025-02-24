@@ -1,5 +1,5 @@
 import { Box, Card, CardBody, Flex, Link, Text, useMediaQuery } from '@chakra-ui/react';
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { firebase } from '../../services/firebase.ts';
 import { groupByCategories } from '../../services/utils.ts';
 import { GroupedPackItem } from '../../types/GroupedPackItem.ts';
@@ -15,16 +15,13 @@ import { usePackingListId } from '../providers/PackingListContext.ts';
 export function PackingList() {
   const categories = useFirebase().categories;
   const packItems = useFirebase().packItems;
+  const groupedPackItems = useFirebase().groupedPackItems;
   const [filteredMembers, setFilteredMembers] = useState<string[]>([]);
   const [textMode, setTextMode] = useState(false);
-  const [grouped, setGrouped] = useState<GroupedPackItem[]>([]);
+  const [grouped, setGrouped] = useState<GroupedPackItem[]>(groupedPackItems);
   const { packingListId } = usePackingListId();
 
-  useMemo(() => {
-    onUpdate(packItems, categories);
-  }, [packItems, categories]);
-
-  function onUpdate(packItems: PackItem[], categories: NamedEntity[]) {
+  function onPackItemsFilter(packItems: PackItem[], categories: NamedEntity[]) {
     const grouped = groupByCategories(packItems, categories);
     setGrouped(grouped);
   }
@@ -38,7 +35,7 @@ export function PackingList() {
     <Box mx="auto" width={isMin1200px ? '1200px' : isMin800px ? '800px' : '400px'}>
       {!textMode && (
         <PackingListControls
-          onPackItemsFilter={(p) => onUpdate(p, categories)}
+          onPackItemsFilter={(p) => onPackItemsFilter(p, categories)}
           onTextMode={() => setTextMode(!textMode)}
           onMemberFilter={setFilteredMembers}
         />
