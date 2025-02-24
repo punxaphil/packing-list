@@ -2,7 +2,7 @@ import { Flex, HStack, Link, Spacer } from '@chakra-ui/react';
 import { AiOutlineEdit } from 'react-icons/ai';
 import { PackItem } from '../../types/PackItem.ts';
 import { useFirebase } from '../providers/FirebaseContext.ts';
-import { Filter } from '../shared/Filter.tsx';
+import { CHECKED_FILTER_STATE, Filter, UNCHECKED_FILTER_STATE } from '../shared/Filter.tsx';
 
 export function PackingListControls({
   onTextMode,
@@ -15,7 +15,7 @@ export function PackingListControls({
 }) {
   const packItems = useFirebase().packItems;
 
-  function onFilter(showTheseCategories: string[], showTheseMembers: string[]) {
+  function onFilter(showTheseCategories: string[], showTheseMembers: string[], showTheseStates: string[]) {
     let filtered = !showTheseCategories.length
       ? packItems
       : packItems.filter((item) => showTheseCategories.includes(item.category ?? ''));
@@ -29,6 +29,13 @@ export function PackingListControls({
             return item.members.some((m) => showTheseMembers.includes(m.id));
           }
         });
+    filtered = !showTheseStates.length
+      ? filtered
+      : filtered.filter(
+          (item) =>
+            (showTheseStates.includes(CHECKED_FILTER_STATE) && item.checked) ||
+            (showTheseStates.includes(UNCHECKED_FILTER_STATE) && !item.checked)
+        );
     onPackItemsFilter(filtered);
     onMemberFilter(showTheseMembers);
   }

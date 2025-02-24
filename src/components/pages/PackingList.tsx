@@ -48,11 +48,18 @@ export function PackingList() {
           {textMode && <PackItemsTextMode grouped={grouped} onDone={() => setTextMode(false)} />}
           {!textMode && (
             <>
-              {grouped.length && <PackingListColumns grouped={grouped} filteredMembers={filteredMembers} />}
-              {!grouped.length && (
+              {grouped.length > 0 && <PackingListColumns grouped={grouped} filteredMembers={filteredMembers} />}
+
+              {grouped.length === 0 && (
                 <Flex justifyContent="center" minWidth="max-content">
                   <Text>
-                    No items yet. <Link onClick={addFirstPackItem}>Click here to add one!</Link>
+                    {packItems.length > 0 ? (
+                      'No items match the current filter.'
+                    ) : (
+                      <>
+                        No items yet. <Link onClick={addFirstPackItem}>Click here to add one!</Link>
+                      </>
+                    )}
                   </Text>
                 </Flex>
               )}

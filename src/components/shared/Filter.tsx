@@ -3,13 +3,16 @@ import { Button, Link, MenuItemOption, MenuOptionGroup } from '@chakra-ui/react'
 import { useState } from 'react';
 import { AiOutlineFilter } from 'react-icons/ai';
 import { UNCATEGORIZED } from '../../services/utils.ts';
-import { NamedEntity } from '../../types/NamedEntity.ts';
+import { COLUMN_COLORS } from '../../types/Column.ts';
 import { useFirebase } from '../providers/FirebaseContext.ts';
+
+export const CHECKED_FILTER_STATE = '☑ Checked';
+export const UNCHECKED_FILTER_STATE = '☐ Unchecked';
 
 export function Filter({
   onFilter,
 }: {
-  onFilter: (filterCategories: string[], filterMembers: string[]) => void;
+  onFilter: (filterCategories: string[], filterMembers: string[], filterPackItemState: string[]) => void;
 }) {
   let usedCategories = useFirebase().categories;
   let usedMembers = useFirebase().members;
@@ -20,35 +23,48 @@ export function Filter({
   usedMembers = [{ id: '', name: 'Without members', rank: 0 }, ...usedMembers];
   const [filteredCategories, setFilteredCategories] = useState<string[]>([]);
   const [filteredMembers, setFilteredMembers] = useState<string[]>([]);
+  const [filteredPackItemState, setFilteredPackItemState] = useState<string[]>([]);
 
   function onChangeCategories(filter: string | string[]) {
     const arr = Array.isArray(filter) ? filter : [filter];
-    onFilter(arr, filteredMembers);
+    onFilter(arr, filteredMembers, filteredPackItemState);
     setFilteredCategories(arr);
   }
 
   function onChangeMembers(filter: string | string[]) {
     const arr = Array.isArray(filter) ? filter : [filter];
-    onFilter(filteredCategories, arr);
+    onFilter(filteredCategories, arr, filteredPackItemState);
     setFilteredMembers(arr);
   }
 
-  function removeFilter(filterToRemove: NamedEntity) {
-    if (filteredCategories.includes(filterToRemove.id)) {
-      const arr = filteredCategories.filter((f) => f !== filterToRemove.id);
-      onFilter(arr, filteredMembers);
+  function onChangePackItemState(filter: string | string[]) {
+    const arr = Array.isArray(filter) ? filter : [filter];
+    onFilter(filteredCategories, filteredMembers, arr);
+    setFilteredPackItemState(arr);
+  }
+
+  function removeNamedEntityFilter(id: string) {
+    if (filteredCategories.includes(id)) {
+      const arr = filteredCategories.filter((f) => f !== id);
+      onFilter(arr, filteredMembers, filteredPackItemState);
       setFilteredCategories(arr);
-    } else {
-      const arr = filteredMembers.filter((f) => f !== filterToRemove.id);
-      onFilter(filteredCategories, arr);
+    } else if (filteredMembers.includes(id)) {
+      const arr = filteredMembers.filter((f) => f !== id);
+      onFilter(filteredCategories, arr, filteredPackItemState);
       setFilteredMembers(arr);
+    } else {
+      const arr = filteredPackItemState.filter((f) => f !== id);
+      onFilter(filteredCategories, filteredMembers, arr);
+      setFilteredPackItemState(arr);
     }
   }
 
-  const allFilters = [
+  const filterButtonsData = [
     ...filteredCategories.map((c) => usedCategories.find((e) => e.id === c)),
     ...filteredMembers.map((m) => usedMembers.find((e) => e.id === m)),
+    ...filteredPackItemState.map((c) => ({ id: c, name: c })),
   ].filter((e) => !!e);
+
   return (
     <>
       <Menu>
@@ -56,6 +72,18 @@ export function Filter({
           <AiOutlineFilter />
         </MenuButton>
         <MenuList>
+          <MenuOptionGroup
+            type="checkbox"
+            value={filteredPackItemState}
+            onChange={onChangePackItemState}
+            title="Pack Item state"
+          >
+            {[CHECKED_FILTER_STATE, UNCHECKED_FILTER_STATE].map((entity) => (
+              <MenuItemOption key={entity} value={entity}>
+                {entity}
+              </MenuItemOption>
+            ))}
+          </MenuOptionGroup>
           <MenuOptionGroup type="checkbox" value={filteredCategories} onChange={onChangeCategories} title="Categories">
             {usedCategories.map((entity) => (
               <MenuItemOption key={entity.id} value={entity.id}>
@@ -73,14 +101,15 @@ export function Filter({
           </MenuOptionGroup>
         </MenuList>
       </Menu>
-      {allFilters.map((c) => (
+      {filterButtonsData.map((c, index) => (
         <Button
           key={c?.id}
-          onClick={() => removeFilter(c)}
+          onClick={() => removeNamedEntityFilter(c?.id)}
           rightIcon={<SmallCloseIcon />}
           size="xs"
           m="1"
           borderRadius="full"
+          bg={COLUMN_COLORS[index % COLUMN_COLORS.length]}
         >
           {c?.name}
         </Button>
