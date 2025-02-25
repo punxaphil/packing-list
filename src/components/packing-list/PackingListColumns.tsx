@@ -71,7 +71,11 @@ export function PackingListColumns({
           return (
             <Box key={key}>
               {key === columns[0].key && packItem && !packItem.category && (
-                <PackingListCategory category={UNCATEGORIZED} sx={{ background: UNCATEGORIZED.color }} />
+                <PackingListCategory
+                  category={UNCATEGORIZED}
+                  sx={{ background: UNCATEGORIZED.color }}
+                  grouped={grouped}
+                />
               )}
               <PackingListColumn
                 id={key}

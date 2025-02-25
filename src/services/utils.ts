@@ -22,7 +22,7 @@ export function allUnChecked(packItem: PackItem) {
 export function groupByCategories(packItems: PackItem[], categories: NamedEntity[]) {
   const result: GroupedPackItem[] = [];
   for (const packItem of packItems) {
-    const find = result.find((r) => r.category?.id === packItem.category);
+    const find = result.find((r) => r.category?.id === (packItem.category || undefined));
     if (!find) {
       const category = categories.find((c) => c.id === packItem.category);
       result.push({

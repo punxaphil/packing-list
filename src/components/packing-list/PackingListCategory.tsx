@@ -75,7 +75,12 @@ export function PackingListCategory({
 
   async function toggleItem() {
     const newState = !checked;
-    const group = grouped?.find((t) => t.category?.id === category.id);
+    const group = grouped?.find((t) => {
+      if (!category.id) {
+        return !t.category?.id;
+      }
+      return t.category?.id === category.id;
+    });
     if (!group) {
       return;
     }
