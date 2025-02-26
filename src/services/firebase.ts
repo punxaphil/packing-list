@@ -12,8 +12,10 @@ import {
   doc,
   getDoc,
   getDocs,
-  getFirestore,
+  initializeFirestore,
   onSnapshot,
+  persistentLocalCache,
+  persistentMultipleTabManager,
   query,
   updateDoc,
   where,
@@ -36,7 +38,9 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-const firestore = getFirestore(app);
+const firestore = initializeFirestore(app, {
+  localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() }),
+});
 
 const CATEGORIES_KEY = 'categories';
 const MEMBERS_KEY = 'members';
