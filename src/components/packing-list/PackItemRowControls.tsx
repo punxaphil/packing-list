@@ -1,5 +1,5 @@
 import { Flex, IconButton, useToast } from '@chakra-ui/react';
-import { AiOutlineCopy, AiOutlineDelete, AiOutlineUserDelete, AiOutlineUsergroupAdd } from 'react-icons/ai';
+import { AiOutlineCopy, AiOutlineDelete, AiOutlineUsergroupAdd } from 'react-icons/ai';
 import { TbStatusChange } from 'react-icons/tb';
 import { firebase } from '../../services/firebase.ts';
 import { PackItem } from '../../types/PackItem.ts';
@@ -39,11 +39,6 @@ export function PackItemRowControls({
     await onUpdate(packItem);
   }
 
-  async function onRemoveMembers() {
-    packItem.members = [];
-    await onUpdate(packItem);
-  }
-
   async function copyToOtherList(id: string, name: string) {
     await firebase.addPackItem(packItem.name, packItem.members, packItem.category ?? '', id, packItem.rank);
     toast({
@@ -80,15 +75,6 @@ export function PackItemRowControls({
         onClick={copyToOtherList}
         size={ICON_SIZE}
       />
-      {packItem.members.length === 1 && (
-        <IconButton
-          aria-label={'Remove member from pack item'}
-          icon={<AiOutlineUserDelete />}
-          onClick={onRemoveMembers}
-          size={ICON_SIZE}
-          variant="ghost"
-        />
-      )}
       <IconButton
         onClick={deleteItem}
         variant="ghost"
