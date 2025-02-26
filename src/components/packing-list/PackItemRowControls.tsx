@@ -1,4 +1,4 @@
-import { Flex, IconButton, useToast } from '@chakra-ui/react';
+import { Flex, useToast } from '@chakra-ui/react';
 import { AiOutlineCopy, AiOutlineDelete, AiOutlineUsergroupAdd } from 'react-icons/ai';
 import { TbStatusChange } from 'react-icons/tb';
 import { firebase } from '../../services/firebase.ts';
@@ -6,6 +6,7 @@ import { PackItem } from '../../types/PackItem.ts';
 import { useFirebase } from '../providers/FirebaseContext.ts';
 import { usePackingListId } from '../providers/PackingListContext.ts';
 import { IconSelect } from '../shared/IconSelect.tsx';
+import { PLIconButton } from '../shared/PLIconButton.tsx';
 
 const ICON_SIZE = 'sm';
 
@@ -75,13 +76,7 @@ export function PackItemRowControls({
         onClick={copyToOtherList}
         size={ICON_SIZE}
       />
-      <IconButton
-        onClick={deleteItem}
-        variant="ghost"
-        icon={<AiOutlineDelete />}
-        aria-label="Delete item"
-        size={ICON_SIZE}
-      />
+      <PLIconButton onClick={deleteItem} icon={<AiOutlineDelete />} aria-label="Delete item" />
     </Flex>
   );
 }

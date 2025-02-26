@@ -1,7 +1,6 @@
 import {
   Box,
   Flex,
-  IconButton,
   Image,
   Input,
   Link,
@@ -17,6 +16,7 @@ import { NamedEntity } from '../../types/NamedEntity.ts';
 import { useError } from '../providers/ErrorContext.ts';
 import { useFirebase } from '../providers/FirebaseContext.ts';
 import { DragHandle } from './DragHandle.tsx';
+import { PLIconButton } from './PLIconButton.tsx';
 import { UploadModal } from './UploadModal.tsx';
 
 export function NamedEntityRow({
@@ -68,10 +68,10 @@ export function NamedEntityRow({
           )}
         </Popover>
         <Input placeholder="name" value={namedEntity.name} onChange={changeName} />
-        <IconButton
+        <PLIconButton
           borderRadius="full"
           onClick={handleDelete}
-          variant="ghost"
+          size="lg"
           icon={<AiOutlineDelete />}
           aria-label="Delete"
         />

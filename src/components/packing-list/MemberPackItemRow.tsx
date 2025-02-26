@@ -1,10 +1,11 @@
-import { Checkbox, Flex, IconButton, Spacer } from '@chakra-ui/react';
+import { Checkbox, Flex, Spacer } from '@chakra-ui/react';
 import { AiOutlineUserDelete } from 'react-icons/ai';
 import { firebase } from '../../services/firebase.ts';
 import { allChecked } from '../../services/utils.ts';
 import { MemberPackItem } from '../../types/MemberPackItem.ts';
 import { NamedEntity } from '../../types/NamedEntity.ts';
 import { PackItem } from '../../types/PackItem.ts';
+import { PLIconButton } from '../shared/PLIconButton.tsx';
 import { PLInput } from '../shared/PLInput.tsx';
 
 export function MemberPackItemRow({
@@ -45,12 +46,10 @@ export function MemberPackItemRow({
       <PLInput value={member.name} onUpdate={onSave} strike={checked} onFocus={onFocus} />
       <Spacer />
       {showControls && (
-        <IconButton
+        <PLIconButton
           aria-label={`Remove ${member.name} from pack item`}
           icon={<AiOutlineUserDelete />}
           onClick={onDelete}
-          variant="ghost"
-          size="sm"
         />
       )}
     </Flex>

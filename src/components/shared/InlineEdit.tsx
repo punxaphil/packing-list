@@ -51,18 +51,7 @@ export function InlineEdit({
         whiteSpace="nowrap"
         display="inline-block"
       />
-      <Input
-        p="0"
-        m="0"
-        as={EditableInput}
-        value={text}
-        onChange={onChange}
-        onKeyDown={onKeyDown}
-        onBlur={() => onUpdate(text)}
-        focusBorderColor="transparent"
-        borderColor="transparent"
-        maxHeight="20px"
-      />
+      <Input as={EditableInput} value={text} onChange={onChange} onKeyDown={onKeyDown} onBlur={() => onUpdate(text)} />
     </Editable>
   );
 }

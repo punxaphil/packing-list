@@ -1,4 +1,4 @@
-import { Flex, Heading, IconButton, Spacer, Stack, useToast } from '@chakra-ui/react';
+import { Flex, Heading, Spacer, Stack, useToast } from '@chakra-ui/react';
 import { useEffect, useState } from 'react';
 import { AiFillCaretDown, AiOutlineCopy, AiOutlineDelete } from 'react-icons/ai';
 import { IoMdAdd } from 'react-icons/io';
@@ -11,6 +11,7 @@ import { usePackingListId } from '../providers/PackingListContext.ts';
 import { IconSelect } from './IconSelect.tsx';
 import { InlineEdit } from './InlineEdit.tsx';
 import { NavButton } from './NavButton.tsx';
+import { PLIconButton } from './PLIconButton.tsx';
 
 export function Header() {
   const { packingListId, setPackingListId } = usePackingListId();
@@ -107,13 +108,8 @@ export function Header() {
               onClick={onSelectPackingList}
               emptyIcon={<IoMdAdd />}
             />
-            <IconButton
-              onClick={onDelete}
-              variant="ghost"
-              icon={<AiOutlineDelete />}
-              aria-label="Delete packing list"
-            />
-            <IconButton onClick={onCopy} variant="ghost" icon={<AiOutlineCopy />} aria-label="Copy packing list" />
+            <PLIconButton onClick={onDelete} icon={<AiOutlineDelete />} aria-label="Delete packing list" size="lg" />
+            <PLIconButton onClick={onCopy} icon={<AiOutlineCopy />} aria-label="Copy packing list" size="lg" />
             <Spacer />
             <ProfileAvatar size="sm" />
           </Flex>
