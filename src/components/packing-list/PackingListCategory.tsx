@@ -1,27 +1,14 @@
-import { CheckIcon, PopoverCloseButton, SmallCloseIcon } from '@chakra-ui/icons';
-import {
-  Button,
-  ButtonGroup,
-  Checkbox,
-  Flex,
-  IconButton,
-  Image,
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-  Text,
-  useDisclosure,
-} from '@chakra-ui/react';
+import { Checkbox, Flex, Image } from '@chakra-ui/react';
 import type { SystemStyleObject } from '@chakra-ui/styled-system';
 import { DraggableProvidedDragHandleProps } from '@hello-pangea/dnd';
 import { useMemo, useState } from 'react';
-import { HexColorPicker } from 'react-colorful';
-import { IoColorPaletteOutline } from 'react-icons/io5';
 import { TbCategoryPlus } from 'react-icons/tb';
 import { firebase } from '../../services/firebase.ts';
 import { NamedEntity } from '../../types/NamedEntity.ts';
 import { useFirebase } from '../providers/FirebaseContext.ts';
+import { ColorPicker } from '../shared/ColorPicker.tsx';
 import { DragHandle } from '../shared/DragHandle.tsx';
+import { PLIconButton } from '../shared/PLIconButton.tsx';
 import { PLInput } from '../shared/PLInput.tsx';
 import { NewPackItemRow } from './NewPackItemRow.tsx';
 
@@ -40,8 +27,6 @@ export function PackingListCategory({
   const grouped = useFirebase().groupedPackItems;
   const [addNewPackItem, setAddNewPackItem] = useState(false);
   const [hideIcons, setHideIcons] = useState(false);
-  const [color, setColor] = useState(category.color || undefined);
-  const { onOpen, onClose, isOpen } = useDisclosure();
 
   const [checked, setChecked] = useState(false);
   const [isIndeterminate, setIsIndeterminate] = useState(false);
@@ -68,12 +53,6 @@ export function PackingListCategory({
   }
 
   const categoryImage = getCategoryImage();
-
-  async function saveColor() {
-    onClose();
-    category.color = color;
-    await firebase.updateCategories(category);
-  }
 
   async function toggleItem() {
     const newState = !checked;
@@ -102,12 +81,6 @@ export function PackingListCategory({
     setChecked(newState);
   }
 
-  async function resetColor() {
-    onClose();
-    category.color = '';
-    await firebase.updateCategories(category);
-  }
-
   return (
     <>
       <Flex gap="1" alignItems="center" borderTopRadius="2xl" pt="1" sx={sx} px="2" h="32px">
@@ -126,43 +99,13 @@ export function PackingListCategory({
         />
         {!hideIcons && (
           <>
-            <IconButton
+            <PLIconButton
               aria-label="Add new pack item to category"
               icon={<TbCategoryPlus />}
               onClick={() => setAddNewPackItem(true)}
-              size="sm"
-              variant="ghost"
               ml="1"
             />
-            {category.id && (
-              <Popover onClose={onClose} closeOnBlur={false} isOpen={isOpen}>
-                <PopoverTrigger>
-                  <IconButton
-                    onClick={onOpen}
-                    aria-label="Set category color"
-                    icon={<IoColorPaletteOutline />}
-                    size="sm"
-                    variant="ghost"
-                  />
-                </PopoverTrigger>
-                <PopoverContent boxShadow="dark-lg" rounded="2xl" p="3" alignItems="center">
-                  <PopoverCloseButton />
-                  <HexColorPicker color={color} onChange={setColor} />
-                  <Text mt="1">
-                    <Text as="b">Selected color: </Text>
-                    {color ?? 'No color selected'}
-                  </Text>
-                  <ButtonGroup>
-                    <Button onClick={saveColor} m="3" leftIcon={<CheckIcon />} colorScheme="green">
-                      Save
-                    </Button>
-                    <Button onClick={resetColor} m="3" leftIcon={<SmallCloseIcon />}>
-                      Reset
-                    </Button>
-                  </ButtonGroup>
-                </PopoverContent>
-              </Popover>
-            )}
+            {category.id && <ColorPicker category={category} />}
           </>
         )}
       </Flex>
