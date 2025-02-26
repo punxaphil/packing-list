@@ -14,13 +14,10 @@ export function Filter({
 }: {
   onFilter: (filterCategories: string[], filterMembers: string[], filterPackItemState: string[]) => void;
 }) {
-  let usedCategories = useFirebase().categories;
-  let usedMembers = useFirebase().members;
-  const packItems = useFirebase().packItems;
-  usedCategories = usedCategories.filter((c) => packItems.some((p) => p.category === c.id));
-  usedMembers = usedMembers.filter((m) => packItems.some((p) => p.members.some((t) => t.id === m.id)));
-  usedCategories = [UNCATEGORIZED, ...usedCategories];
-  usedMembers = [{ id: '', name: 'Without members', rank: 0 }, ...usedMembers];
+  let categories = useFirebase().categoriesInPackingList;
+  let members = useFirebase().membersInPackingList;
+  categories = [UNCATEGORIZED, ...categories];
+  members = [{ id: '', name: 'Without members', rank: 0 }, ...members];
   const [filteredCategories, setFilteredCategories] = useState<string[]>([]);
   const [filteredMembers, setFilteredMembers] = useState<string[]>([]);
   const [filteredPackItemState, setFilteredPackItemState] = useState<string[]>([]);
@@ -60,8 +57,8 @@ export function Filter({
   }
 
   const filterButtonsData = [
-    ...filteredCategories.map((c) => usedCategories.find((e) => e.id === c)),
-    ...filteredMembers.map((m) => usedMembers.find((e) => e.id === m)),
+    ...filteredCategories.map((c) => categories.find((e) => e.id === c)),
+    ...filteredMembers.map((m) => members.find((e) => e.id === m)),
     ...filteredPackItemState.map((c) => ({ id: c, name: c })),
   ].filter((e) => !!e);
 
@@ -85,7 +82,7 @@ export function Filter({
             ))}
           </MenuOptionGroup>
           <MenuOptionGroup type="checkbox" value={filteredCategories} onChange={onChangeCategories} title="Categories">
-            {usedCategories.map((entity) => (
+            {categories.map((entity) => (
               <MenuItemOption key={entity.id} value={entity.id}>
                 {entity.name}
               </MenuItemOption>
@@ -93,7 +90,7 @@ export function Filter({
           </MenuOptionGroup>
           <MenuDivider />
           <MenuOptionGroup type="checkbox" value={filteredMembers} onChange={onChangeMembers} title="Members">
-            {usedMembers.map((entity) => (
+            {members.map((entity) => (
               <MenuItemOption key={entity.id} value={entity.id}>
                 {entity.name}
               </MenuItemOption>

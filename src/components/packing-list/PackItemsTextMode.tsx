@@ -18,20 +18,18 @@ import {
   getGroupedAsText,
   updateFirebaseFromTextPackItems,
 } from '../../services/textModeUtils.ts';
-import { GroupedPackItem } from '../../types/GroupedPackItem.ts';
 import { useFirebase } from '../providers/FirebaseContext.ts';
 import { usePackingListId } from '../providers/PackingListContext.ts';
 
 export function PackItemsTextMode({
-  grouped,
   onDone,
 }: {
-  grouped: GroupedPackItem[];
   onDone: () => void;
 }) {
   const categories = useFirebase().categories;
   const members = useFirebase().members;
   const packItems = useFirebase().packItems;
+  const grouped = useFirebase().groupedPackItems;
   const [groupedAsText, setGroupedAsText] = useState('');
   const [saving, setSaving] = useState(false);
   const packingListId = usePackingListId().packingListId;

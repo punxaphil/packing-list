@@ -16,7 +16,6 @@ import { HexColorPicker } from 'react-colorful';
 import { IoColorPaletteOutline } from 'react-icons/io5';
 import { TbCategoryPlus } from 'react-icons/tb';
 import { firebase } from '../../services/firebase.ts';
-import { GroupedPackItem } from '../../types/GroupedPackItem.ts';
 import { NamedEntity } from '../../types/NamedEntity.ts';
 import { useFirebase } from '../providers/FirebaseContext.ts';
 import { DragHandle } from '../shared/DragHandle.tsx';
@@ -28,15 +27,14 @@ export function PackingListCategory({
   dragHandleProps,
   onFocus,
   sx,
-  grouped,
 }: {
   category: NamedEntity;
   dragHandleProps?: DraggableProvidedDragHandleProps | null;
   onFocus?: () => void;
   sx?: SystemStyleObject;
-  grouped?: GroupedPackItem[];
 }) {
   const images = useFirebase().images;
+  const grouped = useFirebase().groupedPackItems;
   const [addNewPackItem, setAddNewPackItem] = useState(false);
   const [hideIcons, setHideIcons] = useState(false);
   const [color, setColor] = useState('#aabbcc');

@@ -1,42 +1,20 @@
 import { Flex, HStack, Link, Spacer } from '@chakra-ui/react';
 import { AiOutlineEdit } from 'react-icons/ai';
-import { PackItem } from '../../types/PackItem.ts';
 import { useFirebase } from '../providers/FirebaseContext.ts';
-import { CHECKED_FILTER_STATE, Filter, UNCHECKED_FILTER_STATE } from '../shared/Filter.tsx';
+import { Filter } from '../shared/Filter.tsx';
 
 export function PackingListControls({
   onTextMode,
-  onPackItemsFilter,
   onMemberFilter,
 }: {
   onTextMode: () => void;
-  onPackItemsFilter: (packItems: PackItem[]) => void;
   onMemberFilter: (memberIds: string[]) => void;
 }) {
-  const packItems = useFirebase().packItems;
+  const setFilter = useFirebase().setFilter;
 
   function onFilter(showTheseCategories: string[], showTheseMembers: string[], showTheseStates: string[]) {
-    let filtered = !showTheseCategories.length
-      ? packItems
-      : packItems.filter((item) => showTheseCategories.includes(item.category ?? ''));
-    filtered = !showTheseMembers.length
-      ? filtered
-      : filtered.filter((item) => {
-          if (showTheseMembers.includes('') && item.members.length === 0) {
-            return true;
-          }
-          if (item.members.length) {
-            return item.members.some((m) => showTheseMembers.includes(m.id));
-          }
-        });
-    filtered = !showTheseStates.length
-      ? filtered
-      : filtered.filter(
-          (item) =>
-            (showTheseStates.includes(CHECKED_FILTER_STATE) && item.checked) ||
-            (showTheseStates.includes(UNCHECKED_FILTER_STATE) && !item.checked)
-        );
-    onPackItemsFilter(filtered);
+    setFilter({ showTheseCategories, showTheseMembers, showTheseStates });
+
     onMemberFilter(showTheseMembers);
   }
 
