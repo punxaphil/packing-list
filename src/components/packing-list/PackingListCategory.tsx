@@ -1,5 +1,7 @@
-import { CheckIcon } from '@chakra-ui/icons';
+import { CheckIcon, PopoverCloseButton, SmallCloseIcon } from '@chakra-ui/icons';
 import {
+  Button,
+  ButtonGroup,
   Checkbox,
   Flex,
   IconButton,
@@ -7,6 +9,7 @@ import {
   Popover,
   PopoverContent,
   PopoverTrigger,
+  Text,
   useDisclosure,
 } from '@chakra-ui/react';
 import type { SystemStyleObject } from '@chakra-ui/styled-system';
@@ -37,8 +40,8 @@ export function PackingListCategory({
   const grouped = useFirebase().groupedPackItems;
   const [addNewPackItem, setAddNewPackItem] = useState(false);
   const [hideIcons, setHideIcons] = useState(false);
-  const [color, setColor] = useState('#aabbcc');
-  const { onOpen } = useDisclosure();
+  const [color, setColor] = useState(category.color || undefined);
+  const { onOpen, onClose, isOpen } = useDisclosure();
 
   const [checked, setChecked] = useState(false);
   const [isIndeterminate, setIsIndeterminate] = useState(false);
@@ -67,6 +70,7 @@ export function PackingListCategory({
   const categoryImage = getCategoryImage();
 
   async function saveColor() {
+    onClose();
     category.color = color;
     await firebase.updateCategories(category);
   }
@@ -98,6 +102,12 @@ export function PackingListCategory({
     setChecked(newState);
   }
 
+  async function resetColor() {
+    onClose();
+    category.color = '';
+    await firebase.updateCategories(category);
+  }
+
   return (
     <>
       <Flex gap="1" alignItems="center" borderTopRadius="2xl" pt="1" sx={sx} px="2" h="32px">
@@ -125,7 +135,7 @@ export function PackingListCategory({
               ml="1"
             />
             {category.id && (
-              <Popover trigger="hover">
+              <Popover onClose={onClose} closeOnBlur={false} isOpen={isOpen}>
                 <PopoverTrigger>
                   <IconButton
                     onClick={onOpen}
@@ -136,14 +146,20 @@ export function PackingListCategory({
                   />
                 </PopoverTrigger>
                 <PopoverContent boxShadow="dark-lg" rounded="2xl" p="3" alignItems="center">
+                  <PopoverCloseButton />
                   <HexColorPicker color={color} onChange={setColor} />
-                  <IconButton
-                    onClick={saveColor}
-                    m="3"
-                    colorScheme="gray"
-                    icon={<CheckIcon />}
-                    aria-label="Save color"
-                  />
+                  <Text mt="1">
+                    <Text as="b">Selected color: </Text>
+                    {color ?? 'No color selected'}
+                  </Text>
+                  <ButtonGroup>
+                    <Button onClick={saveColor} m="3" leftIcon={<CheckIcon />} colorScheme="green">
+                      Save
+                    </Button>
+                    <Button onClick={resetColor} m="3" leftIcon={<SmallCloseIcon />}>
+                      Reset
+                    </Button>
+                  </ButtonGroup>
                 </PopoverContent>
               </Popover>
             )}
