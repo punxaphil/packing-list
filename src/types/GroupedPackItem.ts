@@ -2,6 +2,6 @@ import { NamedEntity } from './NamedEntity.ts';
 import { PackItem } from './PackItem.ts';
 
 export interface GroupedPackItem {
-  category?: NamedEntity;
+  category: NamedEntity;
   packItems: PackItem[];
 }

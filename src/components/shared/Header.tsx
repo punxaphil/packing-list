@@ -1,4 +1,4 @@
-import { Flex, Heading, IconButton, Spacer, Stack, useToast } from '@chakra-ui/react';
+import { Box, Flex, HStack, Input, Stack, useToast } from '@chakra-ui/react';
 import { useEffect, useState } from 'react';
 import { AiFillCaretDown, AiOutlineCopy, AiOutlineDelete } from 'react-icons/ai';
 import { IoMdAdd } from 'react-icons/io';
@@ -9,8 +9,8 @@ import { ProfileAvatar } from '../auth/ProfileAvatar.tsx';
 import { useFirebase } from '../providers/FirebaseContext.ts';
 import { usePackingListId } from '../providers/PackingListContext.ts';
 import { IconSelect } from './IconSelect.tsx';
-import { InlineEdit } from './InlineEdit.tsx';
 import { NavButton } from './NavButton.tsx';
+import { PLIconButton } from './PLIconButton.tsx';
 
 export function Header() {
   const { packingListId, setPackingListId } = usePackingListId();
@@ -72,7 +72,7 @@ export function Header() {
         batch,
         packItem.name,
         packItem.members,
-        packItem.category ?? '',
+        packItem.category,
         packItem.rank,
         packingListId
       );
@@ -93,29 +93,35 @@ export function Header() {
         <>
           <Flex align="center" justifyContent="space-between" m="3" key={packingListId}>
             <img src="/squirrel_icon.png" alt="squirrel icon" />
-            <Spacer />
-            <Heading as="h1" mr="2" size={['md', 'xl']}>
-              <InlineEdit key={packingList.id} value={packingList.name} onUpdate={savePackingListName} />
-            </Heading>
-            <IconSelect
-              label="Choose another packing list"
-              icon={<AiFillCaretDown />}
-              items={[
-                ...packingLists.filter((l) => l.id !== packingListId),
-                { id: '', name: 'Create new packing list' },
-              ]}
-              onClick={onSelectPackingList}
-              emptyIcon={<IoMdAdd />}
+
+            <Input
+              key={packingList.id}
+              value={packingList.name}
+              onChange={(e) => savePackingListName(e.target.value)}
+              w="min"
+              textAlign="right"
+              fontSize="4xl"
+              flex={1}
+              p={0}
+              variant="unstyled"
             />
-            <IconButton
-              onClick={onDelete}
-              variant="ghost"
-              icon={<AiOutlineDelete />}
-              aria-label="Delete packing list"
-            />
-            <IconButton onClick={onCopy} variant="ghost" icon={<AiOutlineCopy />} aria-label="Copy packing list" />
-            <Spacer />
-            <ProfileAvatar size="sm" />
+            <Box flex={1}>
+              <IconSelect
+                label="Choose another packing list"
+                icon={<AiFillCaretDown />}
+                items={[
+                  ...packingLists.filter((l) => l.id !== packingListId),
+                  { id: '', name: 'Create new packing list' },
+                ]}
+                onClick={onSelectPackingList}
+                emptyIcon={<IoMdAdd />}
+              />
+              <PLIconButton onClick={onDelete} icon={<AiOutlineDelete />} aria-label="Delete packing list" size="lg" />
+              <PLIconButton onClick={onCopy} icon={<AiOutlineCopy />} aria-label="Copy packing list" size="lg" />
+            </Box>
+            <HStack w="50px" justifyContent="flex-end">
+              <ProfileAvatar size="sm" />
+            </HStack>
           </Flex>
           <Stack direction="row" spacing={2} align="center" pt="3" justifyContent="center">
             <NavButton name="Home" path="/" />

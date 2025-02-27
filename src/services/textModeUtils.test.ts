@@ -90,7 +90,7 @@ describe('textModeUtils', () => {
   describe('updateFirebaseFromTextPackItems', () => {
     it('should delete removed pack items', async () => {
       const packItems: PackItem[] = [
-        { id: '1', name: 'Item 1', checked: false, members: [], rank: 0, packingList: PACKING_LIST_ID },
+        { id: '1', name: 'Item 1', checked: false, members: [], rank: 0, packingList: PACKING_LIST_ID, category: '' },
       ];
       const textPackItems: TextPackItem[] = [];
       const members: NamedEntity[] = [];
@@ -103,9 +103,9 @@ describe('textModeUtils', () => {
 
     it('should not update existing pack items', async () => {
       const packItems: PackItem[] = [
-        { id: '1', name: 'Item 1', members: [], checked: false, rank: 1, packingList: PACKING_LIST_ID },
+        { id: '1', name: 'Item 1', members: [], checked: false, rank: 1, packingList: PACKING_LIST_ID, category: '' },
       ];
-      const textPackItems: TextPackItem[] = [{ name: 'Item 1', members: [], category: undefined }];
+      const textPackItems: TextPackItem[] = [{ name: 'Item 1', members: [], category: '' }];
       const members: NamedEntity[] = [];
       const categories: NamedEntity[] = [];
 
@@ -116,9 +116,9 @@ describe('textModeUtils', () => {
 
     it('should update existing pack items', async () => {
       const packItems: PackItem[] = [
-        { id: '1', name: 'Item 1', checked: false, members: [], rank: 0, packingList: PACKING_LIST_ID },
+        { id: '1', name: 'Item 1', checked: false, members: [], rank: 0, packingList: PACKING_LIST_ID, category: '' },
       ];
-      const textPackItems: TextPackItem[] = [{ name: 'Item 1', members: ['Member 1'], category: undefined }];
+      const textPackItems: TextPackItem[] = [{ name: 'Item 1', members: ['Member 1'], category: '' }];
       const members: NamedEntity[] = [{ id: '2', name: 'Member 1', rank: 0 }];
       const categories: NamedEntity[] = [];
 
@@ -142,7 +142,7 @@ describe('textModeUtils', () => {
 
     it('should add new pack items', async () => {
       const packItems: PackItem[] = [];
-      const textPackItems: TextPackItem[] = [{ name: 'Item 1', members: [], category: undefined }];
+      const textPackItems: TextPackItem[] = [{ name: 'Item 1', members: [], category: '' }];
       const members: NamedEntity[] = [];
       const categories: NamedEntity[] = [];
 
@@ -163,18 +163,18 @@ describe('textModeUtils', () => {
           rank: 2,
           packingList: PACKING_LIST_ID,
         },
-        { id: '6', name: 'Item 6', checked: false, rank: 7, packingList: PACKING_LIST_ID, members: [] },
-        { id: '7', name: 'Item 7', checked: false, rank: 9, packingList: PACKING_LIST_ID, members: [] },
-        { id: '8', name: 'Item 8', checked: false, rank: 1, packingList: PACKING_LIST_ID, members: [] },
-        { id: '9', name: 'Item 9', checked: false, rank: 3, packingList: PACKING_LIST_ID, members: [] },
-        { id: '10', name: 'Item 10', checked: false, rank: 6, packingList: PACKING_LIST_ID, members: [] },
+        { id: '6', name: 'Item 6', checked: false, rank: 7, packingList: PACKING_LIST_ID, members: [], category: '' },
+        { id: '7', name: 'Item 7', checked: false, rank: 9, packingList: PACKING_LIST_ID, members: [], category: '' },
+        { id: '8', name: 'Item 8', checked: false, rank: 1, packingList: PACKING_LIST_ID, members: [], category: '' },
+        { id: '9', name: 'Item 9', checked: false, rank: 3, packingList: PACKING_LIST_ID, members: [], category: '' },
+        { id: '10', name: 'Item 10', checked: false, rank: 6, packingList: PACKING_LIST_ID, members: [], category: '' },
       ];
       const textPackItems: TextPackItem[] = [
         { name: 'Item 1', members: ['Member 1'], category: 'Category 1' },
         { name: 'Item 2', members: ['Member 2', 'Member 1'], category: 'Category 1' },
         { name: 'Item 3', members: ['Member 3'], category: 'Category 2' },
         { name: 'Item 4', members: [], category: 'Category 2' },
-        { name: 'Item 5', members: ['Member 2', 'Member 3'] },
+        { name: 'Item 5', members: ['Member 2', 'Member 3'], category: '' },
       ];
       const members: NamedEntity[] = [
         { id: '2', name: 'Member 2', rank: 0 },

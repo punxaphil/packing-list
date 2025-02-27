@@ -38,16 +38,18 @@ export class PackingListRow {
     return 0;
   }
 
-  getColor(categoriesInPackingList: string[], categories: NamedEntity[]) {
+  getColor(categoriesInPackingList: NamedEntity[]) {
     const categoryId = this.category?.id ?? this.packItem?.category;
     if (!categoryId) {
       return UNCATEGORIZED.color;
     }
-    const category = categories.find((c) => c.id === categoryId);
-    if (category?.color) {
-      return category.color;
+    for (const [index, namedEntity] of categoriesInPackingList.entries()) {
+      if (namedEntity.id === categoryId) {
+        if (namedEntity.color) {
+          return namedEntity.color;
+        }
+        return COLUMN_COLORS[index % COLUMN_COLORS.length];
+      }
     }
-    const index = categoriesInPackingList.findIndex((c) => c === categoryId);
-    return COLUMN_COLORS[index % COLUMN_COLORS.length];
   }
 }

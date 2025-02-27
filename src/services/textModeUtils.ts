@@ -5,12 +5,12 @@ import { NamedEntity } from '../types/NamedEntity.ts';
 import { PackItem, TextPackItem } from '../types/PackItem.ts';
 
 import { firebase } from './firebase.ts';
-import { getMemberName, rankOnTop } from './utils.ts';
+import { UNCATEGORIZED, getMemberName, rankOnTop } from './utils.ts';
 
 export function getGroupedAsText(grouped: GroupedPackItem[], members: NamedEntity[]) {
   let result = '';
   for (const group of grouped) {
-    if (group.category?.id) {
+    if (group.category.id) {
       result += `${group.category.name}\n`;
     }
 
@@ -120,8 +120,11 @@ function addMemberIfNew(
 }
 
 function addCategoryIfNew(categories: NamedEntity[], t: TextPackItem, writeBatch: WriteBatch) {
+  if (!t.category) {
+    return UNCATEGORIZED;
+  }
   let category = categories.find((cat) => cat.name === t.category);
-  if (!category && t.category) {
+  if (!category) {
     const id = firebase.addCategoryBatch(t.category, writeBatch);
     category = { id, name: t.category, rank: rankOnTop(categories) };
     categories.push(category);
@@ -131,15 +134,15 @@ function addCategoryIfNew(categories: NamedEntity[], t: TextPackItem, writeBatch
 
 function updatePackItemIfChanged(
   packItem: PackItem,
-  category: NamedEntity | undefined,
+  category: NamedEntity,
   memberPackItems: MemberPackItem[],
   rank: number,
   writeBatch: WriteBatch
 ) {
   const memberPackItemsChanged = JSON.stringify(memberPackItems) !== JSON.stringify(packItem.members);
-  if (category?.id !== packItem.category || memberPackItemsChanged || rank !== packItem.rank) {
+  if (category.id !== packItem.category || memberPackItemsChanged || rank !== packItem.rank) {
     const updated = { ...packItem };
-    updated.category = category?.id ?? '';
+    updated.category = category.id;
     updated.members = memberPackItems;
     updated.rank = rank;
     firebase.updatePackItemBatch(updated, writeBatch);
