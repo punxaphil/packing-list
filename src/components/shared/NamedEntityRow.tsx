@@ -54,7 +54,7 @@ export function NamedEntityRow({
   const image = images.find((t) => t.type === type && t.typeId === namedEntity.id);
   const imageUrl = image?.url;
   return (
-    <Box p="2">
+    <Box>
       <Flex gap="3" align="center">
         <DragHandle dragHandleProps={dragHandleProps} />
         <Popover trigger="hover">
