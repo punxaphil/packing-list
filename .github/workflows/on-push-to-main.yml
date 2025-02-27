@@ -6,7 +6,7 @@ on:
 
 jobs:
   build_and_deploy:
-    uses: ./.github/workflows/common-firebase-deploy.yml
+    uses: ./.github/workflows/build-and-deploy.yml
     secrets: inherit
     with:
       is_production: true

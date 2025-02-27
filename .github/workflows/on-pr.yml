@@ -4,5 +4,5 @@ on:
 
 jobs:
   build_and_preview:
-    uses: ./.github/workflows/common-firebase-deploy.yml
+    uses: ./.github/workflows/build-and-deploy.yml
     secrets: inherit
