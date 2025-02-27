@@ -1,4 +1,4 @@
-import { Flex, Spacer, Spinner, useMediaQuery } from '@chakra-ui/react';
+import { useMediaQuery } from '@chakra-ui/react';
 import { getAuth } from 'firebase/auth';
 import { ReactNode, useEffect, useState } from 'react';
 import { firebase } from '../../services/firebase.ts';
@@ -10,6 +10,7 @@ import { NamedEntity } from '../../types/NamedEntity.ts';
 import { PackItem } from '../../types/PackItem.ts';
 import { MEDIA_QUERIES, createColumns, flattenGroupedPackItems } from '../packing-list/packingListUtils.ts';
 import { CHECKED_FILTER_STATE, UNCHECKED_FILTER_STATE } from '../shared/Filter.tsx';
+import { TextProgress } from '../shared/TextProgress.tsx';
 import { FirebaseContext } from './FirebaseContext.ts';
 import { usePackingListId } from './PackingListContext.ts';
 
@@ -110,11 +111,7 @@ export function FirebaseProvider({ children }: { children: ReactNode }) {
           {children}
         </FirebaseContext.Provider>
       ) : (
-        <Flex>
-          <Spacer />
-          <Spinner thickness="4px" speed="0.65s" emptyColor="gray.200" size="xl" />
-          <Spacer />
-        </Flex>
+        <TextProgress text="Loading your packing lists" />
       )}
     </>
   );

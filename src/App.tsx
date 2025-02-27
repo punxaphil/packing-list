@@ -5,7 +5,6 @@ import {
   AlertTitle,
   Box,
   ChakraProvider,
-  Heading,
   extendTheme,
   withDefaultColorScheme,
 } from '@chakra-ui/react';
@@ -18,16 +17,12 @@ import { PackingList } from './components/pages/PackingList.tsx';
 import { Profile } from './components/pages/Profile.tsx';
 import { Welcome } from './components/pages/Welcome.tsx';
 import { useError } from './components/providers/ErrorContext.ts';
+import { TextProgress } from './components/shared/TextProgress.tsx';
 
 export const THEME_COLOR = 'gray';
 const customTheme = extendTheme(withDefaultColorScheme({ colorScheme: THEME_COLOR }), {
   components: {
     Link: {
-      baseStyle: {
-        color: THEME_COLOR,
-      },
-    },
-    Spinner: {
       baseStyle: {
         color: THEME_COLOR,
       },
@@ -50,7 +45,7 @@ export function App() {
             <Route path="profile" element={<Profile />} />
           </Route>
         ) : loggingIn ? (
-          <Route path="*" element={<Heading as="h3">Logging in...</Heading>} />
+          <Route path="*" element={<TextProgress text="Logging In" />} />
         ) : (
           <Route path="*" element={<Welcome />} />
         )}
