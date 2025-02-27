@@ -73,7 +73,7 @@ export function Header() {
         batch,
         packItem.name,
         packItem.members,
-        packItem.category ?? '',
+        packItem.category,
         packItem.rank,
         packingListId
       );

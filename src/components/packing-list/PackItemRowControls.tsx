@@ -41,7 +41,7 @@ export function PackItemRowControls({
   }
 
   async function copyToOtherList(id: string, name: string) {
-    await firebase.addPackItem(packItem.name, packItem.members, packItem.category ?? '', id, packItem.rank);
+    await firebase.addPackItem(packItem.name, packItem.members, packItem.category, id, packItem.rank);
     toast({
       title: `${packItem.name} copied to ${name}`,
       status: 'success',

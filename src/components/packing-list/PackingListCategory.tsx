@@ -4,7 +4,9 @@ import { DraggableProvidedDragHandleProps } from '@hello-pangea/dnd';
 import { useMemo, useState } from 'react';
 import { TbCategoryPlus } from 'react-icons/tb';
 import { firebase } from '../../services/firebase.ts';
+import { UNCATEGORIZED, getPackItemGroup } from '../../services/utils.ts';
 import { NamedEntity } from '../../types/NamedEntity.ts';
+import { PackItem } from '../../types/PackItem.ts';
 import { useFirebase } from '../providers/FirebaseContext.ts';
 import { ColorPicker } from '../shared/ColorPicker.tsx';
 import { DragHandle } from '../shared/DragHandle.tsx';
@@ -27,14 +29,22 @@ export function PackingListCategory({
   const grouped = useFirebase().groupedPackItems;
   const [addNewPackItem, setAddNewPackItem] = useState(false);
   const [hideIcons, setHideIcons] = useState(false);
-
   const [checked, setChecked] = useState(false);
   const [isIndeterminate, setIsIndeterminate] = useState(false);
+  const [packItems, setPackItems] = useState<PackItem[]>([]);
+
+  const categoryImage = useMemo(() => {
+    if (category.id) {
+      const image = images.find((t) => t.type === 'categories' && t.typeId === category.id);
+      return image?.url;
+    }
+  }, [category.id, images]);
 
   useMemo(() => {
-    const packItems = grouped?.find((t) => t.category?.id === category.id)?.packItems;
-    const allPackItemsChecked = !!packItems?.every((t) => t.checked);
-    const somePackItemsChecked = !!packItems?.some((t) => t.checked);
+    const packItems = getPackItemGroup(grouped, category).packItems;
+    const allPackItemsChecked = packItems.every((t) => t.checked);
+    const somePackItemsChecked = packItems.some((t) => t.checked);
+    setPackItems(packItems);
     setChecked(allPackItemsChecked);
     setIsIndeterminate(!allPackItemsChecked && somePackItemsChecked);
   }, [grouped, category]);
@@ -45,39 +55,19 @@ export function PackingListCategory({
     await firebase.updateCategories(category);
   }
 
-  function getCategoryImage() {
-    if (category.id) {
-      const image = images.find((t) => t.type === 'categories' && t.typeId === category.id);
-      return image?.url;
-    }
-  }
-
-  const categoryImage = getCategoryImage();
-
   async function toggleItem() {
     const newState = !checked;
-    const group = grouped?.find((t) => {
-      if (!category.id) {
-        return !t.category?.id;
-      }
-      return t.category?.id === category.id;
-    });
-    if (!group) {
-      return;
-    }
     const batch = firebase.initBatch();
-    for (const t of group.packItems) {
-      if (t.checked === newState) {
-        continue;
+    for (const t of packItems) {
+      if (t.checked !== newState) {
+        t.checked = newState;
+        for (const member of t.members) {
+          member.checked = newState;
+        }
+        firebase.updatePackItemBatch(t, batch);
       }
-      t.checked = newState;
-      for (const member of t.members) {
-        member.checked = t.checked;
-      }
-      firebase.updatePackItemBatch(t, batch);
     }
     await batch.commit();
-
     setChecked(newState);
   }
 
@@ -95,7 +85,7 @@ export function PackingListCategory({
             setHideIcons(true);
             onFocus?.();
           }}
-          disabled={!category.id}
+          disabled={category === UNCATEGORIZED}
         />
         {!hideIcons && (
           <>

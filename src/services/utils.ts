@@ -5,7 +5,7 @@ import { MemberPackItem } from '../types/MemberPackItem.ts';
 import { NamedEntity } from '../types/NamedEntity.ts';
 import { PackItem } from '../types/PackItem.ts';
 
-export const UNCATEGORIZED = { id: '', name: 'Uncategorized', rank: 0, color: 'gray.50' };
+export const UNCATEGORIZED: NamedEntity = { id: '', name: 'Uncategorized', rank: Number.MAX_VALUE, color: 'gray.50' };
 
 export function getMemberName(members: NamedEntity[], memberId?: string) {
   return members.find((t) => t.id === memberId)?.name;
@@ -22,9 +22,9 @@ export function allUnChecked(packItem: PackItem) {
 export function groupByCategories(packItems: PackItem[], categories: NamedEntity[]) {
   const result: GroupedPackItem[] = [];
   for (const packItem of packItems) {
-    const find = result.find((r) => r.category?.id === (packItem.category || undefined));
+    const find = result.find((r) => r.category.id === packItem.category);
     if (!find) {
-      const category = categories.find((c) => c.id === packItem.category);
+      const category = categories.find((c) => c.id === packItem.category) || UNCATEGORIZED;
       result.push({
         category: category,
         packItems: [packItem],
@@ -81,22 +81,21 @@ export function sortPackItems(packItems: PackItem[], members: NamedEntity[], cat
   }
 
   function sortPackItemsBasedOnCategoryRank() {
-    const getCategoryFromId = (pi: PackItem) =>
-      pi.category ? categories.find((cat) => cat.id === pi.category) : undefined;
+    const getCategoryFromId = (pi: PackItem) => categories.find((cat) => cat.id === pi.category) ?? UNCATEGORIZED;
 
     packItems.sort((a, b) => {
       const categoryA = getCategoryFromId(a);
       const categoryB = getCategoryFromId(b);
 
-      if ((categoryA?.rank ?? 0) !== (categoryB?.rank ?? 0)) {
-        return (categoryB?.rank ?? 0) - (categoryA?.rank ?? 0);
+      if (categoryA.rank !== categoryB.rank) {
+        return categoryB.rank - categoryA.rank;
       }
 
       if (a.checked !== b.checked) {
         return a.checked ? 1 : -1;
       }
 
-      return (b.rank ?? 0) - (a.rank ?? 0);
+      return b.rank - a.rank;
     });
   }
 }
@@ -124,4 +123,12 @@ export function getProfileImage(images: Image[]) {
 
 export function rankOnTop(entities: NamedEntity[]) {
   return Math.max(...entities.map((cat) => cat.rank), 0) + 1;
+}
+
+export function getPackItemGroup(grouped: GroupedPackItem[], category: NamedEntity) {
+  const find = grouped.find((t) => t.category.id === category.id);
+  if (!find) {
+    throw new Error(`Category ${category.name} not found in grouped pack items`);
+  }
+  return find;
 }

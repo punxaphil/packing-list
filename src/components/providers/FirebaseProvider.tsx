@@ -3,7 +3,7 @@ import { getAuth } from 'firebase/auth';
 import { ReactNode, useEffect, useState } from 'react';
 import { firebase } from '../../services/firebase.ts';
 import { groupByCategories, sortAll } from '../../services/utils.ts';
-import { ColumnList, PackingListRow } from '../../types/Column.ts';
+import { ColumnList } from '../../types/Column.ts';
 import { GroupedPackItem } from '../../types/GroupedPackItem.ts';
 import { Image } from '../../types/Image.ts';
 import { NamedEntity } from '../../types/NamedEntity.ts';
@@ -48,7 +48,6 @@ export function FirebaseProvider({ children }: { children: ReactNode }) {
   }, [packingListId]);
 
   let groupedPackItems: GroupedPackItem[] = [];
-  let flattened: PackingListRow[] = [];
   let columns: ColumnList[] = [];
   let categoriesInPackingList: NamedEntity[] = [];
   let membersInPackingList: NamedEntity[] = [];
@@ -57,7 +56,7 @@ export function FirebaseProvider({ children }: { children: ReactNode }) {
     sortAll(members, categories, packItems, packingLists);
     const filtered = filterPackItems(packItems);
     groupedPackItems = groupByCategories(filtered, categories);
-    flattened = flattenGroupedPackItems(groupedPackItems);
+    const flattened = flattenGroupedPackItems(groupedPackItems);
     columns = createColumns(flattened, nbrOfColumns);
     categoriesInPackingList = categories.filter((c) => {
       return packItems.some((p) => p.category === c.id);
@@ -72,7 +71,7 @@ export function FirebaseProvider({ children }: { children: ReactNode }) {
     const { showTheseCategories, showTheseMembers, showTheseStates } = filter;
     let filtered = !showTheseCategories.length
       ? packItems
-      : packItems.filter((item) => showTheseCategories.includes(item.category ?? ''));
+      : packItems.filter((item) => showTheseCategories.includes(item.category));
     filtered = !showTheseMembers.length
       ? filtered
       : filtered.filter((item) => {
@@ -102,7 +101,6 @@ export function FirebaseProvider({ children }: { children: ReactNode }) {
             images,
             packingLists,
             groupedPackItems,
-            flattened,
             columns,
             categoriesInPackingList,
             membersInPackingList,

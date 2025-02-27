@@ -5,7 +5,7 @@ export interface PackItem {
   name: string;
   checked: boolean;
   members: MemberPackItem[];
-  category?: string;
+  category: string;
   packingList: string;
   rank: number;
 }
@@ -13,5 +13,5 @@ export interface PackItem {
 export interface TextPackItem {
   name: string;
   members: string[];
-  category?: string;
+  category: string;
 }

@@ -6,7 +6,6 @@ import { firebase } from '../../services/firebase.ts';
 import { UNCATEGORIZED } from '../../services/utils.ts';
 import { PackingListRow } from '../../types/Column.ts';
 import { useFirebase } from '../providers/FirebaseContext.ts';
-import { PackingListCategory } from './PackingListCategory.tsx';
 import { PackingListColumn } from './PackingListColumn.tsx';
 import { MEDIA_QUERIES, reorder } from './packingListUtils.ts';
 
@@ -30,10 +29,8 @@ export function PackingListColumns({
       if (row.packItem) {
         row.packItem.category = currentCategory;
         firebase.updatePackItemBatch(row.packItem, batch);
-      } else if (row.category) {
-        if (row.category.id) {
-          firebase.updateCategoryBatch(row.category, batch);
-        }
+      } else if (row.category && row.category !== UNCATEGORIZED) {
+        firebase.updateCategoryBatch(row.category, batch);
         currentCategory = row.category.id;
       }
     }
@@ -51,12 +48,8 @@ export function PackingListColumns({
     <DragDropContext onDragEnd={onDragEnd}>
       <HStack alignItems="start" justifyContent="center">
         {columns.map(({ key, rows }) => {
-          const packItem = rows[0].packItem;
           return (
             <Box key={key}>
-              {key === columns[0].key && packItem && !packItem.category && (
-                <PackingListCategory category={UNCATEGORIZED} sx={{ background: UNCATEGORIZED.color }} />
-              )}
               <PackingListColumn
                 id={key}
                 rows={rows}

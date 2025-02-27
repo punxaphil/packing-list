@@ -9,11 +9,9 @@ export const MEDIA_QUERIES = ['(min-width: 800px)', '(min-width: 1200px)'];
 
 export function flattenGroupedPackItems(grouped: GroupedPackItem[]) {
   const flattened: PackingListRow[] = [];
-  for (const group of grouped) {
-    if (group.category) {
-      flattened.push(new PackingListRow({ category: group.category }));
-    }
-    for (const packItem of group.packItems) {
+  for (const { category, packItems } of grouped) {
+    flattened.push(new PackingListRow({ category }));
+    for (const packItem of packItems) {
       flattened.push(new PackingListRow({ packItem }));
     }
   }

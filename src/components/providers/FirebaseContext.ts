@@ -1,5 +1,5 @@
 import { createContext, useContext } from 'react';
-import { ColumnList, PackingListRow } from '../../types/Column.ts';
+import { ColumnList } from '../../types/Column.ts';
 import { GroupedPackItem } from '../../types/GroupedPackItem.ts';
 import { Image } from '../../types/Image.ts';
 import { NamedEntity } from '../../types/NamedEntity.ts';
@@ -12,7 +12,6 @@ interface FirebaseData {
   images: Image[];
   packingLists: NamedEntity[];
   groupedPackItems: GroupedPackItem[];
-  flattened: PackingListRow[];
   columns: ColumnList[];
   categoriesInPackingList: NamedEntity[];
   membersInPackingList: NamedEntity[];
