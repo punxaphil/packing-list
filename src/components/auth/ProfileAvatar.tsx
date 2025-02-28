@@ -1,6 +1,6 @@
 import { Avatar } from '@chakra-ui/react';
 import { NavLink } from 'react-router';
-import { THEME_COLOR } from '../../App.tsx';
+import { THEME_COLOR } from '../../main.tsx';
 import { getProfileImage } from '../../services/utils.ts';
 import { useFirebase } from '../providers/FirebaseContext.ts';
 import { useCurrentUser } from './Auth.tsx';

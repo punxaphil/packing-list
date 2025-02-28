@@ -1,11 +1,13 @@
 import { createContext, useContext } from 'react';
 
-interface ErrorType {
-  error: string;
-  setError: (error: string) => void;
+export type ErrorType = string | string[] | Error;
+
+interface ContextType {
+  error: ErrorType;
+  setError: (error: ErrorType) => void;
 }
 
-export const ErrorContext = createContext<ErrorType | undefined>(undefined);
+export const ErrorContext = createContext<ContextType | undefined>(undefined);
 
 export function useError() {
   const context = useContext(ErrorContext);
