@@ -167,26 +167,43 @@ export const firebase = {
       rank,
     });
   },
-  async deleteCategory(id: string, packingLists: NamedEntity[]) {
+  async deleteCategory(id: string, packingLists: NamedEntity[], deleteEvenIfUsed = false) {
     const packItemsQuery = query(
       collection(firestore, USERS_KEY, getUserId(), PACK_ITEMS_KEY),
       where('category', '==', id)
     );
     const packItems: PackItem[] = fromQueryResult(await getDocs(packItemsQuery));
     if (packItems.length) {
-      throwNamedEntityArrayError('Category', packItems, packingLists);
+      if (!deleteEvenIfUsed) {
+        throwNamedEntityArrayError('Category', packItems, packingLists);
+      }
+      const batch = writeBatch(firestore);
+      for (const packItem of packItems) {
+        packItem.category = '';
+        firebase.updatePackItemBatch(packItem, batch);
+      }
+      await batch.commit();
     }
     await del(CATEGORIES_KEY, id);
   },
-  async deleteMember(id: string, packingLists: NamedEntity[]) {
+  async deleteMember(id: string, packingLists: NamedEntity[], deleteEvenIfUsed = false) {
     const packItemsQuery = query(
       collection(firestore, USERS_KEY, getUserId(), PACK_ITEMS_KEY),
       where('members', '!=', [])
     );
     let packItems: PackItem[] = fromQueryResult(await getDocs(packItemsQuery));
     packItems = packItems.filter((t) => t.members.find((m) => m.id === id));
+
     if (packItems.length) {
-      throwNamedEntityArrayError('Member', packItems, packingLists);
+      if (!deleteEvenIfUsed) {
+        throwNamedEntityArrayError('Member', packItems, packingLists);
+      }
+      const batch = writeBatch(firestore);
+      for (const packItem of packItems) {
+        packItem.members = packItem.members.filter((m) => m.id !== id);
+        firebase.updatePackItemBatch(packItem, batch);
+      }
+      await batch.commit();
     }
     await del(MEMBERS_KEY, id);
   },
@@ -269,9 +286,10 @@ function addBatch<K extends DocumentData>(userColl: string, writeBatch: WriteBat
 function throwNamedEntityArrayError(type: string, packItems: PackItem[], packingLists: NamedEntity[]) {
   throw new ArrayError([
     `${type} was not deleted. It's in use by the following pack items:`,
-    ...packItems.map((t) => {
+    ...packItems.slice(0, 5).map((t) => {
       const packingListName = packingLists.find((pl) => pl.id === t.packingList)?.name;
       return t.name + (packingListName ? ` (in ${packingListName})` : '');
     }),
+    packItems.length > 5 ? ' and more...' : '',
   ]);
 }

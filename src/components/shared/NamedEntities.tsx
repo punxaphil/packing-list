@@ -1,10 +1,11 @@
-import { Box, Button, Card, CardBody, Flex, Input, Spacer, useToast } from '@chakra-ui/react';
+import { Box, Button, Card, CardBody, Flex, Input, Spacer, useDisclosure } from '@chakra-ui/react';
 import { DragDropContext, DragUpdate, Draggable, Droppable } from '@hello-pangea/dnd';
 import { ChangeEvent, KeyboardEvent, useState } from 'react';
 import { handleEnter } from '../../services/utils.ts';
 import { NamedEntity } from '../../types/NamedEntity.ts';
 import { useError } from '../providers/ErrorContext.ts';
 import { useFirebase } from '../providers/FirebaseContext.ts';
+import { ErrorModal } from './ErrorModal.tsx';
 import { handleArrayError } from './HandleArrayError.tsx';
 import { NamedEntityRow } from './NamedEntityRow.tsx';
 
@@ -18,14 +19,16 @@ export function NamedEntities({
   namedEntities: NamedEntity[];
   onAdd: (name: string) => Promise<string>;
   onUpdate: (toUpdate: NamedEntity[] | NamedEntity) => Promise<void>;
-  onDelete: (id: string, packingLists: NamedEntity[]) => Promise<void>;
+  onDelete: (id: string, packingLists: NamedEntity[], deleteEvenIfUsed?: boolean) => Promise<void>;
   type: string;
 }) {
   const [reordered, setReordered] = useState(namedEntities);
   const [newName, setNewName] = useState<string>('');
   const { setError } = useError();
-  const toast = useToast();
   const packingLists = useFirebase().packingLists;
+  const { isOpen, onToggle, onClose } = useDisclosure();
+  const [deleteError, setDeleteError] = useState<string | string[]>('');
+  const [deleteId, setDeleteId] = useState<string>('');
 
   async function onDragEnd(result: DragUpdate) {
     if (!result.destination) {
@@ -67,7 +70,10 @@ export function NamedEntities({
     try {
       await onDelete(id, packingLists);
     } catch (e) {
-      handleArrayError(e as Error, toast);
+      const error = handleArrayError(e as Error);
+      setDeleteError(error);
+      setDeleteId(id);
+      onToggle();
     }
   }
 
@@ -114,6 +120,12 @@ export function NamedEntities({
             <Input placeholder="Enter a name" value={newName} onChange={handleOnChange} onKeyDown={onEnter} />
             <Button onClick={handleAdd}>Add</Button>
           </Flex>
+          <ErrorModal
+            error={deleteError}
+            isOpen={isOpen}
+            onClose={onClose}
+            onProceed={async () => await onDelete(deleteId, packingLists, true)}
+          />
         </CardBody>
       </Card>
       <Spacer />
