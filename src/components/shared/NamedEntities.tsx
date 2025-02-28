@@ -1,6 +1,6 @@
 import { Box, Button, Card, CardBody, Flex, Input, Spacer, useDisclosure } from '@chakra-ui/react';
 import { DragDropContext, DragUpdate, Draggable, Droppable } from '@hello-pangea/dnd';
-import { ChangeEvent, KeyboardEvent, useState } from 'react';
+import { ChangeEvent, KeyboardEvent, useMemo, useState } from 'react';
 import { handleEnter } from '../../services/utils.ts';
 import { NamedEntity } from '../../types/NamedEntity.ts';
 import { useError } from '../providers/ErrorContext.ts';
@@ -23,6 +23,7 @@ export function NamedEntities({
   type: string;
 }) {
   const [reordered, setReordered] = useState(namedEntities);
+  useMemo(() => setReordered(namedEntities), [namedEntities]);
   const [newName, setNewName] = useState<string>('');
   const { setError } = useError();
   const packingLists = useFirebase().packingLists;
