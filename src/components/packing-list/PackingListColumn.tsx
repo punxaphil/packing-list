@@ -55,6 +55,7 @@ export function PackingListColumn({
                           dragHandleProps={provided.dragHandleProps}
                           onFocus={() => setSelectedRow(row.id)}
                           showControls={selectedRow === row.packItem.id}
+                          unSelect={() => setSelectedRow('')}
                           sx={rowStyle}
                           isLastItemInCategory={!rows[index + 1] || !!rows[index + 1].category}
                         />

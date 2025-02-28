@@ -22,6 +22,7 @@ export function PackItemRow({
   showControls,
   sx,
   isLastItemInCategory,
+  unSelect,
 }: {
   packItem: PackItem;
   filteredMembers: string[];
@@ -30,6 +31,7 @@ export function PackItemRow({
   showControls: boolean;
   sx?: SystemStyleObject;
   isLastItemInCategory: boolean;
+  unSelect: () => void;
 }) {
   const members = useFirebase().members;
   const [addNewPackItem, setAddNewPackItem] = useState(false);
@@ -72,7 +74,15 @@ export function PackItemRow({
               onEnter={() => setAddNewPackItem(true)}
             />
           </Flex>
-          {showControls && <PackItemRowControls packItem={packItem} onUpdate={onUpdate} />}
+          {showControls && (
+            <PackItemRowControls
+              packItem={packItem}
+              onUpdate={(pi) => {
+                unSelect();
+                return onUpdate(pi);
+              }}
+            />
+          )}
         </Flex>
         {memberRows.map(({ memberItem, member }) => (
           <MemberPackItemRow
