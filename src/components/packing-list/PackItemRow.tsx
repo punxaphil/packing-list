@@ -23,6 +23,7 @@ export function PackItemRow({
   sx,
   isLastItemInCategory,
   unSelect,
+  isFirstItemInCategory,
 }: {
   packItem: PackItem;
   filteredMembers: string[];
@@ -32,6 +33,7 @@ export function PackItemRow({
   sx?: SystemStyleObject;
   isLastItemInCategory: boolean;
   unSelect: () => void;
+  isFirstItemInCategory?: boolean;
 }) {
   const members = useFirebase().members;
   const [addNewPackItem, setAddNewPackItem] = useState(false);
@@ -55,7 +57,12 @@ export function PackItemRow({
   }
 
   return (
-    <Box sx={sx} borderBottomRadius={isLastItemInCategory ? '2xl' : ''} pb={isLastItemInCategory ? '2' : ''}>
+    <Box
+      sx={sx}
+      borderBottomRadius={isLastItemInCategory ? '2xl' : ''}
+      pb={isLastItemInCategory ? '2' : ''}
+      borderTopRadius={isFirstItemInCategory ? '2xl' : ''}
+    >
       <PackItemRowWrapper>
         <Flex gap="3" align="center">
           <DragHandle dragHandleProps={dragHandleProps} />

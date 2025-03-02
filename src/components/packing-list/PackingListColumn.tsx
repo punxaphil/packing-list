@@ -57,6 +57,7 @@ export function PackingListColumn({
                           showControls={selectedRow === row.packItem.id}
                           unSelect={() => setSelectedRow('')}
                           sx={rowStyle}
+                          isFirstItemInCategory={index === 0}
                           isLastItemInCategory={!rows[index + 1] || !!rows[index + 1].category}
                         />
                       )}
