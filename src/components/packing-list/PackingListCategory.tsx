@@ -1,15 +1,18 @@
-import { Checkbox, Flex, Image } from '@chakra-ui/react';
+import { Checkbox, Flex, Image, useToast } from '@chakra-ui/react';
 import type { SystemStyleObject } from '@chakra-ui/styled-system';
 import { DraggableProvidedDragHandleProps } from '@hello-pangea/dnd';
 import { useMemo, useState } from 'react';
+import { AiOutlineCopy } from 'react-icons/ai';
 import { TbCategoryPlus } from 'react-icons/tb';
 import { firebase } from '../../services/firebase.ts';
 import { UNCATEGORIZED, getPackItemGroup } from '../../services/utils.ts';
 import { NamedEntity } from '../../types/NamedEntity.ts';
 import { PackItem } from '../../types/PackItem.ts';
 import { useFirebase } from '../providers/FirebaseContext.ts';
+import { usePackingListId } from '../providers/PackingListContext.ts';
 import { ColorPicker } from '../shared/ColorPicker.tsx';
 import { DragHandle } from '../shared/DragHandle.tsx';
+import { IconSelect } from '../shared/IconSelect.tsx';
 import { PLIconButton } from '../shared/PLIconButton.tsx';
 import { PLInput } from '../shared/PLInput.tsx';
 import { NewPackItemRow } from './NewPackItemRow.tsx';
@@ -25,13 +28,14 @@ export function PackingListCategory({
   onFocus?: () => void;
   sx?: SystemStyleObject;
 }) {
-  const images = useFirebase().images;
-  const grouped = useFirebase().groupedPackItems;
+  const { images, groupedPackItems, packingLists } = useFirebase();
   const [addNewPackItem, setAddNewPackItem] = useState(false);
   const [hideIcons, setHideIcons] = useState(false);
   const [checked, setChecked] = useState(false);
   const [isIndeterminate, setIsIndeterminate] = useState(false);
   const [packItems, setPackItems] = useState<PackItem[]>([]);
+  const { packingListId } = usePackingListId();
+  const toast = useToast();
 
   const categoryImage = useMemo(() => {
     if (category.id) {
@@ -41,13 +45,13 @@ export function PackingListCategory({
   }, [category.id, images]);
 
   useMemo(() => {
-    const packItems = getPackItemGroup(grouped, category).packItems;
+    const packItems = getPackItemGroup(groupedPackItems, category).packItems;
     const allPackItemsChecked = packItems.every((t) => t.checked);
     const somePackItemsChecked = packItems.some((t) => t.checked);
     setPackItems(packItems);
     setChecked(allPackItemsChecked);
     setIsIndeterminate(!allPackItemsChecked && somePackItemsChecked);
-  }, [grouped, category]);
+  }, [groupedPackItems, category]);
 
   async function onChangeCategory(name: string) {
     setHideIcons(false);
@@ -69,6 +73,20 @@ export function PackingListCategory({
     }
     await batch.commit();
     setChecked(newState);
+  }
+
+  async function copyToOtherList(id: string, name: string) {
+    const batch = firebase.initBatch();
+    for (const packItem of packItems) {
+      if (packItem.category === category.id) {
+        firebase.addPackItemBatch(batch, packItem.name, packItem.members, packItem.category, packItem.rank, id);
+      }
+    }
+    await batch.commit();
+    toast({
+      title: `Category ${category.name} copied to ${name}`,
+      status: 'success',
+    });
   }
 
   return (
@@ -94,6 +112,13 @@ export function PackingListCategory({
               icon={<TbCategoryPlus />}
               onClick={() => setAddNewPackItem(true)}
               ml="1"
+            />
+            <IconSelect
+              label="Copy to other list"
+              icon={<AiOutlineCopy />}
+              items={packingLists.filter((l) => l.id !== packingListId)}
+              onClick={copyToOtherList}
+              size="sm"
             />
             {category.id && <ColorPicker category={category} />}
           </>
