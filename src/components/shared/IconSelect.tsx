@@ -16,7 +16,7 @@ export function IconSelect({
   items: MultiSelectItem[];
   onClick: (id: string, name: string) => void;
   emptyIcon?: ReactElement;
-  size?: string;
+  size?: string | string[];
 }) {
   return (
     <Menu>

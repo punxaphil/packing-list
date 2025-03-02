@@ -100,7 +100,7 @@ export function Header() {
               onChange={(e) => savePackingListName(e.target.value)}
               w="min"
               textAlign="right"
-              fontSize="4xl"
+              fontSize={['xl', '4xl']}
               flex={1}
               p={0}
               variant="unstyled"
@@ -115,9 +115,20 @@ export function Header() {
                 ]}
                 onClick={onSelectPackingList}
                 emptyIcon={<IoMdAdd />}
+                size={['sm', 'lg']}
               />
-              <PLIconButton onClick={onDelete} icon={<AiOutlineDelete />} aria-label="Delete packing list" size="lg" />
-              <PLIconButton onClick={onCopy} icon={<AiOutlineCopy />} aria-label="Copy packing list" size="lg" />
+              <PLIconButton
+                onClick={onDelete}
+                icon={<AiOutlineDelete />}
+                aria-label="Delete packing list"
+                size={['sm', 'lg']}
+              />
+              <PLIconButton
+                onClick={onCopy}
+                icon={<AiOutlineCopy />}
+                aria-label="Copy packing list"
+                size={['sm', 'lg']}
+              />
             </Box>
             <HStack w="50px" justifyContent="flex-end">
               <ProfileAvatar size="sm" />
