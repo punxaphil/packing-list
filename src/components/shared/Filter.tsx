@@ -14,10 +14,9 @@ export function Filter({
 }: {
   onFilter: (filterCategories: string[], filterMembers: string[], filterPackItemState: string[]) => void;
 }) {
-  let categories = useFirebase().categoriesInPackingList;
-  let members = useFirebase().membersInPackingList;
-  categories = [UNCATEGORIZED, ...categories];
-  members = [{ id: '', name: 'Without members', rank: 0 }, ...members];
+  const { categoriesInPackingList, membersInPackingList } = useFirebase();
+  const categories = [UNCATEGORIZED, ...categoriesInPackingList];
+  const members = [{ id: '', name: 'Without members', rank: 0 }, ...membersInPackingList];
   const [filteredCategories, setFilteredCategories] = useState<string[]>([]);
   const [filteredMembers, setFilteredMembers] = useState<string[]>([]);
   const [filteredPackItemState, setFilteredPackItemState] = useState<string[]>([]);

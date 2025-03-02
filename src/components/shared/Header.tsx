@@ -14,8 +14,7 @@ import { PLIconButton } from './PLIconButton.tsx';
 
 export function Header() {
   const { packingListId, setPackingListId } = usePackingListId();
-  const packingLists = useFirebase().packingLists;
-  const packItems = useFirebase().packItems;
+  const { packingLists, packItems } = useFirebase();
   const [packingList, setPackingList] = useState<NamedEntity>();
   const toast = useToast();
   useEffect(() => {

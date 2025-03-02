@@ -4,7 +4,6 @@ import { TbStatusChange } from 'react-icons/tb';
 import { firebase } from '../../services/firebase.ts';
 import { PackItem } from '../../types/PackItem.ts';
 import { useFirebase } from '../providers/FirebaseContext.ts';
-import { usePackingListId } from '../providers/PackingListContext.ts';
 import { IconSelect } from '../shared/IconSelect.tsx';
 import { PLIconButton } from '../shared/PLIconButton.tsx';
 
@@ -17,11 +16,8 @@ export function PackItemRowControls({
   packItem: PackItem;
   onUpdate: (packItem: PackItem) => Promise<void>;
 }) {
-  const packingLists = useFirebase().packingLists;
-  const categories = useFirebase().categories;
-  const members = useFirebase().members;
+  const { packingLists, categories, members } = useFirebase();
   const toast = useToast();
-  const { packingListId, setPackingListId } = usePackingListId();
 
   async function setCategory(id: string) {
     packItem.category = id;
@@ -46,7 +42,6 @@ export function PackItemRowControls({
       title: `${packItem.name} copied to ${name}`,
       status: 'success',
     });
-    setPackingListId(packingListId);
   }
 
   async function deleteItem() {

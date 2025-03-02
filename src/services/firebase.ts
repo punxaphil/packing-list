@@ -49,6 +49,15 @@ const USERS_KEY = 'users';
 const IMAGES_KEY = 'images';
 const PACKING_LISTS_KEY = 'packingLists';
 
+const subs: (() => void)[] = [];
+
+function unsubscribeAll() {
+  for (const unsubscribe of subs) {
+    unsubscribe();
+  }
+  subs.length = 0;
+}
+
 export const firebase = {
   getUserCollectionsAndSubscribe: async (
     setMembers: (members: NamedEntity[]) => void,
@@ -80,11 +89,12 @@ export const firebase = {
     }
 
     function createSubscriptions() {
-      onSnapshot(memberQuery, (res) => setMembers(fromQueryResult(res)));
-      onSnapshot(categoriesQuery, (res) => setCategories(fromQueryResult(res)));
-      onSnapshot(itemsQuery, (res) => setPackItems(fromQueryResult(res)));
-      onSnapshot(imagesQuery, (res) => setImages(fromQueryResult(res)));
-      onSnapshot(packingListsQuery, (res) => setPackingLists(fromQueryResult(res)));
+      unsubscribeAll();
+      subs.push(onSnapshot(memberQuery, (res) => setMembers(fromQueryResult(res))));
+      subs.push(onSnapshot(categoriesQuery, (res) => setCategories(fromQueryResult(res))));
+      subs.push(onSnapshot(itemsQuery, (res) => setPackItems(fromQueryResult<PackItem>(res))));
+      subs.push(onSnapshot(imagesQuery, (res) => setImages(fromQueryResult(res))));
+      subs.push(onSnapshot(packingListsQuery, (res) => setPackingLists(fromQueryResult(res))));
     }
   },
 

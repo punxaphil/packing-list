@@ -9,8 +9,7 @@ import { useFirebase } from '../providers/FirebaseContext.ts';
 import { usePackingListId } from '../providers/PackingListContext.ts';
 
 export function PackingList() {
-  const packItems = useFirebase().packItems;
-  const grouped = useFirebase().groupedPackItems;
+  const { packItems, groupedPackItems } = useFirebase();
   const [filteredMembers, setFilteredMembers] = useState<string[]>([]);
   const [textMode, setTextMode] = useState(false);
   const { packingListId } = usePackingListId();
@@ -30,9 +29,9 @@ export function PackingList() {
           {textMode && <PackItemsTextMode onDone={() => setTextMode(false)} />}
           {!textMode && (
             <>
-              {grouped.length > 0 && <PackingListColumns filteredMembers={filteredMembers} />}
+              {groupedPackItems.length > 0 && <PackingListColumns filteredMembers={filteredMembers} />}
 
-              {grouped.length === 0 && (
+              {groupedPackItems.length === 0 && (
                 <Flex justifyContent="center" minWidth="max-content">
                   <Text>
                     {packItems.length > 0 ? (

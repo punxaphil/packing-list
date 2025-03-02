@@ -26,18 +26,15 @@ export function PackItemsTextMode({
 }: {
   onDone: () => void;
 }) {
-  const categories = useFirebase().categories;
-  const members = useFirebase().members;
-  const packItems = useFirebase().packItems;
-  const grouped = useFirebase().groupedPackItems;
+  const { categories, members, packItems, groupedPackItems } = useFirebase();
   const [groupedAsText, setGroupedAsText] = useState('');
   const [saving, setSaving] = useState(false);
   const packingListId = usePackingListId().packingListId;
 
   useEffect(() => {
-    const text = getGroupedAsText(grouped, members);
+    const text = getGroupedAsText(groupedPackItems, members);
     setGroupedAsText(text);
-  }, [grouped, members]);
+  }, [groupedPackItems, members]);
 
   function onChange(e: ChangeEvent<HTMLTextAreaElement>) {
     setGroupedAsText(e.target.value);
