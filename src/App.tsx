@@ -7,6 +7,7 @@ import { PackingList } from './components/pages/PackingList.tsx';
 import { Profile } from './components/pages/Profile.tsx';
 import { Welcome } from './components/pages/Welcome.tsx';
 
+import { PackingLists } from './components/pages/PackingLists.tsx';
 import { TextProgress } from './components/shared/TextProgress.tsx';
 
 export function App() {
@@ -21,6 +22,7 @@ export function App() {
           <Route path="members" element={<Members />} />
           <Route path="categories" element={<Categories />} />
           <Route path="profile" element={<Profile />} />
+          <Route path="packing-lists" element={<PackingLists />} />
         </Route>
       ) : loggingIn ? (
         <Route path="*" element={<TextProgress text="Logging In" />} />

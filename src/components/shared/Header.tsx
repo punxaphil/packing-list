@@ -1,7 +1,8 @@
 import { Box, Flex, HStack, Input, Stack, useToast } from '@chakra-ui/react';
 import { useEffect, useState } from 'react';
-import { AiFillCaretDown, AiOutlineCopy, AiOutlineDelete } from 'react-icons/ai';
+import { AiFillCaretDown, AiOutlineCopy, AiOutlineDelete, AiOutlineUnorderedList } from 'react-icons/ai';
 import { IoMdAdd } from 'react-icons/io';
+import { useNavigate } from 'react-router';
 import { firebase } from '../../services/firebase.ts';
 import { findUniqueName } from '../../services/utils.ts';
 import { NamedEntity } from '../../types/NamedEntity.ts';
@@ -16,6 +17,7 @@ export function Header() {
   const { packingListId, setPackingListId } = usePackingListId();
   const { packingLists, packItems } = useFirebase();
   const [packingList, setPackingList] = useState<NamedEntity>();
+  const navigate = useNavigate();
   const toast = useToast();
   useEffect(() => {
     const initialPackingList = packingLists.find((packingList) => packingList.id === packingListId) as NamedEntity;
@@ -86,6 +88,10 @@ export function Header() {
     });
   }
 
+  function onShowLists() {
+    navigate('/packing-lists');
+  }
+
   return (
     <>
       {packingList && (
@@ -114,19 +120,25 @@ export function Header() {
                 ]}
                 onClick={onSelectPackingList}
                 emptyIcon={<IoMdAdd />}
-                size={['sm', 'lg']}
+                size={['sm', 'md']}
               />
               <PLIconButton
                 onClick={onDelete}
                 icon={<AiOutlineDelete />}
                 aria-label="Delete packing list"
-                size={['sm', 'lg']}
+                size={['sm', 'md']}
               />
               <PLIconButton
                 onClick={onCopy}
                 icon={<AiOutlineCopy />}
                 aria-label="Copy packing list"
-                size={['sm', 'lg']}
+                size={['sm', 'md']}
+              />
+              <PLIconButton
+                onClick={onShowLists}
+                icon={<AiOutlineUnorderedList />}
+                aria-label="Show all packing lists"
+                size={['sm', 'md']}
               />
             </Box>
             <HStack w="50px" justifyContent="flex-end">

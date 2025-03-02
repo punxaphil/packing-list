@@ -13,6 +13,7 @@ import {
   getDoc,
   getDocs,
   initializeFirestore,
+  limit,
   onSnapshot,
   persistentLocalCache,
   persistentMultipleTabManager,
@@ -245,6 +246,25 @@ export const firebase = {
   },
   updateCategoryBatch<K extends DocumentData>(data: WithFieldValue<K>, batch: WriteBatch) {
     batch.update(doc(firestore, USERS_KEY, getUserId(), CATEGORIES_KEY, data.id), data);
+  },
+  getTopItemsForPackingLists: async (packingLists: NamedEntity[]) => {
+    const userId = getUserId();
+    const topItems: { [key: string]: PackItem[] } = {};
+    for (const packingList of packingLists) {
+      const q = query(
+        collection(firestore, USERS_KEY, userId, PACK_ITEMS_KEY),
+        where('packingList', '==', packingList.id),
+        limit(5)
+      );
+      const items = fromQueryResult<PackItem>(await getDocs(q));
+      for (const item of items) {
+        if (!topItems[packingList.id]) {
+          topItems[packingList.id] = [];
+        }
+        topItems[packingList.id].push(item);
+      }
+    }
+    return topItems;
   },
 };
 
