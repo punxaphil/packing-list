@@ -1,8 +1,8 @@
-import { Checkbox, Flex, Image, useToast } from '@chakra-ui/react';
+import { Checkbox, Flex, Image, useDisclosure, useToast } from '@chakra-ui/react';
 import type { SystemStyleObject } from '@chakra-ui/styled-system';
 import { DraggableProvidedDragHandleProps } from '@hello-pangea/dnd';
 import { useMemo, useState } from 'react';
-import { AiOutlineCopy } from 'react-icons/ai';
+import { AiOutlineCopy, AiOutlineDelete } from 'react-icons/ai';
 import { TbCategoryPlus } from 'react-icons/tb';
 import { firebase } from '../../services/firebase.ts';
 import { UNCATEGORIZED, getPackItemGroup } from '../../services/utils.ts';
@@ -11,6 +11,7 @@ import { PackItem } from '../../types/PackItem.ts';
 import { useFirebase } from '../providers/FirebaseContext.ts';
 import { usePackingListId } from '../providers/PackingListContext.ts';
 import { ColorPicker } from '../shared/ColorPicker.tsx';
+import { DeleteDialog } from '../shared/DeleteDialog.tsx';
 import { DragHandle } from '../shared/DragHandle.tsx';
 import { IconSelect } from '../shared/IconSelect.tsx';
 import { PLIconButton } from '../shared/PLIconButton.tsx';
@@ -36,6 +37,7 @@ export function PackingListCategory({
   const [packItems, setPackItems] = useState<PackItem[]>([]);
   const { packingListId } = usePackingListId();
   const toast = useToast();
+  const { isOpen, onOpen, onClose } = useDisclosure();
 
   const categoryImage = useMemo(() => {
     if (category.id) {
@@ -89,6 +91,16 @@ export function PackingListCategory({
     });
   }
 
+  async function onConfirmDelete() {
+    const batch = firebase.initBatch();
+    for (const packItem of packItems) {
+      if (packItem.category === category.id) {
+        firebase.deletePackItemBatch(packItem.id, batch);
+      }
+    }
+    await batch.commit();
+  }
+
   return (
     <>
       <Flex gap="1" alignItems="center" borderTopRadius="2xl" pt="1" sx={sx} px="2" h="32px">
@@ -120,10 +132,12 @@ export function PackingListCategory({
               onClick={copyToOtherList}
               size="sm"
             />
+            <PLIconButton onClick={onOpen} icon={<AiOutlineDelete />} aria-label="Delete items in category" />
             {category.id && <ColorPicker category={category} />}
           </>
         )}
       </Flex>
+      <DeleteDialog text={`category ${category.name}`} onConfirm={onConfirmDelete} onClose={onClose} isOpen={isOpen} />
       {addNewPackItem && <NewPackItemRow categoryId={category.id} onHide={() => setAddNewPackItem(false)} />}
     </>
   );
