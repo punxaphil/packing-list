@@ -1,7 +1,9 @@
 import { Flex, HStack, Link, Spacer } from '@chakra-ui/react';
-import { AiOutlineEdit } from 'react-icons/ai';
+import { AiOutlineEdit, AiOutlineFullscreen, AiOutlineFullscreenExit } from 'react-icons/ai';
 import { useFirebase } from '../providers/FirebaseContext.ts';
+import { useFullscreenMode } from '../providers/FullscreenModeContext.ts';
 import { Filter } from '../shared/Filter.tsx';
+import { PLIconButton } from '../shared/PLIconButton.tsx';
 
 export function PackingListControls({
   onTextMode,
@@ -11,11 +13,16 @@ export function PackingListControls({
   onMemberFilter: (memberIds: string[]) => void;
 }) {
   const setFilter = useFirebase().setFilter;
+  const { fullscreenMode, setFullscreenMode } = useFullscreenMode();
 
   function onFilter(showTheseCategories: string[], showTheseMembers: string[], showTheseStates: string[]) {
     setFilter({ showTheseCategories, showTheseMembers, showTheseStates });
 
     onMemberFilter(showTheseMembers);
+  }
+
+  function onFullscreen() {
+    setFullscreenMode(!fullscreenMode);
   }
 
   return (
@@ -27,6 +34,11 @@ export function PackingListControls({
           <AiOutlineEdit /> Text mode
         </Flex>
       </Link>
+      <PLIconButton
+        aria-label="Full screen"
+        icon={fullscreenMode ? <AiOutlineFullscreenExit /> : <AiOutlineFullscreen />}
+        onClick={onFullscreen}
+      />
     </HStack>
   );
 }

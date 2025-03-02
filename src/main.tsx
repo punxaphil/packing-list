@@ -5,6 +5,7 @@ import { ChakraProvider, extendTheme, withDefaultColorScheme } from '@chakra-ui/
 import { StrictMode } from 'react';
 import { BrowserRouter } from 'react-router';
 import { ErrorProvider } from './components/providers/ErrorProvider.tsx';
+import { FullscreenModeProvider } from './components/providers/FullscreenModeProvider.tsx';
 export const THEME_COLOR = 'gray';
 const customTheme = extendTheme(withDefaultColorScheme({ colorScheme: THEME_COLOR }), {
   components: {
@@ -22,9 +23,11 @@ if (elementById) {
     <StrictMode>
       <ChakraProvider theme={customTheme}>
         <ErrorProvider>
-          <BrowserRouter>
-            <App />
-          </BrowserRouter>
+          <FullscreenModeProvider>
+            <BrowserRouter>
+              <App />
+            </BrowserRouter>
+          </FullscreenModeProvider>
         </ErrorProvider>
       </ChakraProvider>
     </StrictMode>
