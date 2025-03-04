@@ -9,7 +9,7 @@ export function PackItemRowWrapper({
   bgColor?: string;
 }) {
   return (
-    <Box mx="2" bgColor={bgColor} width="350px">
+    <Box mx="2" bgColor={bgColor}>
       {children}
     </Box>
   );

@@ -23,7 +23,7 @@ export function PackingListColumn({
   return (
     <Droppable droppableId={id}>
       {(provided) => (
-        <Box {...provided.droppableProps} ref={provided.innerRef}>
+        <Box {...provided.droppableProps} ref={provided.innerRef} w="300px" minW="300px" maxW="300px">
           {rows.map((row, index) => {
             const rowStyle = { background: row.getColor(categoriesInPackingList) };
             if (row.category === UNCATEGORIZED) {
