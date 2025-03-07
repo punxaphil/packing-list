@@ -29,7 +29,7 @@ export function PackingListCategory({
   const [checked, setChecked] = useState(false);
   const [isIndeterminate, setIsIndeterminate] = useState(false);
   const [packItemsInCat, setPackItemsInCat] = useState<PackItem[]>([]);
-  const { packingListId } = usePackingListId();
+  const { packingList } = usePackingListId();
 
   const categoryImage = useMemo(() => {
     if (category.id) {
@@ -84,7 +84,7 @@ export function PackingListCategory({
           disabled={category === UNCATEGORIZED}
         />
         <CategoryMenu
-          packingListId={packingListId}
+          packingListId={packingList.id}
           packItemsInCat={packItemsInCat}
           category={category}
           setAddNewPackItem={setAddNewPackItem}

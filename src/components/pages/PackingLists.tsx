@@ -1,60 +1,46 @@
-import { Box, Flex } from '@chakra-ui/react';
+import { Box, Button, Flex, Stack } from '@chakra-ui/react';
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router';
 import { firebase } from '../../services/firebase.ts';
-import { PackItem } from '../../types/PackItem.ts';
+import { findUniqueName } from '../../services/utils.ts';
+import { PackingListWithItems } from '../../types/PackingListsWithItems.ts';
 import { useError } from '../providers/ErrorContext.ts';
 import { useFirebase } from '../providers/FirebaseContext.ts';
 import { usePackingListId } from '../providers/PackingListContext.ts';
+import { PackingListCard } from '../shared/PackingListCard.tsx';
 
 export function PackingLists() {
   const { packingLists } = useFirebase();
-  const [items, setItems] = useState<{ [key: string]: PackItem[] } | undefined>();
-  const { packingListId, setPackingListId } = usePackingListId();
-  const navigate = useNavigate();
+  const [packingListsWithItems, setPackingListsWithItems] = useState<PackingListWithItems[]>([]);
+  const currentList = usePackingListId().packingList;
   const { setError } = useError();
 
   useEffect(() => {
     (async () => {
-      setItems(await firebase.getTopItemsForPackingLists(packingLists));
+      setPackingListsWithItems(await firebase.getPackingListsWithItems(packingLists));
     })().catch(setError);
   }, [packingLists, setError]);
 
-  function onListClick(id: string) {
-    setPackingListId(id);
-    navigate('/');
+  async function OnNewList() {
+    const name = findUniqueName('My packing list', packingLists);
+    await firebase.addPackingList(name);
   }
 
   return (
     <Flex wrap="wrap" direction="row" justifyContent="center">
-      {items &&
-        packingLists.map((packingList) => {
-          const isCurrentList = packingList.id === packingListId;
-          return (
-            <Box
-              key={packingList.id}
-              boxShadow={isCurrentList ? 'lg' : 'md'}
-              p={4}
-              m={2}
-              borderRadius="md"
-              width="200px"
-              onClick={() => onListClick(packingList.id)}
-              cursor="pointer"
-              borderWidth={isCurrentList ? '3px' : '1px'}
-            >
-              <Box fontWeight="bold">{packingList.name}</Box>
-              <Box>
-                {items[packingList.id].map((item, index) => {
-                  return (
-                    <Box key={item.id} overflow="hidden" textOverflow="ellipsis" whiteSpace="nowrap">
-                      {index === 4 ? '...' : item.name}
-                    </Box>
-                  );
-                })}
-              </Box>
-            </Box>
-          );
-        })}
+      {packingListsWithItems.map(({ packingList, packItems }) => (
+        <PackingListCard
+          key={packingList.id}
+          packingList={packingList}
+          isCurrentList={packingList.id === currentList.id}
+          packItems={packItems}
+        />
+      ))}
+      <Button onClick={OnNewList} variant="outline" w="200px" h="220px" m={2}>
+        <Stack>
+          <Box fontSize="6xl">+</Box>
+          <Box>Create new</Box>
+        </Stack>
+      </Button>
     </Flex>
   );
 }

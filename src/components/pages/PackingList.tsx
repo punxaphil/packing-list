@@ -12,10 +12,10 @@ export function PackingList() {
   const { packItems, groupedPackItems } = useFirebase();
   const [filteredMembers, setFilteredMembers] = useState<string[]>([]);
   const [textMode, setTextMode] = useState(false);
-  const { packingListId } = usePackingListId();
+  const { packingList } = usePackingListId();
 
   async function addFirstPackItem() {
-    await firebase.addPackItem('Toothbrush', [], '', packingListId, 0);
+    await firebase.addPackItem('Toothbrush', [], '', packingList.id, 0);
   }
   const [isMin800px, isMin1200px] = useMediaQuery(MEDIA_QUERIES);
 

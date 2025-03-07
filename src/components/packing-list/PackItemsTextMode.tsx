@@ -29,7 +29,7 @@ export function PackItemsTextMode({
   const { categories, members, packItems, groupedPackItems } = useFirebase();
   const [groupedAsText, setGroupedAsText] = useState('');
   const [saving, setSaving] = useState(false);
-  const packingListId = usePackingListId().packingListId;
+  const packingList = usePackingListId().packingList;
 
   useEffect(() => {
     const text = getGroupedAsText(groupedPackItems, members);
@@ -43,7 +43,7 @@ export function PackItemsTextMode({
   async function save() {
     setSaving(true);
     const textPackItems = createTextPackItemsFromText(groupedAsText);
-    await updateFirebaseFromTextPackItems(packItems, textPackItems, members, categories, packingListId);
+    await updateFirebaseFromTextPackItems(packItems, textPackItems, members, categories, packingList.id);
     setSaving(false);
     onDone();
   }

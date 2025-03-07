@@ -20,7 +20,7 @@ export function FirebaseProvider({ children }: { children: ReactNode }) {
   const [packItems, setPackItems] = useState<PackItem[]>();
   const [images, setImages] = useState<Image[]>();
   const [packingLists, setPackingLists] = useState<NamedEntity[]>();
-  const { packingListId } = usePackingListId();
+  const { packingList } = usePackingListId();
   const [filter, setFilter] = useState<{
     showTheseCategories: string[];
     showTheseMembers: string[];
@@ -35,24 +35,24 @@ export function FirebaseProvider({ children }: { children: ReactNode }) {
       if (!userId) {
         throw new Error('No user logged in');
       }
-      if (packingListId) {
+      if (packingList) {
         await firebase.getUserCollectionsAndSubscribe(
           setMembers,
           setCategories,
           setPackItems,
           setImages,
           setPackingLists,
-          packingListId
+          packingList.id
         );
       }
     })().catch(console.error);
-  }, [packingListId]);
+  }, [packingList]);
 
   let groupedPackItems: GroupedPackItem[] = [];
   let columns: ColumnList[] = [];
   let categoriesInPackingList: NamedEntity[] = [];
   let membersInPackingList: NamedEntity[] = [];
-  const isInitialized = members && categories && packItems && images && packingLists && packingListId;
+  const isInitialized = members && categories && packItems && images && packingLists && packingList;
   if (isInitialized) {
     sortAll(members, categories, packItems, packingLists);
     const filtered = filterPackItems(packItems);

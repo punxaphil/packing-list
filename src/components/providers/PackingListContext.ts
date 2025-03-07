@@ -1,7 +1,8 @@
 import { createContext, useContext } from 'react';
+import { NamedEntity } from '../../types/NamedEntity.ts';
 
 interface PackingListIdType {
-  packingListId: string;
+  packingList: NamedEntity;
   setPackingListId: (packingListId: string) => void;
 }
 

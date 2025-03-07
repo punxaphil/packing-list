@@ -9,7 +9,7 @@ import { PackItemRowWrapper } from './PackItemRowWrapper.tsx';
 
 export function NewPackItemRow({ categoryId, onHide }: { categoryId: string; onHide: () => void }) {
   const [newRowText, setNewRowText] = useState('');
-  const { packingListId } = usePackingListId();
+  const { packingList } = usePackingListId();
   const packItems = useFirebase().packItems;
 
   async function onChange(e: ChangeEvent<HTMLInputElement>) {
@@ -19,7 +19,7 @@ export function NewPackItemRow({ categoryId, onHide }: { categoryId: string; onH
   async function save() {
     if (newRowText) {
       const nextRank = rankOnTop(packItems);
-      await firebase.addPackItem(newRowText, [], categoryId, packingListId, nextRank);
+      await firebase.addPackItem(newRowText, [], categoryId, packingList.id, nextRank);
       setNewRowText('');
     }
   }

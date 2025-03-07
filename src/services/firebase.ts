@@ -13,7 +13,6 @@ import {
   getDoc,
   getDocs,
   initializeFirestore,
-  limit,
   onSnapshot,
   persistentLocalCache,
   persistentMultipleTabManager,
@@ -27,6 +26,8 @@ import { Image } from '../types/Image.ts';
 import { MemberPackItem } from '../types/MemberPackItem.ts';
 import { NamedEntity } from '../types/NamedEntity.ts';
 import { PackItem } from '../types/PackItem.ts';
+import { PackingListWithItems } from '../types/PackingListsWithItems.ts';
+import { sortEntities } from './utils.ts';
 
 const firebaseConfig = {
   // This is the public key (used client side in browser), so it's safe to be here
@@ -238,8 +239,8 @@ export const firebase = {
   updatePackingList(packingList: NamedEntity) {
     return update(PACKING_LISTS_KEY, packingList.id, packingList);
   },
-  deletePackingList(id: string) {
-    return del(PACKING_LISTS_KEY, id);
+  deletePackingListBatch(id: string, batch: WriteBatch) {
+    batch.delete(doc(firestore, USERS_KEY, getUserId(), PACKING_LISTS_KEY, id));
   },
   addPackingListBatch(name: string, writeBatch: WriteBatch) {
     return addBatch(PACKING_LISTS_KEY, writeBatch, { name });
@@ -247,24 +248,22 @@ export const firebase = {
   updateCategoryBatch<K extends DocumentData>(data: WithFieldValue<K>, batch: WriteBatch) {
     batch.update(doc(firestore, USERS_KEY, getUserId(), CATEGORIES_KEY, data.id), data);
   },
-  getTopItemsForPackingLists: async (packingLists: NamedEntity[]) => {
+  getPackingListsWithItems: async (packingLists: NamedEntity[]) => {
     const userId = getUserId();
-    const topItems: { [key: string]: PackItem[] } = {};
+    const q = query(collection(firestore, USERS_KEY, userId, PACK_ITEMS_KEY));
+    const allPackItems = fromQueryResult<PackItem>(await getDocs(q));
+    sortEntities(allPackItems);
+    const groups: PackingListWithItems[] = [];
     for (const packingList of packingLists) {
-      const q = query(
-        collection(firestore, USERS_KEY, userId, PACK_ITEMS_KEY),
-        where('packingList', '==', packingList.id),
-        limit(5)
-      );
-      const items = fromQueryResult<PackItem>(await getDocs(q));
-      for (const item of items) {
-        if (!topItems[packingList.id]) {
-          topItems[packingList.id] = [];
+      const group: PackingListWithItems = { packingList, packItems: [] };
+      for (const packItem of allPackItems) {
+        if (packItem.packingList === packingList.id) {
+          group.packItems.push(packItem);
         }
-        topItems[packingList.id].push(item);
       }
+      groups.push(group);
     }
-    return topItems;
+    return groups;
   },
 };
 
