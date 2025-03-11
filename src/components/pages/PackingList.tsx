@@ -6,13 +6,13 @@ import { PackingListColumns } from '../packing-list/PackingListColumns.tsx';
 import { PackingListControls } from '../packing-list/PackingListControls.tsx';
 import { MEDIA_QUERIES } from '../packing-list/packingListUtils.ts';
 import { useFirebase } from '../providers/FirebaseContext.ts';
-import { usePackingListId } from '../providers/PackingListContext.ts';
+import { usePackingList } from '../providers/PackingListContext.ts';
 
 export function PackingList() {
   const { packItems, groupedPackItems } = useFirebase();
   const [filteredMembers, setFilteredMembers] = useState<string[]>([]);
   const [textMode, setTextMode] = useState(false);
-  const { packingList } = usePackingListId();
+  const { packingList } = usePackingList();
 
   async function addFirstPackItem() {
     await firebase.addPackItem('Toothbrush', [], '', packingList.id, 0);

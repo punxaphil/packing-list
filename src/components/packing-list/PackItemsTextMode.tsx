@@ -19,7 +19,7 @@ import {
   updateFirebaseFromTextPackItems,
 } from '../../services/textModeUtils.ts';
 import { useFirebase } from '../providers/FirebaseContext.ts';
-import { usePackingListId } from '../providers/PackingListContext.ts';
+import { usePackingList } from '../providers/PackingListContext.ts';
 
 export function PackItemsTextMode({
   onDone,
@@ -29,7 +29,7 @@ export function PackItemsTextMode({
   const { categories, members, packItems, groupedPackItems } = useFirebase();
   const [groupedAsText, setGroupedAsText] = useState('');
   const [saving, setSaving] = useState(false);
-  const packingList = usePackingListId().packingList;
+  const packingList = usePackingList().packingList;
 
   useEffect(() => {
     const text = getGroupedAsText(groupedPackItems, members);

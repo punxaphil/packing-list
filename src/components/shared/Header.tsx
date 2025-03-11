@@ -2,11 +2,11 @@ import { Flex, HStack, Input, Stack } from '@chakra-ui/react';
 import { useMemo, useState } from 'react';
 import { firebase } from '../../services/firebase.ts';
 import { ProfileAvatar } from '../auth/ProfileAvatar.tsx';
-import { usePackingListId } from '../providers/PackingListContext.ts';
+import { usePackingList } from '../providers/PackingListContext.ts';
 import { NavButton } from './NavButton.tsx';
 
 export function Header() {
-  const { packingList } = usePackingListId();
+  const { packingList } = usePackingList();
   const [packingListName, setPackingListName] = useState('');
   useMemo(() => {
     setPackingListName(packingList.name);

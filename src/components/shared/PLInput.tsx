@@ -8,7 +8,6 @@ export function PLInput({
   strike,
   bold,
   onEnter,
-  onFocus,
   disabled,
 }: {
   value: string;
@@ -16,7 +15,6 @@ export function PLInput({
   strike?: boolean;
   bold?: boolean;
   onEnter?: () => void;
-  onFocus?: () => void;
   disabled?: boolean;
 }) {
   const [text, setText] = useState(value);
@@ -61,7 +59,6 @@ export function PLInput({
         onBlur={() => onUpdate(text)}
         variant="unstyled"
         height="32px"
-        onFocus={onFocus}
         ref={textRef}
         disabled={disabled}
         fontStyle={disabled ? 'italic' : 'normal'}

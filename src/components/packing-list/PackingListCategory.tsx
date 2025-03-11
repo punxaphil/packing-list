@@ -7,7 +7,6 @@ import { UNCATEGORIZED, getPackItemGroup } from '../../services/utils.ts';
 import { NamedEntity } from '../../types/NamedEntity.ts';
 import { PackItem } from '../../types/PackItem.ts';
 import { useFirebase } from '../providers/FirebaseContext.ts';
-import { usePackingListId } from '../providers/PackingListContext.ts';
 import { CategoryMenu } from '../shared/CategoryMenu.tsx';
 import { DragHandle } from '../shared/DragHandle.tsx';
 import { PLInput } from '../shared/PLInput.tsx';
@@ -16,12 +15,10 @@ import { NewPackItemRow } from './NewPackItemRow.tsx';
 export function PackingListCategory({
   category,
   dragHandleProps,
-  onFocus,
   sx,
 }: {
   category: NamedEntity;
   dragHandleProps?: DraggableProvidedDragHandleProps | null;
-  onFocus?: () => void;
   sx?: SystemStyleObject;
 }) {
   const { images, groupedPackItems } = useFirebase();
@@ -29,7 +26,6 @@ export function PackingListCategory({
   const [checked, setChecked] = useState(false);
   const [isIndeterminate, setIsIndeterminate] = useState(false);
   const [packItemsInCat, setPackItemsInCat] = useState<PackItem[]>([]);
-  const { packingList } = usePackingListId();
 
   const categoryImage = useMemo(() => {
     if (category.id) {
@@ -74,21 +70,8 @@ export function PackingListCategory({
         {category.id && <DragHandle dragHandleProps={dragHandleProps} />}
         <Checkbox isChecked={checked} isIndeterminate={isIndeterminate} onChange={toggleItem} />
         {categoryImage && <Image borderRadius="full" boxSize="30px" src={categoryImage} mr="2" />}
-        <PLInput
-          bold={true}
-          value={category.name}
-          onUpdate={onChangeCategory}
-          onFocus={() => {
-            onFocus?.();
-          }}
-          disabled={category === UNCATEGORIZED}
-        />
-        <CategoryMenu
-          packingListId={packingList.id}
-          packItemsInCat={packItemsInCat}
-          category={category}
-          setAddNewPackItem={setAddNewPackItem}
-        />
+        <PLInput bold={true} value={category.name} onUpdate={onChangeCategory} disabled={category === UNCATEGORIZED} />
+        <CategoryMenu packItemsInCat={packItemsInCat} category={category} setAddNewPackItem={setAddNewPackItem} />
       </Flex>
 
       {addNewPackItem && <NewPackItemRow categoryId={category.id} onHide={() => setAddNewPackItem(false)} />}

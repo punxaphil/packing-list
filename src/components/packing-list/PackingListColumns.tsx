@@ -1,6 +1,5 @@
 import { Box, HStack, useMediaQuery } from '@chakra-ui/react';
 import { DragDropContext, DragUpdate } from '@hello-pangea/dnd';
-import { useState } from 'react';
 import { useMemo } from 'react';
 import { firebase } from '../../services/firebase.ts';
 import { UNCATEGORIZED } from '../../services/utils.ts';
@@ -14,7 +13,6 @@ export function PackingListColumns({
 }: {
   filteredMembers: string[];
 }) {
-  const [selectedRow, setSelectedRow] = useState('');
   const initialColumns = useFirebase().columns;
 
   const columns = useMemo(() => initialColumns, [initialColumns]);
@@ -50,13 +48,7 @@ export function PackingListColumns({
         {columns.map(({ key, rows }) => {
           return (
             <Box key={key}>
-              <PackingListColumn
-                id={key}
-                rows={rows}
-                setSelectedRow={setSelectedRow}
-                selectedRow={selectedRow}
-                filteredMembers={filteredMembers}
-              />
+              <PackingListColumn id={key} rows={rows} filteredMembers={filteredMembers} />
             </Box>
           );
         })}

@@ -12,7 +12,7 @@ import { MEDIA_QUERIES, createColumns, flattenGroupedPackItems } from '../packin
 import { CHECKED_FILTER_STATE, UNCHECKED_FILTER_STATE } from '../shared/Filter.tsx';
 import { TextProgress } from '../shared/TextProgress.tsx';
 import { FirebaseContext } from './FirebaseContext.ts';
-import { usePackingListId } from './PackingListContext.ts';
+import { usePackingList } from './PackingListContext.ts';
 
 export function FirebaseProvider({ children }: { children: ReactNode }) {
   const [members, setMembers] = useState<NamedEntity[]>();
@@ -20,7 +20,7 @@ export function FirebaseProvider({ children }: { children: ReactNode }) {
   const [packItems, setPackItems] = useState<PackItem[]>();
   const [images, setImages] = useState<Image[]>();
   const [packingLists, setPackingLists] = useState<NamedEntity[]>();
-  const { packingList } = usePackingListId();
+  const { packingList } = usePackingList();
   const [filter, setFilter] = useState<{
     showTheseCategories: string[];
     showTheseMembers: string[];

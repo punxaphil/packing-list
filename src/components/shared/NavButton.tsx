@@ -5,7 +5,7 @@ export function NavButton({ name, path }: { name: string; path: string }) {
   return (
     <NavLink to={path} end>
       {({ isActive }) => (
-        <Button variant={isActive ? undefined : 'soft'} size={['sm', 'md']}>
+        <Button variant={isActive ? undefined : 'soft'} size={['xs', 'sm', 'md']}>
           {name}
         </Button>
       )}

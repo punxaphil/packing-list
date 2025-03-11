@@ -8,9 +8,9 @@ import { useFirebase } from '../providers/FirebaseContext.ts';
 import { DragHandle } from '../shared/DragHandle.tsx';
 import { MultiCheckbox } from '../shared/MultiCheckbox.tsx';
 import { PLInput } from '../shared/PLInput.tsx';
+import { PackItemMenu } from '../shared/PackItemMenu.tsx';
 import { MemberPackItemRow } from './MemberPackItemRow.tsx';
 import { NewPackItemRow } from './NewPackItemRow.tsx';
-import { PackItemRowControls } from './PackItemRowControls.tsx';
 import { PackItemRowWrapper } from './PackItemRowWrapper.tsx';
 import { getMemberRows } from './packingListUtils.ts';
 
@@ -18,21 +18,15 @@ export function PackItemRow({
   packItem,
   filteredMembers,
   dragHandleProps,
-  onFocus,
-  showControls,
   sx,
   isLastItemInCategory,
-  unSelect,
   isFirstItemInCategory,
 }: {
   packItem: PackItem;
   filteredMembers: string[];
   dragHandleProps: DraggableProvidedDragHandleProps | null;
-  onFocus: () => void;
-  showControls: boolean;
   sx?: SystemStyleObject;
   isLastItemInCategory: boolean;
-  unSelect: () => void;
   isFirstItemInCategory?: boolean;
 }) {
   const members = useFirebase().members;
@@ -77,19 +71,10 @@ export function PackItemRow({
               value={packItem.name}
               onUpdate={onChangeText}
               strike={packItem.checked}
-              onFocus={onFocus}
               onEnter={() => setAddNewPackItem(true)}
             />
           </Flex>
-          {showControls && (
-            <PackItemRowControls
-              packItem={packItem}
-              onUpdate={(pi) => {
-                unSelect();
-                return onUpdate(pi);
-              }}
-            />
-          )}
+          <PackItemMenu packItem={packItem} />
         </Flex>
         {memberRows.map(({ memberItem, member }) => (
           <MemberPackItemRow
@@ -97,8 +82,6 @@ export function PackItemRow({
             parent={packItem}
             key={memberItem.id + member.name}
             member={member}
-            showControls={showControls}
-            onFocus={onFocus}
           />
         ))}
       </PackItemRowWrapper>

@@ -8,7 +8,7 @@ interface PackingListIdType {
 
 export const PackingListContext = createContext<PackingListIdType | undefined>(undefined);
 
-export function usePackingListId() {
+export function usePackingList() {
   const context = useContext(PackingListContext);
   if (context === undefined) {
     throw new Error('usePackingListId must be used within a PackingListProvider');

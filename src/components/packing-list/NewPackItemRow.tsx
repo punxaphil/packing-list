@@ -4,12 +4,12 @@ import { KeyboardEvent } from 'react';
 import { firebase } from '../../services/firebase.ts';
 import { handleEnter, rankOnTop } from '../../services/utils.ts';
 import { useFirebase } from '../providers/FirebaseContext.ts';
-import { usePackingListId } from '../providers/PackingListContext.ts';
+import { usePackingList } from '../providers/PackingListContext.ts';
 import { PackItemRowWrapper } from './PackItemRowWrapper.tsx';
 
 export function NewPackItemRow({ categoryId, onHide }: { categoryId: string; onHide: () => void }) {
   const [newRowText, setNewRowText] = useState('');
-  const { packingList } = usePackingListId();
+  const { packingList } = usePackingList();
   const packItems = useFirebase().packItems;
 
   async function onChange(e: ChangeEvent<HTMLInputElement>) {

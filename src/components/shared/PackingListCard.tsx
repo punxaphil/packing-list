@@ -6,7 +6,7 @@ import { findUniqueName } from '../../services/utils.ts';
 import { NamedEntity } from '../../types/NamedEntity.ts';
 import { PackItem } from '../../types/PackItem.ts';
 import { useFirebase } from '../providers/FirebaseContext.ts';
-import { usePackingListId } from '../providers/PackingListContext.ts';
+import { usePackingList } from '../providers/PackingListContext.ts';
 import { DeleteDialog } from './DeleteDialog.tsx';
 import { PLIconButton } from './PLIconButton.tsx';
 
@@ -22,7 +22,7 @@ export function PackingListCard({
   const deleteDialog = useDisclosure();
   const navigate = useNavigate();
   const { packingLists, groupedPackItems } = useFirebase();
-  const { setPackingListId } = usePackingListId();
+  const { setPackingListId } = usePackingList();
   const toast = useToast();
 
   function onListClick() {

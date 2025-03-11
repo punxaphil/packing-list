@@ -9,14 +9,10 @@ import { PackingListCategory } from './PackingListCategory.tsx';
 export function PackingListColumn({
   rows,
   id,
-  setSelectedRow,
-  selectedRow,
   filteredMembers,
 }: {
   rows: PackingListRow[];
   id: string;
-  setSelectedRow: (id: string) => void;
-  selectedRow?: string;
   filteredMembers: string[];
 }) {
   const categoriesInPackingList = useFirebase().categoriesInPackingList;
@@ -44,7 +40,6 @@ export function PackingListColumn({
                         <PackingListCategory
                           category={row.category}
                           dragHandleProps={provided.dragHandleProps}
-                          onFocus={() => setSelectedRow(row.id)}
                           sx={{ ...rowStyle, marginTop: index === 0 ? '0' : '1' }}
                         />
                       )}
@@ -53,9 +48,6 @@ export function PackingListColumn({
                           packItem={row.packItem}
                           filteredMembers={filteredMembers}
                           dragHandleProps={provided.dragHandleProps}
-                          onFocus={() => setSelectedRow(row.id)}
-                          showControls={selectedRow === row.packItem.id}
-                          unSelect={() => setSelectedRow('')}
                           sx={rowStyle}
                           isFirstItemInCategory={index === 0}
                           isLastItemInCategory={!rows[index + 1] || !!rows[index + 1].category}

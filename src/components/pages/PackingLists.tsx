@@ -5,13 +5,13 @@ import { findUniqueName } from '../../services/utils.ts';
 import { PackingListWithItems } from '../../types/PackingListsWithItems.ts';
 import { useError } from '../providers/ErrorContext.ts';
 import { useFirebase } from '../providers/FirebaseContext.ts';
-import { usePackingListId } from '../providers/PackingListContext.ts';
+import { usePackingList } from '../providers/PackingListContext.ts';
 import { PackingListCard } from '../shared/PackingListCard.tsx';
 
 export function PackingLists() {
   const { packingLists } = useFirebase();
   const [packingListsWithItems, setPackingListsWithItems] = useState<PackingListWithItems[]>([]);
-  const currentList = usePackingListId().packingList;
+  const currentList = usePackingList().packingList;
   const { setError } = useError();
 
   useEffect(() => {
