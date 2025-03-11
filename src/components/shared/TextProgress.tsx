@@ -9,7 +9,7 @@ export function TextProgress({ text }: { text: string }) {
 `;
   return (
     <Flex justifyContent="center" h="100vh" align="center">
-      <Heading as="h3">
+      <Heading as="h3" textAlign="center">
         {text}
         <Box as="span" animation={`${dotFlashing} 1s infinite`} mx="1">
           .
