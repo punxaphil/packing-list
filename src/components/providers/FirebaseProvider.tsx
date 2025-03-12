@@ -1,4 +1,4 @@
-import { useMediaQuery } from '@chakra-ui/react';
+import { useBreakpointValue } from '@chakra-ui/react';
 import { getAuth } from 'firebase/auth';
 import { ReactNode, useEffect, useState } from 'react';
 import { firebase } from '../../services/firebase.ts';
@@ -8,7 +8,7 @@ import { GroupedPackItem } from '../../types/GroupedPackItem.ts';
 import { Image } from '../../types/Image.ts';
 import { NamedEntity } from '../../types/NamedEntity.ts';
 import { PackItem } from '../../types/PackItem.ts';
-import { MEDIA_QUERIES, createColumns, flattenGroupedPackItems } from '../packing-list/packingListUtils.ts';
+import { createColumns, flattenGroupedPackItems } from '../packing-list/packingListUtils.ts';
 import { CHECKED_FILTER_STATE, UNCHECKED_FILTER_STATE } from '../shared/Filter.tsx';
 import { TextProgress } from '../shared/TextProgress.tsx';
 import { FirebaseContext } from './FirebaseContext.ts';
@@ -26,8 +26,7 @@ export function FirebaseProvider({ children }: { children: ReactNode }) {
     showTheseMembers: string[];
     showTheseStates: string[];
   } | null>(null);
-  const [isMin800px, isMin1200px] = useMediaQuery(MEDIA_QUERIES);
-  const nbrOfColumns = isMin1200px ? 3 : isMin800px ? 2 : 1;
+  const nbrOfColumns: 1 | 2 | 3 = useBreakpointValue({ base: 1, sm: 1, md: 2, lg: 3 }) ?? 3;
 
   useEffect(() => {
     (async () => {
@@ -103,6 +102,7 @@ export function FirebaseProvider({ children }: { children: ReactNode }) {
             packingLists,
             groupedPackItems,
             columns,
+            nbrOfColumns,
             categoriesInPackingList,
             membersInPackingList,
             setFilter,

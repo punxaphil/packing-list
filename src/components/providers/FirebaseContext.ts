@@ -13,6 +13,7 @@ interface FirebaseData {
   packingLists: NamedEntity[];
   groupedPackItems: GroupedPackItem[];
   columns: ColumnList[];
+  nbrOfColumns: 1 | 2 | 3;
   categoriesInPackingList: NamedEntity[];
   membersInPackingList: NamedEntity[];
   setFilter: ({

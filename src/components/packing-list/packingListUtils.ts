@@ -5,7 +5,6 @@ import { MemberPackItem } from '../../types/MemberPackItem.ts';
 import { NamedEntity } from '../../types/NamedEntity.ts';
 
 const COLUMN_THRESHOLD = 15;
-export const MEDIA_QUERIES = ['(min-width: 800px)', '(min-width: 1200px)'];
 
 export function flattenGroupedPackItems(grouped: GroupedPackItem[]) {
   const flattened: PackingListRow[] = [];
@@ -21,7 +20,7 @@ export function flattenGroupedPackItems(grouped: GroupedPackItem[]) {
 export function reorder(
   dragUpdate: DragUpdate,
   columns: ColumnList[],
-  nbrOfColumns: 1 | 2 | 3
+  nbrOfColumns: number
 ): [PackingListRow[], ColumnList[]] | [null, null] {
   const { source, destination } = dragUpdate;
 
@@ -40,7 +39,7 @@ export function reorder(
   return [allRows, newColumns];
 }
 
-export function createColumns(rows: PackingListRow[], nbrOfColumns: 1 | 2 | 3): ColumnList[] {
+export function createColumns(rows: PackingListRow[], nbrOfColumns: number): ColumnList[] {
   let columns: PackingListRow[][] = [];
   if (nbrOfColumns > 1) {
     const arraySize = rows.map((item) => item.getSize()).reduce((a, b) => a + b, 0);
