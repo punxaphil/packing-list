@@ -85,7 +85,13 @@ export function PackItemRow({
           />
         ))}
       </PackItemRowWrapper>
-      {addNewPackItem && <NewPackItemRow categoryId={packItem.category} onHide={() => setAddNewPackItem(false)} />}
+      {addNewPackItem && (
+        <NewPackItemRow
+          categoryId={packItem.category}
+          onHide={() => setAddNewPackItem(false)}
+          packItemToPlaceNewItemAfter={packItem}
+        />
+      )}
     </Box>
   );
 }
