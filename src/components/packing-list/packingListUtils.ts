@@ -59,7 +59,18 @@ export function createColumns(rows: PackingListRow[], nbrOfColumns: number): Col
   } else {
     columns = [rows];
   }
+  moveLastCategoryToNextColumn(columns);
   return columns.map((rows, index) => ({ key: index.toString(), rows }));
+}
+
+function moveLastCategoryToNextColumn(columns: PackingListRow[][]) {
+  for (let i = 0; i < columns.length - 1; i++) {
+    const lastItem = columns[i][columns[i].length - 1];
+    if (lastItem.category) {
+      columns[i].pop();
+      columns[i + 1].unshift(lastItem);
+    }
+  }
 }
 
 export function getMemberRows(memberPackItems: MemberPackItem[], filteredMembers: string[], members: NamedEntity[]) {
