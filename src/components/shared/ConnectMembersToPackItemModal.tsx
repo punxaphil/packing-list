@@ -72,7 +72,7 @@ export function ConnectMembersToPackItemModal({
                 );
               })}
             </Stack>
-            <Button onClick={onClose} w={'100%'}>
+            <Button onClick={onClose} w={'100%'} mb={2}>
               Done
             </Button>
           </ModalBody>
