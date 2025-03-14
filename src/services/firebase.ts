@@ -170,7 +170,7 @@ export const firebase = {
     rank: number,
     packingList: string
   ) {
-    addBatch(PACK_ITEMS_KEY, writeBatch, {
+    return addBatch(PACK_ITEMS_KEY, writeBatch, {
       name,
       members,
       checked: false,

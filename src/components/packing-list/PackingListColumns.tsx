@@ -5,6 +5,7 @@ import { firebase } from '../../services/firebase.ts';
 import { UNCATEGORIZED } from '../../services/utils.ts';
 import { PackingListRow } from '../../types/Column.ts';
 import { useFirebase } from '../providers/FirebaseContext.ts';
+import { NewPackItemRowIdProvider } from '../providers/NewPackItemRowIdProvider.tsx';
 import { PackingListColumn } from './PackingListColumn.tsx';
 import { reorder } from './packingListUtils.ts';
 
@@ -42,13 +43,15 @@ export function PackingListColumns({
   return (
     <DragDropContext onDragEnd={onDragEnd}>
       <HStack alignItems="start" justifyContent="center">
-        {columns.map(({ key, rows }) => {
-          return (
-            <Box key={key}>
-              <PackingListColumn id={key} rows={rows} filteredMembers={filteredMembers} />
-            </Box>
-          );
-        })}
+        <NewPackItemRowIdProvider>
+          {columns.map(({ key, rows }) => {
+            return (
+              <Box key={key}>
+                <PackingListColumn id={key} rows={rows} filteredMembers={filteredMembers} />
+              </Box>
+            );
+          })}
+        </NewPackItemRowIdProvider>
       </HStack>
     </DragDropContext>
   );

@@ -6,6 +6,7 @@ import { TbCategoryPlus } from 'react-icons/tb';
 import { firebase } from '../../services/firebase.ts';
 import { NamedEntity } from '../../types/NamedEntity.ts';
 import { PackItem } from '../../types/PackItem.ts';
+import { useNewPackItemRowId } from '../providers/NewPackItemRowIdContext.ts';
 import { ColorPicker } from './ColorPicker.tsx';
 import { ContextMenu } from './ContextMenu.tsx';
 import { CopyToOtherListModal } from './CopyToOtherListModal.tsx';
@@ -14,12 +15,11 @@ import { DeleteDialog } from './DeleteDialog.tsx';
 export function CategoryMenu({
   packItemsInCat,
   category,
-  setAddNewPackItem,
 }: {
   packItemsInCat: PackItem[];
   category: NamedEntity;
-  setAddNewPackItem: (value: boolean) => void;
 }) {
+  const { setNewPackItemRowId } = useNewPackItemRowId();
   const copyDisclosure = useDisclosure();
   const deleteDisclosure = useDisclosure();
   const colorDisclosure = useDisclosure();
@@ -40,7 +40,7 @@ export function CategoryMenu({
 
   return (
     <ContextMenu title="Category actions">
-      <MenuItem key="add" onClick={() => setAddNewPackItem(true)} icon={<TbCategoryPlus />}>
+      <MenuItem key="add" onClick={() => setNewPackItemRowId(category.id)} icon={<TbCategoryPlus />}>
         Add new pack item
       </MenuItem>
       <MenuItem key="copy" onClick={copyToOtherList} icon={<AiOutlineCopy />}>

@@ -5,6 +5,7 @@ import { firebase } from '../../services/firebase.ts';
 import { handleEnter, rankOnTop } from '../../services/utils.ts';
 import { PackItem } from '../../types/PackItem.ts';
 import { useFirebase } from '../providers/FirebaseContext.ts';
+import { useNewPackItemRowId } from '../providers/NewPackItemRowIdContext.ts';
 import { usePackingList } from '../providers/PackingListContext.ts';
 import { PackItemRowWrapper } from './PackItemRowWrapper.tsx';
 
@@ -19,6 +20,7 @@ export function NewPackItemRow({
 }) {
   const [newRowText, setNewRowText] = useState('');
   const { packingList } = usePackingList();
+  const { setNewPackItemRowId } = useNewPackItemRowId();
   const packItems = useFirebase().packItems;
 
   async function onChange(e: ChangeEvent<HTMLInputElement>) {
@@ -33,7 +35,6 @@ export function NewPackItemRow({
         rank = packItemToPlaceNewItemAfter.rank;
         for (const packItem of packItems) {
           packItem.rank = packItem.rank + 1;
-          console.log('packItem', packItem.rank, packItem.name);
           firebase.updatePackItemBatch(packItem, batch);
           if (packItem.id === packItemToPlaceNewItemAfter.id) {
             break;
@@ -42,10 +43,9 @@ export function NewPackItemRow({
       } else {
         rank = rankOnTop(packItems);
       }
-      console.log('packItem newrank', rank, newRowText);
-      firebase.addPackItemBatch(batch, newRowText, [], categoryId, rank, packingList.id);
+      const newId = firebase.addPackItemBatch(batch, newRowText, [], categoryId, rank, packingList.id);
+      setNewPackItemRowId(newId);
       await batch.commit();
-      setNewRowText('');
     }
   }
 

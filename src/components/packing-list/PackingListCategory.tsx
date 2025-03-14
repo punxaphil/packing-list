@@ -7,6 +7,7 @@ import { UNCATEGORIZED, getPackItemGroup } from '../../services/utils.ts';
 import { NamedEntity } from '../../types/NamedEntity.ts';
 import { PackItem } from '../../types/PackItem.ts';
 import { useFirebase } from '../providers/FirebaseContext.ts';
+import { useNewPackItemRowId } from '../providers/NewPackItemRowIdContext.ts';
 import { CategoryMenu } from '../shared/CategoryMenu.tsx';
 import { DragHandle } from '../shared/DragHandle.tsx';
 import { PLInput } from '../shared/PLInput.tsx';
@@ -22,7 +23,7 @@ export function PackingListCategory({
   sx?: SystemStyleObject;
 }) {
   const { images, groupedPackItems } = useFirebase();
-  const [addNewPackItem, setAddNewPackItem] = useState(false);
+  const { newPackItemRowId, setNewPackItemRowId } = useNewPackItemRowId();
   const [checked, setChecked] = useState(false);
   const [isIndeterminate, setIsIndeterminate] = useState(false);
   const [packItemsInCat, setPackItemsInCat] = useState<PackItem[]>([]);
@@ -71,10 +72,12 @@ export function PackingListCategory({
         <Checkbox isChecked={checked} isIndeterminate={isIndeterminate} onChange={toggleItem} />
         {categoryImage && <Image borderRadius="full" boxSize="30px" src={categoryImage} mr="2" />}
         <PLInput bold={true} value={category.name} onUpdate={onChangeCategory} disabled={category === UNCATEGORIZED} />
-        <CategoryMenu packItemsInCat={packItemsInCat} category={category} setAddNewPackItem={setAddNewPackItem} />
+        <CategoryMenu packItemsInCat={packItemsInCat} category={category} />
       </Flex>
 
-      {addNewPackItem && <NewPackItemRow categoryId={category.id} onHide={() => setAddNewPackItem(false)} />}
+      {newPackItemRowId === category.id && (
+        <NewPackItemRow categoryId={category.id} onHide={() => setNewPackItemRowId()} />
+      )}
     </>
   );
 }

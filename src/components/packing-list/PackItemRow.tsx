@@ -1,10 +1,11 @@
 import { Box, Checkbox, Flex } from '@chakra-ui/react';
 import type { SystemStyleObject } from '@chakra-ui/styled-system';
 import { DraggableProvidedDragHandleProps } from '@hello-pangea/dnd';
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { firebase } from '../../services/firebase.ts';
 import { PackItem } from '../../types/PackItem.ts';
 import { useFirebase } from '../providers/FirebaseContext.ts';
+import { useNewPackItemRowId } from '../providers/NewPackItemRowIdContext.ts';
 import { DragHandle } from '../shared/DragHandle.tsx';
 import { MultiCheckbox } from '../shared/MultiCheckbox.tsx';
 import { PLInput } from '../shared/PLInput.tsx';
@@ -30,7 +31,7 @@ export function PackItemRow({
   isFirstItemInCategory?: boolean;
 }) {
   const members = useFirebase().members;
-  const [addNewPackItem, setAddNewPackItem] = useState(false);
+  const { newPackItemRowId, setNewPackItemRowId } = useNewPackItemRowId();
 
   const memberRows = useMemo(() => {
     return getMemberRows(packItem.members, filteredMembers, members);
@@ -71,7 +72,7 @@ export function PackItemRow({
               value={packItem.name}
               onUpdate={onChangeText}
               strike={packItem.checked}
-              onEnter={() => setAddNewPackItem(true)}
+              onEnter={() => setNewPackItemRowId(packItem.id)}
             />
           </Flex>
           <PackItemMenu packItem={packItem} />
@@ -85,10 +86,10 @@ export function PackItemRow({
           />
         ))}
       </PackItemRowWrapper>
-      {addNewPackItem && (
+      {newPackItemRowId === packItem.id && (
         <NewPackItemRow
           categoryId={packItem.category}
-          onHide={() => setAddNewPackItem(false)}
+          onHide={() => setNewPackItemRowId()}
           packItemToPlaceNewItemAfter={packItem}
         />
       )}
