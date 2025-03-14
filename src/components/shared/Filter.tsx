@@ -54,7 +54,7 @@ export function Filter({
       setFilteredPackItemState(arr);
     }
   }
-
+  const showFilterButtons = useBreakpointValue({ base: false, lg: true });
   const filterButtonsData = [
     ...filteredCategories.map((c) => categories.find((e) => e.id === c)),
     ...filteredMembers.map((m) => members.find((e) => e.id === m)),
@@ -64,8 +64,13 @@ export function Filter({
   return (
     <>
       <Menu>
-        <MenuButton as={Link} m="3">
-          <AiOutlineFilter />
+        <MenuButton ml="3">
+          <HStack gap={0}>
+            <AiOutlineFilter />
+            <Text fontSize="2xs">
+              {!showFilterButtons && filterButtonsData.length > 0 && `${filterButtonsData.length}*`}
+            </Text>
+          </HStack>
         </MenuButton>
         <MenuList>
           <MenuOptionGroup
@@ -97,19 +102,20 @@ export function Filter({
           </MenuOptionGroup>
         </MenuList>
       </Menu>
-      {filterButtonsData.map((c, index) => (
-        <Button
-          key={c?.id}
-          onClick={() => removeNamedEntityFilter(c?.id)}
-          rightIcon={<SmallCloseIcon />}
-          size="xs"
-          m="1"
-          borderRadius="full"
-          bg={COLUMN_COLORS[index % COLUMN_COLORS.length]}
-        >
-          {c?.name}
-        </Button>
-      ))}
+      {showFilterButtons &&
+        filterButtonsData.map((c, index) => (
+          <Button
+            key={c?.id || index}
+            onClick={() => removeNamedEntityFilter(c?.id)}
+            rightIcon={<SmallCloseIcon />}
+            size="xs"
+            m="1"
+            borderRadius="full"
+            bg={COLUMN_COLORS[index % COLUMN_COLORS.length]}
+          >
+            {c?.name}
+          </Button>
+        ))}
     </>
   );
 }
