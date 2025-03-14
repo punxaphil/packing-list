@@ -25,13 +25,18 @@ export function PackingListControls({
     setFullscreenMode(!fullscreenMode);
   }
 
+  function onEditClick() {
+    setFilter({ showTheseCategories: [], showTheseMembers: [], showTheseStates: [] });
+    onTextMode();
+  }
+
   return (
     <HStack justifyContent="space-between" alignItems="center">
       <Filter onFilter={onFilter} />
       <Spacer />
-      <Link onClick={onTextMode} variant="outline" m="3">
+      <Link onClick={onEditClick} variant="outline" m="3">
         <Flex alignItems="center" gap="1">
-          <AiOutlineEdit /> Text mode
+          <AiOutlineEdit />
         </Flex>
       </Link>
       <PLIconButton

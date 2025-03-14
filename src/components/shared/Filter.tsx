@@ -1,5 +1,5 @@
-import { Menu, MenuButton, MenuDivider, MenuList, SmallCloseIcon } from '@chakra-ui/icons';
-import { Button, Link, MenuItemOption, MenuOptionGroup } from '@chakra-ui/react';
+import { Menu, MenuButton, MenuDivider, MenuList, SmallCloseIcon, Text } from '@chakra-ui/icons';
+import { Button, HStack, MenuItemOption, MenuOptionGroup, useBreakpointValue } from '@chakra-ui/react';
 import { useState } from 'react';
 import { AiOutlineFilter } from 'react-icons/ai';
 import { UNCATEGORIZED } from '../../services/utils.ts';
