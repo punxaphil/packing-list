@@ -1,5 +1,5 @@
 import { DeleteIcon } from '@chakra-ui/icons';
-import { Button, ButtonGroup, Card, CardBody, Flex, IconButton, Spacer, useDisclosure } from '@chakra-ui/react';
+import { Button, Card, CardBody, Flex, IconButton, Spacer, Stack, useDisclosure } from '@chakra-ui/react';
 import { getAuth, signOut } from 'firebase/auth';
 import { firebase } from '../../services/firebase.ts';
 import { getProfileImage } from '../../services/utils.ts';
@@ -45,12 +45,12 @@ export function Profile() {
               </>
             </Flex>
             <Spacer />
-            <ButtonGroup flexDirection="column" gap="2">
+            <Stack gap="2">
               <Button onClick={onOpen}>{profileImage ? 'Change' : 'Add'} profile picture</Button>
               <Button onClick={handleLogout} colorScheme="gray">
                 Logout
               </Button>
-            </ButtonGroup>
+            </Stack>
           </Flex>
           <UploadModal
             type="profile"
