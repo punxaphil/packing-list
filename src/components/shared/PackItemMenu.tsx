@@ -4,6 +4,7 @@ import { AiOutlineCopy, AiOutlineDelete, AiOutlineUsergroupAdd } from 'react-ico
 import { TbStatusChange } from 'react-icons/tb';
 import { firebase } from '../../services/firebase.ts';
 import { PackItem } from '../../types/PackItem.ts';
+import { useFirebase } from '../providers/FirebaseContext.ts';
 import { ConnectMembersToPackItemModal } from './ConnectMembersToPackItemModal.tsx';
 import { ContextMenu } from './ContextMenu.tsx';
 import { CopyToOtherListModal } from './CopyToOtherListModal.tsx';
@@ -15,6 +16,7 @@ export function PackItemMenu({
 }: {
   packItem: PackItem;
 }) {
+  const { packingLists } = useFirebase();
   const copyDisclosure = useDisclosure();
   const deleteDisclosure = useDisclosure();
   const moveDisclosure = useDisclosure();
@@ -32,9 +34,11 @@ export function PackItemMenu({
       <MenuItem key="copy" onClick={membersDisclosure.onOpen} icon={<AiOutlineUsergroupAdd />}>
         Add/remove members to pack item
       </MenuItem>
-      <MenuItem key="delete" onClick={copyDisclosure.onOpen} icon={<AiOutlineCopy />}>
-        Copy to other list
-      </MenuItem>
+      {packingLists.length > 1 && (
+        <MenuItem key="delete" onClick={copyDisclosure.onOpen} icon={<AiOutlineCopy />}>
+          Copy to other list
+        </MenuItem>
+      )}
       <MenuItem key="color" onClick={deleteDisclosure.onOpen} icon={<AiOutlineDelete />}>
         Delete item
       </MenuItem>

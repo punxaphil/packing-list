@@ -6,6 +6,7 @@ import { TbCategoryPlus } from 'react-icons/tb';
 import { firebase } from '../../services/firebase.ts';
 import { NamedEntity } from '../../types/NamedEntity.ts';
 import { PackItem } from '../../types/PackItem.ts';
+import { useFirebase } from '../providers/FirebaseContext.ts';
 import { useNewPackItemRowId } from '../providers/NewPackItemRowIdContext.ts';
 import { ColorPicker } from './ColorPicker.tsx';
 import { ContextMenu } from './ContextMenu.tsx';
@@ -20,6 +21,7 @@ export function CategoryMenu({
   category: NamedEntity;
 }) {
   const { setNewPackItemRowId } = useNewPackItemRowId();
+  const { packingLists } = useFirebase();
   const copyDisclosure = useDisclosure();
   const deleteDisclosure = useDisclosure();
   const colorDisclosure = useDisclosure();
@@ -43,9 +45,11 @@ export function CategoryMenu({
       <MenuItem key="add" onClick={() => setNewPackItemRowId(category.id)} icon={<TbCategoryPlus />}>
         Add new pack item
       </MenuItem>
-      <MenuItem key="copy" onClick={copyToOtherList} icon={<AiOutlineCopy />}>
-        Copy items to another list
-      </MenuItem>
+      {packingLists.length > 1 && (
+        <MenuItem key="copy" onClick={copyToOtherList} icon={<AiOutlineCopy />}>
+          Copy items to another list
+        </MenuItem>
+      )}
       <MenuItem key="delete" icon={<AiOutlineDelete />} onClick={deleteDisclosure.onOpen}>
         Remove items
       </MenuItem>
