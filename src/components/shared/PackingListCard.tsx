@@ -111,7 +111,7 @@ export function PackingListCard({
         ...draggableProvided.draggableProps.style,
       }}
       bg={draggableSnapshot.isDragging ? 'gray.100' : ''}
-      width={'100%'}
+      width="100%"
     >
       <Box cursor="pointer" px={2}>
         <HStack gap="0">

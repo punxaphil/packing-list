@@ -70,9 +70,7 @@ export function PackingLists() {
                 <Flex
                   wrap="wrap"
                   direction="column"
-                  alignItems={'center'}
-                  justifyContent={'center'}
-                  alignContent={'center'}
+                  alignItems="center"
                   {...provided.droppableProps}
                   ref={provided.innerRef}
                   m={2}
