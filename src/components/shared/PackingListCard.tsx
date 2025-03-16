@@ -9,6 +9,7 @@ import { PackItem } from '../../types/PackItem.ts';
 import { useFirebase } from '../providers/FirebaseContext.ts';
 import { usePackingList } from '../providers/PackingListContext.ts';
 import { DeleteDialog } from './DeleteDialog.tsx';
+import { DragHandle } from './DragHandle.tsx';
 import { PLIconButton } from './PLIconButton.tsx';
 
 export function PackingListCard({
@@ -53,6 +54,10 @@ export function PackingListCard({
     const filtered = packingLists.filter((l) => l.id !== packingList.id);
     const selectedPackingList = filtered[0];
     setPackingListId(selectedPackingList.id);
+    toast({
+      title: `Packing list "${packingList.name}" deleted`,
+      status: 'success',
+    });
   }
 
   function showToast(description: string) {
@@ -106,11 +111,11 @@ export function PackingListCard({
         ...draggableProvided.draggableProps.style,
       }}
       bg={draggableSnapshot.isDragging ? 'gray.100' : ''}
-      {...draggableProvided.dragHandleProps}
       width={'100%'}
     >
       <Box cursor="pointer" px={2}>
         <HStack gap="0">
+          <DragHandle dragHandleProps={draggableProvided.dragHandleProps} />
           <Box fontWeight="bold" onClick={onListClick} flexGrow={1}>
             {packingList.name}
           </Box>

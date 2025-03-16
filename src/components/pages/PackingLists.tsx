@@ -1,4 +1,4 @@
-import { Button, Flex } from '@chakra-ui/react';
+import { Button, Card, CardBody, Flex, Spacer, useToast } from '@chakra-ui/react';
 import { DragDropContext, Draggable, DropResult, Droppable } from '@hello-pangea/dnd';
 import { useEffect, useMemo, useState } from 'react';
 import { firebase } from '../../services/firebase.ts';
@@ -19,6 +19,7 @@ export function PackingLists() {
   const [allPackItems, setAllPackItems] = useState<PackItem[]>([]);
   const currentList = usePackingList().packingList;
   const { setError } = useError();
+  const toast = useToast();
 
   useEffect(() => {
     (async () => {
@@ -48,6 +49,10 @@ export function PackingLists() {
     const name = findUniqueName('My packing list', reordered);
     const rank = rankOnTop(reordered);
     await firebase.addPackingList(name, rank);
+    toast({
+      title: `Packing list "${name}" created`,
+      status: 'success',
+    });
   }
 
   function dragEnd(result: DropResult) {
@@ -55,31 +60,49 @@ export function PackingLists() {
   }
 
   return (
-    <DragDropContext onDragEnd={dragEnd}>
-      <Droppable droppableId="droppable">
-        {(provided) => (
-          <Flex wrap="wrap" direction="column" {...provided.droppableProps} ref={provided.innerRef} m={2}>
-            <Button onClick={OnNewList} my={2}>
-              Create new
-            </Button>
-            {packingListsWithItems.map(({ packingList, packItems }, index) => (
-              <Draggable key={packingList.id} draggableId={packingList.id} index={index}>
-                {(provided, snapshot) => (
-                  <PackingListCard
-                    key={packingList.id}
-                    packingList={packingList}
-                    isCurrentList={packingList.id === currentList.id}
-                    packItems={packItems}
-                    draggableProvided={provided}
-                    draggableSnapshot={snapshot}
-                  />
-                )}
-              </Draggable>
-            ))}
-            {provided.placeholder}
-          </Flex>
-        )}
-      </Droppable>
-    </DragDropContext>
+    <Flex m="5" minWidth={300}>
+      <Spacer />
+      <Card>
+        <CardBody>
+          <DragDropContext onDragEnd={dragEnd}>
+            <Droppable droppableId="droppable">
+              {(provided) => (
+                <Flex
+                  wrap="wrap"
+                  direction="column"
+                  alignItems={'center'}
+                  justifyContent={'center'}
+                  alignContent={'center'}
+                  {...provided.droppableProps}
+                  ref={provided.innerRef}
+                  m={2}
+                  maxWidth={800}
+                >
+                  <Button onClick={OnNewList} my={2}>
+                    Create new Packing List
+                  </Button>
+                  {packingListsWithItems.map(({ packingList, packItems }, index) => (
+                    <Draggable key={packingList.id} draggableId={packingList.id} index={index}>
+                      {(provided, snapshot) => (
+                        <PackingListCard
+                          key={packingList.id}
+                          packingList={packingList}
+                          isCurrentList={packingList.id === currentList.id}
+                          packItems={packItems}
+                          draggableProvided={provided}
+                          draggableSnapshot={snapshot}
+                        />
+                      )}
+                    </Draggable>
+                  ))}
+                  {provided.placeholder}
+                </Flex>
+              )}
+            </Droppable>
+          </DragDropContext>
+        </CardBody>
+      </Card>
+      <Spacer />
+    </Flex>
   );
 }
