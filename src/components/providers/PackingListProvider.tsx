@@ -23,8 +23,10 @@ export function PackingListProvider({ children }: { children: ReactNode }) {
         initialId = list.id;
         setPackingList(list);
       } else {
-        initialId = await firebase.addPackingList('My Packing List');
-        setPackingList({ id: initialId, name: 'My Packing List', rank: 0 });
+        const name = 'My Packing List';
+        const rank = 0;
+        initialId = await firebase.addPackingList(name, rank);
+        setPackingList({ id: initialId, name, rank });
       }
       localStorage.setItem(LOCAL_STORAGE_KEY, initialId);
     })().catch(console.error);

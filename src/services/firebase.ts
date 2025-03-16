@@ -26,7 +26,6 @@ import { Image } from '../types/Image.ts';
 import { MemberPackItem } from '../types/MemberPackItem.ts';
 import { NamedEntity } from '../types/NamedEntity.ts';
 import { PackItem } from '../types/PackItem.ts';
-import { PackingListWithItems } from '../types/PackingListsWithItems.ts';
 import { sortEntities } from './utils.ts';
 
 const firebaseConfig = {
@@ -138,6 +137,13 @@ export const firebase = {
       await update(CATEGORIES_KEY, categories.id, categories);
     }
   },
+  updatePackingLists: async (packingLists: NamedEntity[] | NamedEntity) => {
+    if (Array.isArray(packingLists)) {
+      await updateInBatch(PACKING_LISTS_KEY, packingLists);
+    } else {
+      await update(PACKING_LISTS_KEY, packingLists.id, packingLists);
+    }
+  },
   addImage: async (type: string, typeId: string, url: string): Promise<void> => {
     await add(IMAGES_KEY, { type, typeId, url });
   },
@@ -225,8 +231,8 @@ export const firebase = {
     const packingLists = fromQueryResult(await getDocs(query)) as NamedEntity[];
     return packingLists.length ? packingLists[0] : undefined;
   },
-  async addPackingList(name: string) {
-    const docRef = await add(PACKING_LISTS_KEY, { name: name });
+  async addPackingList(name: string, rank: number) {
+    const docRef = await add(PACKING_LISTS_KEY, { name: name, rank });
     return docRef.id;
   },
   async getPackingList(id: string) {
@@ -242,28 +248,18 @@ export const firebase = {
   deletePackingListBatch(id: string, batch: WriteBatch) {
     batch.delete(doc(firestore, USERS_KEY, getUserId(), PACKING_LISTS_KEY, id));
   },
-  addPackingListBatch(name: string, writeBatch: WriteBatch) {
-    return addBatch(PACKING_LISTS_KEY, writeBatch, { name });
+  addPackingListBatch(name: string, writeBatch: WriteBatch, rank: number) {
+    return addBatch(PACKING_LISTS_KEY, writeBatch, { name, rank });
   },
   updateCategoryBatch<K extends DocumentData>(data: WithFieldValue<K>, batch: WriteBatch) {
     batch.update(doc(firestore, USERS_KEY, getUserId(), CATEGORIES_KEY, data.id), data);
   },
-  getPackingListsWithItems: async (packingLists: NamedEntity[]) => {
+  getPackItemsForAllPackingLists: async () => {
     const userId = getUserId();
     const q = query(collection(firestore, USERS_KEY, userId, PACK_ITEMS_KEY));
     const allPackItems = fromQueryResult<PackItem>(await getDocs(q));
     sortEntities(allPackItems);
-    const groups: PackingListWithItems[] = [];
-    for (const packingList of packingLists) {
-      const group: PackingListWithItems = { packingList, packItems: [] };
-      for (const packItem of allPackItems) {
-        if (packItem.packingList === packingList.id) {
-          group.packItems.push(packItem);
-        }
-      }
-      groups.push(group);
-    }
-    return groups;
+    return allPackItems;
   },
 };
 

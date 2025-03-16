@@ -122,7 +122,7 @@ export function getProfileImage(images: Image[]) {
 }
 
 export function rankOnTop(entities: NamedEntity[]) {
-  return Math.max(...entities.map((cat) => cat.rank), 0) + 1;
+  return Math.max(...entities.map((entity) => entity.rank).filter((rank) => Number.isInteger(rank)), 0) + 1;
 }
 
 export function getPackItemGroup(grouped: GroupedPackItem[], category: NamedEntity) {

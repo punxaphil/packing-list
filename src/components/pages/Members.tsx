@@ -7,9 +7,9 @@ export function Members() {
     <NamedEntities
       namedEntities={useFirebase().members}
       type="members"
-      onAdd={firebase.addMember}
-      onUpdate={firebase.updateMembers}
-      onDelete={firebase.deleteMember}
+      dbAdd={firebase.addMember}
+      dbUpdate={firebase.updateMembers}
+      dbDelete={firebase.deleteMember}
     />
   );
 }

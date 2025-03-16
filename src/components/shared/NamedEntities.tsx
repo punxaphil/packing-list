@@ -1,6 +1,7 @@
 import { Box, Button, Card, CardBody, Flex, Input, Spacer, useDisclosure } from '@chakra-ui/react';
-import { DragDropContext, DragUpdate, Draggable, Droppable } from '@hello-pangea/dnd';
+import { DragDropContext, Draggable, DropResult, Droppable } from '@hello-pangea/dnd';
 import { ChangeEvent, KeyboardEvent, useMemo, useState } from 'react';
+import { reorderAndSave } from '../../services/reorderUtils.ts';
 import { handleEnter } from '../../services/utils.ts';
 import { NamedEntity } from '../../types/NamedEntity.ts';
 import { useError } from '../providers/ErrorContext.ts';
@@ -11,15 +12,15 @@ import { NamedEntityRow } from './NamedEntityRow.tsx';
 
 export function NamedEntities({
   namedEntities,
-  onAdd,
-  onUpdate,
-  onDelete,
+  dbAdd,
+  dbUpdate,
+  dbDelete,
   type,
 }: {
   namedEntities: NamedEntity[];
-  onAdd: (name: string) => Promise<string>;
-  onUpdate: (toUpdate: NamedEntity[] | NamedEntity) => Promise<void>;
-  onDelete: (id: string, packingLists: NamedEntity[], deleteEvenIfUsed?: boolean) => Promise<void>;
+  dbAdd: (name: string) => Promise<string>;
+  dbUpdate: (toUpdate: NamedEntity[] | NamedEntity) => Promise<void>;
+  dbDelete: (id: string, packingLists: NamedEntity[], deleteEvenIfUsed?: boolean) => Promise<void>;
   type: string;
 }) {
   const [reordered, setReordered] = useState(namedEntities);
@@ -31,29 +32,10 @@ export function NamedEntities({
   const [deleteError, setDeleteError] = useState<string | string[]>('');
   const [deleteId, setDeleteId] = useState<string>('');
 
-  async function onDragEnd(result: DragUpdate) {
-    if (!result.destination) {
-      return;
-    }
-    const updated = reorder(result.source.index, result.destination.index);
-    updated.forEach((entity, index) => {
-      entity.rank = updated.length - index;
-    });
-    await onUpdate(updated);
-    setReordered(updated);
-  }
-
-  function reorder(startIndex: number, endIndex: number) {
-    const result = [...namedEntities];
-    const [removed] = result.splice(startIndex, 1);
-    result.splice(endIndex, 0, removed);
-    return result;
-  }
-
   function handleAdd() {
     (async () => {
       if (!namedEntities.find((t) => t.name === newName)) {
-        await onAdd(newName);
+        await dbAdd(newName);
       }
     })().catch(setError);
     setNewName('');
@@ -69,13 +51,17 @@ export function NamedEntities({
 
   async function handleDelete(id: string) {
     try {
-      await onDelete(id, packingLists);
+      await dbDelete(id, packingLists);
     } catch (e) {
       const error = handleArrayError(e as Error);
       setDeleteError(error);
       setDeleteId(id);
       onToggle();
     }
+  }
+
+  function onDragEnd(result: DropResult) {
+    return reorderAndSave(result, dbUpdate, reordered, setReordered);
   }
 
   return (
@@ -89,27 +75,25 @@ export function NamedEntities({
                 <Box {...provided.droppableProps} ref={provided.innerRef}>
                   {reordered.map((entity, index) => (
                     <Draggable key={entity.id} draggableId={entity.id} index={index}>
-                      {(provided, snapshot) => {
-                        return (
-                          <Box
-                            ref={provided.innerRef}
-                            {...provided.draggableProps}
-                            style={{
-                              ...provided.draggableProps.style,
-                              padding: '1px',
-                            }}
-                            bg={snapshot.isDragging ? 'gray.100' : ''}
-                          >
-                            <NamedEntityRow
-                              namedEntity={entity}
-                              onUpdate={onUpdate}
-                              onDelete={handleDelete}
-                              type={type}
-                              dragHandleProps={provided.dragHandleProps}
-                            />
-                          </Box>
-                        );
-                      }}
+                      {(provided, snapshot) => (
+                        <Box
+                          ref={provided.innerRef}
+                          {...provided.draggableProps}
+                          style={{
+                            ...provided.draggableProps.style,
+                            padding: '1px',
+                          }}
+                          bg={snapshot.isDragging ? 'gray.100' : ''}
+                        >
+                          <NamedEntityRow
+                            namedEntity={entity}
+                            onUpdate={dbUpdate}
+                            onDelete={handleDelete}
+                            type={type}
+                            dragHandleProps={provided.dragHandleProps}
+                          />
+                        </Box>
+                      )}
                     </Draggable>
                   ))}
                   {provided.placeholder}
@@ -125,7 +109,7 @@ export function NamedEntities({
             error={deleteError}
             isOpen={isOpen}
             onClose={onClose}
-            onProceed={async () => await onDelete(deleteId, packingLists, true)}
+            onProceed={async () => await dbDelete(deleteId, packingLists, true)}
           />
         </CardBody>
       </Card>

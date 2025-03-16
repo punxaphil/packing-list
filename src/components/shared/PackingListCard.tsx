@@ -1,8 +1,9 @@
 import { Box, HStack, Spacer, Stack, useDisclosure, useToast } from '@chakra-ui/react';
+import { DraggableProvided, DraggableStateSnapshot } from '@hello-pangea/dnd';
 import { AiOutlineCopy, AiOutlineDelete } from 'react-icons/ai';
 import { useNavigate } from 'react-router';
 import { firebase } from '../../services/firebase.ts';
-import { findUniqueName } from '../../services/utils.ts';
+import { findUniqueName, rankOnTop } from '../../services/utils.ts';
 import { NamedEntity } from '../../types/NamedEntity.ts';
 import { PackItem } from '../../types/PackItem.ts';
 import { useFirebase } from '../providers/FirebaseContext.ts';
@@ -14,10 +15,14 @@ export function PackingListCard({
   isCurrentList,
   packItems,
   packingList,
+  draggableProvided,
+  draggableSnapshot,
 }: {
   isCurrentList: boolean;
   packItems: PackItem[];
   packingList: NamedEntity;
+  draggableProvided: DraggableProvided;
+  draggableSnapshot: DraggableStateSnapshot;
 }) {
   const deleteDialog = useDisclosure();
   const navigate = useNavigate();
@@ -66,7 +71,8 @@ export function PackingListCard({
     }
     const name = findUniqueName(`${packingList.name} - Copy`, packingLists);
     const batch = firebase.initBatch();
-    const packingListId = firebase.addPackingListBatch(name, batch);
+    const rank = rankOnTop(packingLists);
+    const packingListId = firebase.addPackingListBatch(name, batch, rank);
     for (const packItem of packItems) {
       firebase.addPackItemBatch(
         batch,
@@ -89,30 +95,37 @@ export function PackingListCard({
   return (
     <Stack
       boxShadow={isCurrentList ? 'lg' : 'md'}
-      p={2}
       paddingBottom={0}
-      m={2}
+      my={2}
       borderRadius="md"
-      width="200px"
-      borderWidth={isCurrentList ? '3px' : '1px'}
+      borderWidth="1px"
+      borderColor={isCurrentList ? 'black' : 'gray.200'}
+      ref={draggableProvided.innerRef}
+      {...draggableProvided.draggableProps}
+      style={{
+        ...draggableProvided.draggableProps.style,
+      }}
+      bg={draggableSnapshot.isDragging ? 'gray.100' : ''}
+      {...draggableProvided.dragHandleProps}
+      width={'100%'}
     >
-      <Box onClick={onListClick} cursor="pointer">
-        <Box fontWeight="bold">{packingList.name}</Box>
-        <Box>
-          {packItems.slice(0, 5).map((item, index) => {
-            return (
-              <Box key={item.id} overflow="hidden" textOverflow="ellipsis" whiteSpace="nowrap">
-                {index === 4 ? '...' : item.name}
-              </Box>
-            );
-          })}
+      <Box cursor="pointer" px={2}>
+        <HStack gap="0">
+          <Box fontWeight="bold" onClick={onListClick} flexGrow={1}>
+            {packingList.name}
+          </Box>
+          <PLIconButton onClick={onDelete} icon={<AiOutlineDelete />} aria-label="Delete packing list" size="sm" />
+          <PLIconButton onClick={onCopy} icon={<AiOutlineCopy />} aria-label="Copy packing list" size="sm" />
+        </HStack>
+        <Box overflow="hidden" whiteSpace="nowrap" textOverflow="ellipsis" onClick={onListClick}>
+          {packItems
+            .slice(0, 10)
+            .map((item) => item.name)
+            .join(', ')}
+          {!packItems.length ? 'No items' : ''}
         </Box>
       </Box>
       <Spacer />
-      <HStack justifyContent="flex-end" gap="0">
-        <PLIconButton onClick={onDelete} icon={<AiOutlineDelete />} aria-label="Delete packing list" size={'sm'} />
-        <PLIconButton onClick={onCopy} icon={<AiOutlineCopy />} aria-label="Copy packing list" size={'sm'} />
-      </HStack>
       <DeleteDialog
         text={`packing list ${packingList.name}${packItems.length ? ` with ${packItems.length} items` : ''}`}
         onConfirm={confirmDelete}
