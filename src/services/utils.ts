@@ -1,9 +1,9 @@
 import { KeyboardEvent } from 'react';
-import { GroupedPackItem } from '../types/GroupedPackItem.ts';
-import { Image } from '../types/Image.ts';
-import { MemberPackItem } from '../types/MemberPackItem.ts';
-import { NamedEntity } from '../types/NamedEntity.ts';
-import { PackItem } from '../types/PackItem.ts';
+import { GroupedPackItem } from '~/types/GroupedPackItem.ts';
+import { Image } from '~/types/Image.ts';
+import { MemberPackItem } from '~/types/MemberPackItem.ts';
+import { NamedEntity } from '~/types/NamedEntity.ts';
+import { PackItem } from '~/types/PackItem.ts';
 
 export const UNCATEGORIZED: NamedEntity = { id: '', name: 'Uncategorized', rank: Number.MAX_VALUE, color: 'gray.50' };
 

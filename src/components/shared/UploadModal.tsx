@@ -15,10 +15,10 @@ import {
   Switch,
 } from '@chakra-ui/react';
 import { ChangeEvent, useState } from 'react';
-import { firebase } from '../../services/firebase.ts';
-import { cropImage, resizeImageFromFile } from '../../services/imageUtils.ts';
-import { Image } from '../../types/Image.ts';
-import { useFirebase } from '../providers/FirebaseContext.ts';
+import { useFirebase } from '~/providers/FirebaseContext.ts';
+import { firebase } from '~/services/firebase.ts';
+import { cropImage, resizeImageFromFile } from '~/services/imageUtils.ts';
+import { Image } from '~/types/Image.ts';
 
 export function UploadModal({
   type,

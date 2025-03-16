@@ -1,8 +1,8 @@
 import { WriteBatch } from 'firebase/firestore';
-import { GroupedPackItem } from '../types/GroupedPackItem.ts';
-import { MemberPackItem } from '../types/MemberPackItem.ts';
-import { NamedEntity } from '../types/NamedEntity.ts';
-import { PackItem, TextPackItem } from '../types/PackItem.ts';
+import { GroupedPackItem } from '~/types/GroupedPackItem.ts';
+import { MemberPackItem } from '~/types/MemberPackItem.ts';
+import { NamedEntity } from '~/types/NamedEntity.ts';
+import { PackItem, TextPackItem } from '~/types/PackItem.ts';
 
 import { firebase } from './firebase.ts';
 import { UNCATEGORIZED, getMemberName, rankOnTop } from './utils.ts';

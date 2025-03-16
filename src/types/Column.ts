@@ -1,4 +1,4 @@
-import { UNCATEGORIZED } from '../services/utils.ts';
+import { UNCATEGORIZED } from '~/services/utils.ts';
 import { NamedEntity } from './NamedEntity.ts';
 import { PackItem } from './PackItem.ts';
 

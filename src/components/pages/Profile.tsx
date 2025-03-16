@@ -1,13 +1,13 @@
 import { DeleteIcon } from '@chakra-ui/icons';
 import { Button, Card, CardBody, Flex, IconButton, Spacer, Stack, useDisclosure } from '@chakra-ui/react';
 import { getAuth, signOut } from 'firebase/auth';
-import { firebase } from '../../services/firebase.ts';
-import { getProfileImage } from '../../services/utils.ts';
-import { useCurrentUser } from '../auth/Auth.tsx';
-import { ProfileAvatar } from '../auth/ProfileAvatar.tsx';
-import { useError } from '../providers/ErrorContext.ts';
-import { useFirebase } from '../providers/FirebaseContext.ts';
-import { UploadModal } from '../shared/UploadModal.tsx';
+import { useCurrentUser } from '~/components/auth/Auth.tsx';
+import { ProfileAvatar } from '~/components/auth/ProfileAvatar.tsx';
+import { UploadModal } from '~/components/shared/UploadModal.tsx';
+import { useError } from '~/providers/ErrorContext.ts';
+import { useFirebase } from '~/providers/FirebaseContext.ts';
+import { firebase } from '~/services/firebase.ts';
+import { getProfileImage } from '~/services/utils.ts';
 
 export function Profile() {
   const images = useFirebase().images;

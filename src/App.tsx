@@ -1,13 +1,13 @@
 import { Route, Routes } from 'react-router';
 import { useCurrentUser } from './components/auth/Auth.tsx';
-import { Categories } from './components/pages/Categories.tsx';
-import { LoggedInLayout } from './components/pages/LoggedInLayout.tsx';
-import { Members } from './components/pages/Members.tsx';
-import { PackingList } from './components/pages/PackingList.tsx';
 import { Profile } from './components/pages/Profile.tsx';
 import { Welcome } from './components/pages/Welcome.tsx';
 
-import { PackingLists } from './components/pages/PackingLists.tsx';
+import { LoggedInLayout } from '~/components/pages/LoggedInLayout/LoggedInLayout.tsx';
+import { Categories } from '~/components/pages/NamedEntities/Categories.tsx';
+import { Members } from '~/components/pages/NamedEntities/Members.tsx';
+import { PackingList } from '~/components/pages/PackingList/PackingList.tsx';
+import { PackingLists } from '~/components/pages/PackingLists/PackingLists.tsx';
 import { TextProgress } from './components/shared/TextProgress.tsx';
 
 export function App() {

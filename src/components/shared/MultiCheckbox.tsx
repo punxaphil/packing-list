@@ -1,6 +1,6 @@
 import { Checkbox } from '@chakra-ui/react';
-import { allChecked, allUnChecked } from '../../services/utils.ts';
-import { PackItem } from '../../types/PackItem.ts';
+import { allChecked, allUnChecked } from '~/services/utils.ts';
+import { PackItem } from '~/types/PackItem.ts';
 
 export function MultiCheckbox({ packItem, onUpdate }: { packItem: PackItem; onUpdate: (item: PackItem) => void }) {
   function checkAll(checked: boolean) {

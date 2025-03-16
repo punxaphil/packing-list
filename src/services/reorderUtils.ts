@@ -1,5 +1,5 @@
 import { DropResult } from '@hello-pangea/dnd';
-import { NamedEntity } from '../types/NamedEntity.ts';
+import { NamedEntity } from '~/types/NamedEntity.ts';
 
 export async function reorderAndSave(
   dropResult: DropResult,

@@ -1,4 +1,4 @@
-import { ArrayError } from '../../types/ArrayError.ts';
+import { ArrayError } from '~/types/ArrayError.ts';
 
 export function handleArrayError(e: Error) {
   if (e instanceof ArrayError) {

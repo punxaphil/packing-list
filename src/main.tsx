@@ -4,9 +4,11 @@ import './index.css';
 import { ChakraProvider, extendTheme, withDefaultColorScheme } from '@chakra-ui/react';
 import { StrictMode } from 'react';
 import { BrowserRouter } from 'react-router';
-import { ErrorProvider } from './components/providers/ErrorProvider.tsx';
-import { FullscreenModeProvider } from './components/providers/FullscreenModeProvider.tsx';
+import { ErrorProvider } from '~/providers/ErrorProvider.tsx';
+import { FullscreenModeProvider } from '~/providers/FullscreenModeProvider.tsx';
+
 export const THEME_COLOR = 'gray';
+
 const customTheme = extendTheme(withDefaultColorScheme({ colorScheme: THEME_COLOR }), {
   components: {
     Link: {

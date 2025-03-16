@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { NamedEntity } from '../types/NamedEntity';
-import { PackItem } from '../types/PackItem';
+import { NamedEntity } from '~/types/NamedEntity';
+import { PackItem } from '~/types/PackItem';
 import { sortPackItems } from './utils';
 import { sortEntities } from './utils';
 

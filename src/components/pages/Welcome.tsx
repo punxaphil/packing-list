@@ -1,5 +1,5 @@
 import { Box, Heading, Stack } from '@chakra-ui/react';
-import { Login } from '../auth/Auth.tsx';
+import { Login } from '~/components/auth/Auth.tsx';
 
 export function Welcome() {
   return (

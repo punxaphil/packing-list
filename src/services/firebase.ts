@@ -21,11 +21,11 @@ import {
   where,
   writeBatch,
 } from 'firebase/firestore';
-import { ArrayError } from '../types/ArrayError.ts';
-import { Image } from '../types/Image.ts';
-import { MemberPackItem } from '../types/MemberPackItem.ts';
-import { NamedEntity } from '../types/NamedEntity.ts';
-import { PackItem } from '../types/PackItem.ts';
+import { ArrayError } from '~/types/ArrayError.ts';
+import { Image } from '~/types/Image.ts';
+import { MemberPackItem } from '~/types/MemberPackItem.ts';
+import { NamedEntity } from '~/types/NamedEntity.ts';
+import { PackItem } from '~/types/PackItem.ts';
 import { sortEntities } from './utils.ts';
 
 const firebaseConfig = {

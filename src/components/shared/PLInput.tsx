@@ -1,6 +1,6 @@
 import { Input, Tooltip } from '@chakra-ui/react';
 import { ChangeEvent, KeyboardEvent, useCallback, useEffect, useRef, useState } from 'react';
-import { handleEnter } from '../../services/utils.ts';
+import { handleEnter } from '~/services/utils.ts';
 
 export function PLInput({
   value,

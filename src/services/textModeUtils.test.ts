@@ -1,7 +1,7 @@
 import { WriteBatch } from 'firebase/firestore';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { NamedEntity } from '../types/NamedEntity';
-import { PackItem, TextPackItem } from '../types/PackItem';
+import { NamedEntity } from '~/types/NamedEntity';
+import { PackItem, TextPackItem } from '~/types/PackItem';
 import { firebase } from './firebase.ts';
 import { expectFirebaseCallsToThese } from './testUtils.ts';
 import { createTextPackItemsFromText, updateFirebaseFromTextPackItems } from './textModeUtils.ts';

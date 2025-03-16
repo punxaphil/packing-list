@@ -8,8 +8,8 @@ import {
 } from 'firebase/auth';
 import { ChangeEvent, KeyboardEvent, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router';
-import { handleEnter } from '../../services/utils.ts';
-import { useError } from '../providers/ErrorContext.ts';
+import { useError } from '~/providers/ErrorContext.ts';
+import { handleEnter } from '~/services/utils.ts';
 
 export function useCurrentUser() {
   const [userId, setUserId] = useState('');
