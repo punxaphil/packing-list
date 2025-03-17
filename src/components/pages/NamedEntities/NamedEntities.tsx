@@ -3,8 +3,8 @@ import { DragDropContext, Draggable, DropResult, Droppable } from '@hello-pangea
 import { ChangeEvent, KeyboardEvent, useMemo, useState } from 'react';
 import { ErrorModal } from '~/components/shared/ErrorModal.tsx';
 import { handleArrayError } from '~/components/shared/HandleArrayError.tsx';
+import { useDatabase } from '~/providers/DatabaseContext.ts';
 import { useError } from '~/providers/ErrorContext.ts';
-import { useFirebase } from '~/providers/FirebaseContext.ts';
 import { reorderAndSave } from '~/services/reorderUtils.ts';
 import { handleEnter } from '~/services/utils.ts';
 import { NamedEntity } from '~/types/NamedEntity.ts';
@@ -27,7 +27,7 @@ export function NamedEntities({
   useMemo(() => setReordered(namedEntities), [namedEntities]);
   const [newName, setNewName] = useState<string>('');
   const { setError } = useError();
-  const packingLists = useFirebase().packingLists;
+  const packingLists = useDatabase().packingLists;
   const { isOpen, onToggle, onClose } = useDisclosure();
   const [deleteError, setDeleteError] = useState<string | string[]>('');
   const [deleteId, setDeleteId] = useState<string>('');

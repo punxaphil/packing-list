@@ -2,7 +2,7 @@ import { Flex, HStack, Link, Spacer } from '@chakra-ui/react';
 import { AiOutlineEdit, AiOutlineFullscreen, AiOutlineFullscreenExit } from 'react-icons/ai';
 import { Filter } from '~/components/pages/PackingList/Filter.tsx';
 import { PLIconButton } from '~/components/shared/PLIconButton.tsx';
-import { useFirebase } from '~/providers/FirebaseContext.ts';
+import { useDatabase } from '~/providers/DatabaseContext.ts';
 import { useFullscreenMode } from '~/providers/FullscreenModeContext.ts';
 
 export function PackingListControls({
@@ -12,7 +12,7 @@ export function PackingListControls({
   onTextMode: () => void;
   onMemberFilter: (memberIds: string[]) => void;
 }) {
-  const setFilter = useFirebase().setFilter;
+  const setFilter = useDatabase().setFilter;
   const { fullscreenMode, setFullscreenMode } = useFullscreenMode();
 
   function onFilter(showTheseCategories: string[], showTheseMembers: string[], showTheseStates: string[]) {

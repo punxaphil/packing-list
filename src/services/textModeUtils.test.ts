@@ -2,16 +2,16 @@ import { WriteBatch } from 'firebase/firestore';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { NamedEntity } from '~/types/NamedEntity';
 import { PackItem, TextPackItem } from '~/types/PackItem';
-import { firebase } from './firebase.ts';
-import { expectFirebaseCallsToThese } from './testUtils.ts';
-import { createTextPackItemsFromText, updateFirebaseFromTextPackItems } from './textModeUtils.ts';
+import { writeDb } from './database.ts';
+import { expectDatabaseCallsToThese } from './testUtils.ts';
+import { createTextPackItemsFromText, updateDatabaseFromTextPackItems } from './textModeUtils.ts';
 
 const PACKING_LIST_ID = 'packingListId';
 
-vi.mock('./firebase.ts');
+vi.mock('./database.ts');
 
 const writeBatchMock = { commit: () => {} } as WriteBatch;
-vi.mocked(firebase.initBatch).mockImplementation(() => {
+vi.mocked(writeDb.initBatch).mockImplementation(() => {
   return writeBatchMock;
 });
 
@@ -87,7 +87,7 @@ describe('textModeUtils', () => {
     });
   });
 
-  describe('updateFirebaseFromTextPackItems', () => {
+  describe('updateDatabaseFromTextPackItems', () => {
     it('should delete removed pack items', async () => {
       const packItems: PackItem[] = [
         { id: '1', name: 'Item 1', checked: false, members: [], rank: 0, packingList: PACKING_LIST_ID, category: '' },
@@ -96,9 +96,9 @@ describe('textModeUtils', () => {
       const members: NamedEntity[] = [];
       const categories: NamedEntity[] = [];
 
-      await updateFirebaseFromTextPackItems(packItems, textPackItems, members, categories, PACKING_LIST_ID);
+      await updateDatabaseFromTextPackItems(packItems, textPackItems, members, categories, PACKING_LIST_ID);
 
-      expectFirebaseCallsToThese(firebase.deletePackItemBatch, firebase.initBatch);
+      expectDatabaseCallsToThese(writeDb.deletePackItemBatch, writeDb.initBatch);
     });
 
     it('should not update existing pack items', async () => {
@@ -109,9 +109,9 @@ describe('textModeUtils', () => {
       const members: NamedEntity[] = [];
       const categories: NamedEntity[] = [];
 
-      await updateFirebaseFromTextPackItems(packItems, textPackItems, members, categories, PACKING_LIST_ID);
+      await updateDatabaseFromTextPackItems(packItems, textPackItems, members, categories, PACKING_LIST_ID);
 
-      expectFirebaseCallsToThese(firebase.initBatch);
+      expectDatabaseCallsToThese(writeDb.initBatch);
     });
 
     it('should update existing pack items', async () => {
@@ -122,9 +122,9 @@ describe('textModeUtils', () => {
       const members: NamedEntity[] = [{ id: '2', name: 'Member 1', rank: 0 }];
       const categories: NamedEntity[] = [];
 
-      await updateFirebaseFromTextPackItems(packItems, textPackItems, members, categories, PACKING_LIST_ID);
+      await updateDatabaseFromTextPackItems(packItems, textPackItems, members, categories, PACKING_LIST_ID);
 
-      expectFirebaseCallsToThese(firebase.updatePackItemBatch, firebase.initBatch);
+      expectDatabaseCallsToThese(writeDb.updatePackItemBatch, writeDb.initBatch);
     });
 
     it('should update existing pack items because category changed', async () => {
@@ -135,9 +135,9 @@ describe('textModeUtils', () => {
       const members: NamedEntity[] = [];
       const categories: NamedEntity[] = [{ id: '2', name: 'Category 2', rank: 0 }];
 
-      await updateFirebaseFromTextPackItems(packItems, textPackItems, members, categories, PACKING_LIST_ID);
+      await updateDatabaseFromTextPackItems(packItems, textPackItems, members, categories, PACKING_LIST_ID);
 
-      expectFirebaseCallsToThese(firebase.updatePackItemBatch, firebase.addCategoryBatch, firebase.initBatch);
+      expectDatabaseCallsToThese(writeDb.updatePackItemBatch, writeDb.addCategoryBatch, writeDb.initBatch);
     });
 
     it('should add new pack items', async () => {
@@ -146,9 +146,9 @@ describe('textModeUtils', () => {
       const members: NamedEntity[] = [];
       const categories: NamedEntity[] = [];
 
-      await updateFirebaseFromTextPackItems(packItems, textPackItems, members, categories, PACKING_LIST_ID);
+      await updateDatabaseFromTextPackItems(packItems, textPackItems, members, categories, PACKING_LIST_ID);
 
-      expectFirebaseCallsToThese(firebase.addPackItemBatch, firebase.initBatch);
+      expectDatabaseCallsToThese(writeDb.addPackItemBatch, writeDb.initBatch);
     });
 
     it('should add 3 new pack items, update 2 pack items, delete 5 pack items, add one new category, add 2 members', async () => {
@@ -183,12 +183,12 @@ describe('textModeUtils', () => {
       ];
       const categories: NamedEntity[] = [{ id: '2', name: 'Category 2', rank: 0 }];
 
-      vi.mocked(firebase.addMemberBatch).mockImplementation((name: string) => `added${name}`);
-      vi.mocked(firebase.addCategoryBatch).mockImplementation((name: string) => `added${name}`);
+      vi.mocked(writeDb.addMemberBatch).mockImplementation((name: string) => `added${name}`);
+      vi.mocked(writeDb.addCategoryBatch).mockImplementation((name: string) => `added${name}`);
 
-      await updateFirebaseFromTextPackItems(packItems, textPackItems, members, categories, PACKING_LIST_ID);
-      expect(firebase.addPackItemBatch).toHaveBeenCalledTimes(3);
-      expect(firebase.addPackItemBatch).toHaveBeenNthCalledWith(
+      await updateDatabaseFromTextPackItems(packItems, textPackItems, members, categories, PACKING_LIST_ID);
+      expect(writeDb.addPackItemBatch).toHaveBeenCalledTimes(3);
+      expect(writeDb.addPackItemBatch).toHaveBeenNthCalledWith(
         1,
         writeBatchMock,
         'Item 3',
@@ -197,7 +197,7 @@ describe('textModeUtils', () => {
         3,
         PACKING_LIST_ID
       );
-      expect(firebase.addPackItemBatch).toHaveBeenNthCalledWith(
+      expect(writeDb.addPackItemBatch).toHaveBeenNthCalledWith(
         2,
         writeBatchMock,
         'Item 4',
@@ -206,7 +206,7 @@ describe('textModeUtils', () => {
         2,
         PACKING_LIST_ID
       );
-      expect(firebase.addPackItemBatch).toHaveBeenNthCalledWith(
+      expect(writeDb.addPackItemBatch).toHaveBeenNthCalledWith(
         3,
         writeBatchMock,
         'Item 5',
@@ -218,8 +218,8 @@ describe('textModeUtils', () => {
         1,
         PACKING_LIST_ID
       );
-      expect(firebase.updatePackItemBatch).toHaveBeenCalledTimes(2);
-      expect(firebase.updatePackItemBatch).toHaveBeenNthCalledWith(
+      expect(writeDb.updatePackItemBatch).toHaveBeenCalledTimes(2);
+      expect(writeDb.updatePackItemBatch).toHaveBeenNthCalledWith(
         1,
         {
           id: '1',
@@ -232,7 +232,7 @@ describe('textModeUtils', () => {
         },
         writeBatchMock
       );
-      expect(firebase.updatePackItemBatch).toHaveBeenNthCalledWith(
+      expect(writeDb.updatePackItemBatch).toHaveBeenNthCalledWith(
         2,
         {
           id: '2',
@@ -248,13 +248,13 @@ describe('textModeUtils', () => {
         },
         writeBatchMock
       );
-      expect(firebase.addCategoryBatch).toHaveBeenCalledTimes(1);
-      expect(firebase.addCategoryBatch).toHaveBeenCalledWith('Category 1', writeBatchMock);
-      expect(firebase.addMemberBatch).toHaveBeenCalledTimes(2);
-      expect(firebase.addMemberBatch).toHaveBeenNthCalledWith(1, 'Member 1', writeBatchMock);
-      expect(firebase.addMemberBatch).toHaveBeenNthCalledWith(2, 'Member 3', writeBatchMock);
+      expect(writeDb.addCategoryBatch).toHaveBeenCalledTimes(1);
+      expect(writeDb.addCategoryBatch).toHaveBeenCalledWith('Category 1', writeBatchMock);
+      expect(writeDb.addMemberBatch).toHaveBeenCalledTimes(2);
+      expect(writeDb.addMemberBatch).toHaveBeenNthCalledWith(1, 'Member 1', writeBatchMock);
+      expect(writeDb.addMemberBatch).toHaveBeenNthCalledWith(2, 'Member 3', writeBatchMock);
 
-      expect(firebase.deletePackItemBatch).toHaveBeenCalledTimes(5);
+      expect(writeDb.deletePackItemBatch).toHaveBeenCalledTimes(5);
     });
   });
 });

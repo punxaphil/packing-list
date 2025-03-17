@@ -5,9 +5,9 @@ import { useMemo, useState } from 'react';
 import { CategoryMenu } from '~/components/pages/PackingList/CategoryMenu.tsx';
 import { DragHandle } from '~/components/shared/DragHandle.tsx';
 import { PLInput } from '~/components/shared/PLInput.tsx';
-import { useFirebase } from '~/providers/FirebaseContext.ts';
+import { useDatabase } from '~/providers/DatabaseContext.ts';
 import { useNewPackItemRowId } from '~/providers/NewPackItemRowIdContext.ts';
-import { firebase } from '~/services/firebase.ts';
+import { writeDb } from '~/services/database.ts';
 import { UNCATEGORIZED, getPackItemGroup } from '~/services/utils.ts';
 import { NamedEntity } from '~/types/NamedEntity.ts';
 import { PackItem } from '~/types/PackItem.ts';
@@ -22,7 +22,7 @@ export function PackingListCategory({
   dragHandleProps?: DraggableProvidedDragHandleProps | null;
   sx?: SystemStyleObject;
 }) {
-  const { images, groupedPackItems } = useFirebase();
+  const { images, groupedPackItems } = useDatabase();
   const { newPackItemRowId, setNewPackItemRowId } = useNewPackItemRowId();
   const [checked, setChecked] = useState(false);
   const [isIndeterminate, setIsIndeterminate] = useState(false);
@@ -46,19 +46,19 @@ export function PackingListCategory({
 
   async function onChangeCategory(name: string) {
     category.name = name;
-    await firebase.updateCategories(category);
+    await writeDb.updateCategories(category);
   }
 
   async function toggleItem() {
     const newState = !checked;
-    const batch = firebase.initBatch();
+    const batch = writeDb.initBatch();
     for (const t of packItemsInCat) {
       if (t.checked !== newState) {
         t.checked = newState;
         for (const member of t.members) {
           member.checked = newState;
         }
-        firebase.updatePackItemBatch(t, batch);
+        writeDb.updatePackItemBatch(t, batch);
       }
     }
     await batch.commit();

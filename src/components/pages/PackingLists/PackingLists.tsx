@@ -2,10 +2,10 @@ import { Button, Card, CardBody, Flex, Spacer, useToast } from '@chakra-ui/react
 import { DragDropContext, Draggable, DropResult, Droppable } from '@hello-pangea/dnd';
 import { useEffect, useMemo, useState } from 'react';
 import { PackingListCard } from '~/components/pages/PackingLists/PackingListCard.tsx';
+import { useDatabase } from '~/providers/DatabaseContext.ts';
 import { useError } from '~/providers/ErrorContext.ts';
-import { useFirebase } from '~/providers/FirebaseContext.ts';
 import { usePackingList } from '~/providers/PackingListContext.ts';
-import { firebase } from '~/services/firebase.ts';
+import { writeDb } from '~/services/database.ts';
 import { reorderAndSave } from '~/services/reorderUtils.ts';
 import { findUniqueName, rankOnTop } from '~/services/utils.ts';
 import { NamedEntity } from '~/types/NamedEntity.ts';
@@ -14,7 +14,7 @@ import { PackingListWithItems } from '~/types/PackingListsWithItems.ts';
 
 export function PackingLists() {
   const [reordered, setReordered] = useState<NamedEntity[]>([]);
-  const initialPackingLists = useFirebase().packingLists;
+  const initialPackingLists = useDatabase().packingLists;
   const [packingListsWithItems, setPackingListsWithItems] = useState<PackingListWithItems[]>([]);
   const [allPackItems, setAllPackItems] = useState<PackItem[]>([]);
   const currentList = usePackingList().packingList;
@@ -24,7 +24,7 @@ export function PackingLists() {
 
   useEffect(() => {
     (async () => {
-      setAllPackItems(await firebase.getPackItemsForAllPackingLists());
+      setAllPackItems(await writeDb.getPackItemsForAllPackingLists());
       setInitialized(true);
     })().catch(setError);
   }, [setError]);
@@ -50,7 +50,7 @@ export function PackingLists() {
   async function OnNewList() {
     const name = findUniqueName('My packing list', reordered);
     const rank = rankOnTop(reordered);
-    await firebase.addPackingList(name, rank);
+    await writeDb.addPackingList(name, rank);
     toast({
       title: `Packing list "${name}" created`,
       status: 'success',
@@ -58,7 +58,7 @@ export function PackingLists() {
   }
 
   function dragEnd(result: DropResult) {
-    return reorderAndSave(result, firebase.updatePackingLists, reordered, setReordered);
+    return reorderAndSave(result, writeDb.updatePackingLists, reordered, setReordered);
   }
 
   return (

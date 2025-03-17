@@ -1,15 +1,15 @@
 import { NamedEntities } from '~/components/pages/NamedEntities/NamedEntities.tsx';
-import { useFirebase } from '~/providers/FirebaseContext.ts';
-import { firebase } from '~/services/firebase.ts';
+import { useDatabase } from '~/providers/DatabaseContext.ts';
+import { writeDb } from '~/services/database.ts';
 
 export function Categories() {
   return (
     <NamedEntities
-      namedEntities={useFirebase().categories}
+      namedEntities={useDatabase().categories}
       type="categories"
-      dbAdd={firebase.addCategory}
-      dbUpdate={firebase.updateCategories}
-      dbDelete={firebase.deleteCategory}
+      dbAdd={writeDb.addCategory}
+      dbUpdate={writeDb.updateCategories}
+      dbDelete={writeDb.deleteCategory}
     />
   );
 }

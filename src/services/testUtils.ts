@@ -1,9 +1,9 @@
 import { expect } from 'vitest';
 
-import { firebase } from './firebase.ts';
+import { writeDb } from './database.ts';
 
-export function expectFirebaseCallsToThese(...newParam: FirebaseMethod[]) {
-  for (const mockFn of Object.values(firebase)) {
+export function expectDatabaseCallsToThese(...newParam: DatabaseMethod[]) {
+  for (const mockFn of Object.values(writeDb)) {
     if (
       newParam.every((mockFn2) => {
         return mockFn !== mockFn2;
@@ -16,9 +16,9 @@ export function expectFirebaseCallsToThese(...newParam: FirebaseMethod[]) {
   }
 }
 
-type FirebaseMethod =
-  | typeof firebase.updatePackItemBatch
-  | typeof firebase.addCategoryBatch
-  | typeof firebase.deletePackItemBatch
-  | typeof firebase.addPackItemBatch
-  | typeof firebase.addMemberBatch;
+type DatabaseMethod =
+  | typeof writeDb.updatePackItemBatch
+  | typeof writeDb.addCategoryBatch
+  | typeof writeDb.deletePackItemBatch
+  | typeof writeDb.addPackItemBatch
+  | typeof writeDb.addMemberBatch;

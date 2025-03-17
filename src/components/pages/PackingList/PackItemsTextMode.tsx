@@ -13,12 +13,12 @@ import {
   useDisclosure,
 } from '@chakra-ui/react';
 import { ChangeEvent, useEffect, useState } from 'react';
-import { useFirebase } from '~/providers/FirebaseContext.ts';
+import { useDatabase } from '~/providers/DatabaseContext.ts';
 import { usePackingList } from '~/providers/PackingListContext.ts';
 import {
   createTextPackItemsFromText,
   getGroupedAsText,
-  updateFirebaseFromTextPackItems,
+  updateDatabaseFromTextPackItems,
 } from '~/services/textModeUtils.ts';
 
 export function PackItemsTextMode({
@@ -26,7 +26,7 @@ export function PackItemsTextMode({
 }: {
   onDone: () => void;
 }) {
-  const { categories, members, packItems, groupedPackItems } = useFirebase();
+  const { categories, members, packItems, groupedPackItems } = useDatabase();
   const [groupedAsText, setGroupedAsText] = useState('');
   const [saving, setSaving] = useState(false);
   const packingList = usePackingList().packingList;
@@ -43,7 +43,7 @@ export function PackItemsTextMode({
   async function save() {
     setSaving(true);
     const textPackItems = createTextPackItemsFromText(groupedAsText);
-    await updateFirebaseFromTextPackItems(packItems, textPackItems, members, categories, packingList.id);
+    await updateDatabaseFromTextPackItems(packItems, textPackItems, members, categories, packingList.id);
     setSaving(false);
     onDone();
   }

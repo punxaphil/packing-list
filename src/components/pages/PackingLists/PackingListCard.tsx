@@ -5,9 +5,9 @@ import { useNavigate } from 'react-router';
 import { DeleteDialog } from '~/components/shared/DeleteDialog.tsx';
 import { DragHandle } from '~/components/shared/DragHandle.tsx';
 import { PLIconButton } from '~/components/shared/PLIconButton.tsx';
-import { useFirebase } from '~/providers/FirebaseContext.ts';
+import { useDatabase } from '~/providers/DatabaseContext.ts';
 import { usePackingList } from '~/providers/PackingListContext.ts';
-import { firebase } from '~/services/firebase.ts';
+import { writeDb } from '~/services/database.ts';
 import { findUniqueName, rankOnTop } from '~/services/utils.ts';
 import { NamedEntity } from '~/types/NamedEntity.ts';
 import { PackItem } from '~/types/PackItem.ts';
@@ -27,7 +27,7 @@ export function PackingListCard({
 }) {
   const deleteDialog = useDisclosure();
   const navigate = useNavigate();
-  const { packingLists, groupedPackItems } = useFirebase();
+  const { packingLists, groupedPackItems } = useDatabase();
   const { setPackingListId } = usePackingList();
   const toast = useToast();
 
@@ -45,11 +45,11 @@ export function PackingListCard({
   }
 
   async function confirmDelete() {
-    const batch = firebase.initBatch();
+    const batch = writeDb.initBatch();
     for (const packItem of packItems) {
-      firebase.deletePackItemBatch(packItem.id, batch);
+      writeDb.deletePackItemBatch(packItem.id, batch);
     }
-    firebase.deletePackingListBatch(packingList.id, batch);
+    writeDb.deletePackingListBatch(packingList.id, batch);
     await batch.commit();
     const filtered = packingLists.filter((l) => l.id !== packingList.id);
     const selectedPackingList = filtered[0];
@@ -75,18 +75,11 @@ export function PackingListCard({
       throw new Error('Grouped pack items not loaded');
     }
     const name = findUniqueName(`${packingList.name} - Copy`, packingLists);
-    const batch = firebase.initBatch();
+    const batch = writeDb.initBatch();
     const rank = rankOnTop(packingLists);
-    const packingListId = firebase.addPackingListBatch(name, batch, rank);
+    const packingListId = writeDb.addPackingListBatch(name, batch, rank);
     for (const packItem of packItems) {
-      firebase.addPackItemBatch(
-        batch,
-        packItem.name,
-        packItem.members,
-        packItem.category,
-        packItem.rank,
-        packingListId
-      );
+      writeDb.addPackItemBatch(batch, packItem.name, packItem.members, packItem.category, packItem.rank, packingListId);
     }
     await batch.commit();
     toast({

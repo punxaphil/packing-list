@@ -8,8 +8,8 @@ import {
   ModalOverlay,
   useToast,
 } from '@chakra-ui/react';
-import { useFirebase } from '~/providers/FirebaseContext.ts';
-import { firebase } from '~/services/firebase.ts';
+import { useDatabase } from '~/providers/DatabaseContext.ts';
+import { writeDb } from '~/services/database.ts';
 import { COLUMN_COLORS } from '~/types/Column.ts';
 import { NamedEntity } from '~/types/NamedEntity.ts';
 import { PackItem } from '~/types/PackItem.ts';
@@ -23,12 +23,12 @@ export function MoveToCategoryModal({
   onClose: () => void;
   packItem: PackItem;
 }) {
-  const categories = useFirebase().categories;
+  const categories = useDatabase().categories;
   const toast = useToast();
 
   async function onClick(category: NamedEntity) {
     const updatedPackItem = { ...packItem, category: category.id };
-    await firebase.updatePackItem(updatedPackItem);
+    await writeDb.updatePackItem(updatedPackItem);
     toast({
       title: `Moved ${packItem.name} to ${category.name}`,
       status: 'success',

@@ -3,8 +3,8 @@ import { useDisclosure } from '@chakra-ui/react';
 import { AiOutlineCopy, AiOutlineDelete, AiOutlineUsergroupAdd } from 'react-icons/ai';
 import { TbStatusChange } from 'react-icons/tb';
 import { DeleteDialog } from '~/components/shared/DeleteDialog.tsx';
-import { useFirebase } from '~/providers/FirebaseContext.ts';
-import { firebase } from '~/services/firebase.ts';
+import { useDatabase } from '~/providers/DatabaseContext.ts';
+import { writeDb } from '~/services/database.ts';
 import { PackItem } from '~/types/PackItem.ts';
 import { ConnectMembersToPackItemModal } from './ConnectMembersToPackItemModal.tsx';
 import { ContextMenu } from './ContextMenu.tsx';
@@ -16,14 +16,14 @@ export function PackItemMenu({
 }: {
   packItem: PackItem;
 }) {
-  const { packingLists } = useFirebase();
+  const { packingLists } = useDatabase();
   const copyDisclosure = useDisclosure();
   const deleteDisclosure = useDisclosure();
   const moveDisclosure = useDisclosure();
   const membersDisclosure = useDisclosure();
 
   async function onConfirmDelete() {
-    await firebase.deletePackItem(packItem.id);
+    await writeDb.deletePackItem(packItem.id);
   }
 
   return (

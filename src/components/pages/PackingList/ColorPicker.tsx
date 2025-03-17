@@ -13,7 +13,7 @@ import {
 } from '@chakra-ui/react';
 import { useState } from 'react';
 import { HexColorPicker } from 'react-colorful';
-import { firebase } from '~/services/firebase.ts';
+import { writeDb } from '~/services/database.ts';
 import { NamedEntity } from '~/types/NamedEntity.ts';
 
 export function ColorPicker({
@@ -31,7 +31,7 @@ export function ColorPicker({
   async function saveColor() {
     onClose();
     category.color = color;
-    await firebase.updateCategories(category);
+    await writeDb.updateCategories(category);
     toast({
       title: 'Color saved!',
       status: 'success',
@@ -41,7 +41,7 @@ export function ColorPicker({
   async function resetColor() {
     onClose();
     category.color = '';
-    await firebase.updateCategories(category);
+    await writeDb.updateCategories(category);
   }
 
   return (

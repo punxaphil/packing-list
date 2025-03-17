@@ -59,7 +59,7 @@ function unsubscribeAll() {
   subs.length = 0;
 }
 
-export const firebase = {
+export const readDb = {
   getUserCollectionsAndSubscribe: async (
     setMembers: (members: NamedEntity[]) => void,
     setCategories: (categories: NamedEntity[]) => void,
@@ -98,7 +98,8 @@ export const firebase = {
       subs.push(onSnapshot(packingListsQuery, (res) => setPackingLists(fromQueryResult(res))));
     }
   },
-
+};
+export const writeDb = {
   addPackItem: async (
     name: string,
     members: MemberPackItem[],
@@ -198,7 +199,7 @@ export const firebase = {
       const batch = writeBatch(firestore);
       for (const packItem of packItems) {
         packItem.category = '';
-        firebase.updatePackItemBatch(packItem, batch);
+        writeDb.updatePackItemBatch(packItem, batch);
       }
       await batch.commit();
     }
@@ -219,7 +220,7 @@ export const firebase = {
       const batch = writeBatch(firestore);
       for (const packItem of packItems) {
         packItem.members = packItem.members.filter((m) => m.id !== id);
-        firebase.updatePackItemBatch(packItem, batch);
+        writeDb.updatePackItemBatch(packItem, batch);
       }
       await batch.commit();
     }

@@ -12,7 +12,7 @@ export const ErrorContext = createContext<ContextType | undefined>(undefined);
 export function useError() {
   const context = useContext(ErrorContext);
   if (context === undefined) {
-    throw new Error('useFirebase must be used within a FirebaseContext.Provider');
+    throw new Error('useError must be used within a ErrorContext.Provider');
   }
   return context;
 }

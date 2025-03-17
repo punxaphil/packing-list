@@ -4,17 +4,17 @@ import { ReactNode, useEffect, useState } from 'react';
 import { CHECKED_FILTER_STATE, UNCHECKED_FILTER_STATE } from '~/components/pages/PackingList/Filter.tsx';
 import { createColumns, flattenGroupedPackItems } from '~/components/pages/PackingList/packingListUtils.ts';
 import { TextProgress } from '~/components/shared/TextProgress.tsx';
-import { firebase } from '~/services/firebase.ts';
+import { readDb } from '~/services/database.ts';
 import { groupByCategories, sortAll } from '~/services/utils.ts';
 import { ColumnList } from '~/types/Column.ts';
 import { GroupedPackItem } from '~/types/GroupedPackItem.ts';
 import { Image } from '~/types/Image.ts';
 import { NamedEntity } from '~/types/NamedEntity.ts';
 import { PackItem } from '~/types/PackItem.ts';
-import { FirebaseContext } from './FirebaseContext.ts';
+import { DatabaseContext } from './DatabaseContext.ts';
 import { usePackingList } from './PackingListContext.ts';
 
-export function FirebaseProvider({ children }: { children: ReactNode }) {
+export function DatabaseProvider({ children }: { children: ReactNode }) {
   const [members, setMembers] = useState<NamedEntity[]>();
   const [categories, setCategories] = useState<NamedEntity[]>();
   const [packItems, setPackItems] = useState<PackItem[]>();
@@ -35,7 +35,7 @@ export function FirebaseProvider({ children }: { children: ReactNode }) {
         throw new Error('No user logged in');
       }
       if (packingList) {
-        await firebase.getUserCollectionsAndSubscribe(
+        await readDb.getUserCollectionsAndSubscribe(
           setMembers,
           setCategories,
           setPackItems,
@@ -93,7 +93,7 @@ export function FirebaseProvider({ children }: { children: ReactNode }) {
   return (
     <>
       {isInitialized ? (
-        <FirebaseContext.Provider
+        <DatabaseContext.Provider
           value={{
             members,
             categories,
@@ -109,7 +109,7 @@ export function FirebaseProvider({ children }: { children: ReactNode }) {
           }}
         >
           {children}
-        </FirebaseContext.Provider>
+        </DatabaseContext.Provider>
       ) : (
         <TextProgress text="Loading your packing lists" />
       )}

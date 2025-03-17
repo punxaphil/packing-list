@@ -9,8 +9,8 @@ import {
   Stack,
   useToast,
 } from '@chakra-ui/react';
-import { useFirebase } from '~/providers/FirebaseContext.ts';
-import { firebase } from '~/services/firebase.ts';
+import { useDatabase } from '~/providers/DatabaseContext.ts';
+import { writeDb } from '~/services/database.ts';
 import { COLUMN_COLORS } from '~/types/Column.ts';
 import { NamedEntity } from '~/types/NamedEntity.ts';
 import { PackItem } from '~/types/PackItem.ts';
@@ -24,7 +24,7 @@ export function ConnectMembersToPackItemModal({
   onClose: () => void;
   packItem: PackItem;
 }) {
-  const members = useFirebase().members;
+  const members = useDatabase().members;
   const toast = useToast();
 
   async function onClick(member: NamedEntity) {
@@ -37,7 +37,7 @@ export function ConnectMembersToPackItemModal({
       packItem.members.push({ id: member.id, checked: false });
       title = `Added ${member.name} to ${packItem.name}`;
     }
-    await firebase.updatePackItem(packItem);
+    await writeDb.updatePackItem(packItem);
     toast({
       title: title,
       status: 'success',
