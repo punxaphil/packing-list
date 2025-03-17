@@ -15,8 +15,8 @@ export function PackingListColumns({
   filteredMembers: string[];
 }) {
   const { columns: initialColumns, nbrOfColumns } = useFirebase();
-
   const columns = useMemo(() => initialColumns, [initialColumns]);
+
   async function saveReorderedList(rows: PackingListRow[]) {
     const batch = firebase.initBatch();
     let currentCategory = '';
