@@ -26,7 +26,7 @@ export function PackItemsTextMode({
 }: {
   onDone: () => void;
 }) {
-  const { categories, members, packItems, groupedPackItems } = useDatabase();
+  const { categories, members, packItems, groupedPackItems, dbInvoke } = useDatabase();
   const [groupedAsText, setGroupedAsText] = useState('');
   const [saving, setSaving] = useState(false);
   const packingList = usePackingList().packingList;
@@ -43,7 +43,7 @@ export function PackItemsTextMode({
   async function save() {
     setSaving(true);
     const textPackItems = createTextPackItemsFromText(groupedAsText);
-    await updateDatabaseFromTextPackItems(packItems, textPackItems, members, categories, packingList.id);
+    await updateDatabaseFromTextPackItems(packItems, textPackItems, members, categories, packingList.id, dbInvoke);
     setSaving(false);
     onDone();
   }

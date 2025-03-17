@@ -5,17 +5,16 @@ import { PackingListColumns } from '~/components/pages/PackingList/PackingListCo
 import { PackingListControls } from '~/components/pages/PackingList/PackingListControls.tsx';
 import { useDatabase } from '~/providers/DatabaseContext.ts';
 import { usePackingList } from '~/providers/PackingListContext.ts';
-import { writeDb } from '~/services/database.ts';
 
 export function PackingList() {
-  const { packItems, groupedPackItems } = useDatabase();
+  const { packItems, groupedPackItems, dbInvoke } = useDatabase();
   const [filteredMembers, setFilteredMembers] = useState<string[]>([]);
   const [textMode, setTextMode] = useState(false);
   const { packingList } = usePackingList();
   const width = useBreakpointValue({ base: 320, sm: 400, md: 650, lg: 970 });
 
   async function addFirstPackItem() {
-    await writeDb.addPackItem('Toothbrush', [], '', packingList.id, 0);
+    await dbInvoke.addPackItem('Toothbrush', [], '', packingList.id, 0);
   }
 
   return (

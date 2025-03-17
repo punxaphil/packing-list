@@ -4,7 +4,7 @@ import { Filter } from '~/components/pages/PackingList/Filter.tsx';
 import { PLIconButton } from '~/components/shared/PLIconButton.tsx';
 import { useDatabase } from '~/providers/DatabaseContext.ts';
 import { useFullscreenMode } from '~/providers/FullscreenModeContext.ts';
-import { hasChangeHistory, writeDb } from '~/services/database.ts';
+import { hasChangeHistory } from '~/services/database.ts';
 
 export function PackingListControls({
   onTextMode,
@@ -32,7 +32,7 @@ export function PackingListControls({
   }
 
   async function onUndo() {
-    await writeDb.undo();
+    await dbInvoke.undo();
   }
 
   return (

@@ -10,7 +10,6 @@ import {
 } from '@chakra-ui/react';
 import { useDatabase } from '~/providers/DatabaseContext.ts';
 import { usePackingList } from '~/providers/PackingListContext.ts';
-import { writeDb } from '~/services/database.ts';
 import { COLUMN_COLORS } from '~/types/Column.ts';
 import { NamedEntity } from '~/types/NamedEntity.ts';
 import { PackItem } from '~/types/PackItem.ts';
@@ -28,7 +27,7 @@ export function CopyToOtherListModal({
   category?: NamedEntity;
   packItem?: PackItem;
 }) {
-  const packingLists = useDatabase().packingLists;
+  const { packingLists, dbInvoke } = useDatabase();
   const { packingList } = usePackingList();
   const toast = useToast();
 
@@ -41,7 +40,7 @@ export function CopyToOtherListModal({
       });
     }
     if (packItem) {
-      await writeDb.addPackItem(packItem.name, packItem.members, packItem.category, packingList.id, packItem.rank);
+      await dbInvoke.addPackItem(packItem.name, packItem.members, packItem.category, packingList.id, packItem.rank);
       toast({
         title: `Pack item ${packItem.name} copied to ${packingList.name}`,
         status: 'success',
@@ -51,10 +50,10 @@ export function CopyToOtherListModal({
   }
 
   async function copyCategory(packItemsInCat: PackItem[], category: NamedEntity, packingList: NamedEntity) {
-    const batch = writeDb.initBatch();
+    const batch = dbInvoke.initBatch();
     for (const packItem of packItemsInCat) {
       if (packItem.category === category.id) {
-        writeDb.addPackItemBatch(
+        dbInvoke.addPackItemBatch(
           batch,
           packItem.name,
           packItem.members,

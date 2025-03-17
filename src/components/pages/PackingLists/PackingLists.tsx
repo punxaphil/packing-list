@@ -5,7 +5,6 @@ import { PackingListCard } from '~/components/pages/PackingLists/PackingListCard
 import { useDatabase } from '~/providers/DatabaseContext.ts';
 import { useError } from '~/providers/ErrorContext.ts';
 import { usePackingList } from '~/providers/PackingListContext.ts';
-import { writeDb } from '~/services/database.ts';
 import { reorderAndSave } from '~/services/reorderUtils.ts';
 import { findUniqueName, rankOnTop } from '~/services/utils.ts';
 import { NamedEntity } from '~/types/NamedEntity.ts';
@@ -14,7 +13,7 @@ import { PackingListWithItems } from '~/types/PackingListsWithItems.ts';
 
 export function PackingLists() {
   const [reordered, setReordered] = useState<NamedEntity[]>([]);
-  const initialPackingLists = useDatabase().packingLists;
+  const { packingLists: initialPackingLists, dbInvoke } = useDatabase();
   const [packingListsWithItems, setPackingListsWithItems] = useState<PackingListWithItems[]>([]);
   const [allPackItems, setAllPackItems] = useState<PackItem[]>([]);
   const currentList = usePackingList().packingList;
@@ -24,10 +23,10 @@ export function PackingLists() {
 
   useEffect(() => {
     (async () => {
-      setAllPackItems(await writeDb.getPackItemsForAllPackingLists());
+      setAllPackItems(await dbInvoke.getPackItemsForAllPackingLists());
       setInitialized(true);
     })().catch(setError);
-  }, [setError]);
+  }, [setError, dbInvoke]);
 
   useMemo(() => {
     setReordered(initialPackingLists);
@@ -50,7 +49,7 @@ export function PackingLists() {
   async function OnNewList() {
     const name = findUniqueName('My packing list', reordered);
     const rank = rankOnTop(reordered);
-    await writeDb.addPackingList(name, rank);
+    await dbInvoke.addPackingList(name, rank);
     toast({
       title: `Packing list "${name}" created`,
       status: 'success',
@@ -58,7 +57,7 @@ export function PackingLists() {
   }
 
   function dragEnd(result: DropResult) {
-    return reorderAndSave(result, writeDb.updatePackingLists, reordered, setReordered);
+    return reorderAndSave(result, dbInvoke.updatePackingLists, reordered, setReordered);
   }
 
   return (

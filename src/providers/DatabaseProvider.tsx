@@ -4,10 +4,11 @@ import { ReactNode, useEffect, useState } from 'react';
 import { CHECKED_FILTER_STATE, UNCHECKED_FILTER_STATE } from '~/components/pages/PackingList/Filter.tsx';
 import { createColumns, flattenGroupedPackItems } from '~/components/pages/PackingList/packingListUtils.ts';
 import { TextProgress } from '~/components/shared/TextProgress.tsx';
-import { readDb } from '~/services/database.ts';
+import { getDatabase } from '~/services/database.ts';
 import { groupByCategories, sortAll } from '~/services/utils.ts';
 import { ColumnList } from '~/types/Column.ts';
 import { GroupedPackItem } from '~/types/GroupedPackItem.ts';
+import { HistoryItem } from '~/types/HistoryItem.ts';
 import { Image } from '~/types/Image.ts';
 import { NamedEntity } from '~/types/NamedEntity.ts';
 import { PackItem } from '~/types/PackItem.ts';
@@ -27,7 +28,8 @@ export function DatabaseProvider({ children }: { children: ReactNode }) {
     showTheseStates: string[];
   } | null>(null);
   const nbrOfColumns: 1 | 2 | 3 = useBreakpointValue({ base: 1, sm: 1, md: 2, lg: 3 }) ?? 3;
-
+  const [changeHistory, setChangeHistory] = useState<HistoryItem[]>([]);
+  const db = getDatabase(changeHistory, setChangeHistory);
   useEffect(() => {
     (async () => {
       const userId = getAuth().currentUser?.uid;
@@ -35,7 +37,7 @@ export function DatabaseProvider({ children }: { children: ReactNode }) {
         throw new Error('No user logged in');
       }
       if (packingList) {
-        await readDb.getUserCollectionsAndSubscribe(
+        await db.getUserCollectionsAndSubscribe(
           setMembers,
           setCategories,
           setPackItems,
@@ -45,7 +47,7 @@ export function DatabaseProvider({ children }: { children: ReactNode }) {
         );
       }
     })().catch(console.error);
-  }, [packingList]);
+  }, [packingList, db]);
 
   let groupedPackItems: GroupedPackItem[] = [];
   let columns: ColumnList[] = [];
@@ -90,6 +92,7 @@ export function DatabaseProvider({ children }: { children: ReactNode }) {
             (showTheseStates.includes(UNCHECKED_FILTER_STATE) && !item.checked)
         );
   }
+
   return (
     <>
       {isInitialized ? (
@@ -106,6 +109,8 @@ export function DatabaseProvider({ children }: { children: ReactNode }) {
             categoriesInPackingList,
             membersInPackingList,
             setFilter,
+            dbInvoke: db,
+            changeHistory,
           }}
         >
           {children}

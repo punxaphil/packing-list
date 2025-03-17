@@ -1,15 +1,15 @@
 import { NamedEntities } from '~/components/pages/NamedEntities/NamedEntities.tsx';
 import { useDatabase } from '~/providers/DatabaseContext.ts';
-import { writeDb } from '~/services/database.ts';
 
 export function Categories() {
+  const { dbInvoke } = useDatabase();
   return (
     <NamedEntities
       namedEntities={useDatabase().categories}
       type="categories"
-      dbAdd={writeDb.addCategory}
-      dbUpdate={writeDb.updateCategories}
-      dbDelete={writeDb.deleteCategory}
+      dbAdd={dbInvoke.addCategory}
+      dbUpdate={dbInvoke.updateCategories}
+      dbDelete={dbInvoke.deleteCategory}
     />
   );
 }

@@ -4,7 +4,6 @@ import { KeyboardEvent } from 'react';
 import { useDatabase } from '~/providers/DatabaseContext.ts';
 import { useNewPackItemRowId } from '~/providers/NewPackItemRowIdContext.ts';
 import { usePackingList } from '~/providers/PackingListContext.ts';
-import { writeDb } from '~/services/database.ts';
 import { handleEnter, rankOnTop } from '~/services/utils.ts';
 import { PackItem } from '~/types/PackItem.ts';
 import { PackItemRowWrapper } from './PackItemRowWrapper.tsx';
@@ -21,7 +20,7 @@ export function NewPackItemRow({
   const [newRowText, setNewRowText] = useState('');
   const { packingList } = usePackingList();
   const { setNewPackItemRowId } = useNewPackItemRowId();
-  const packItems = useDatabase().packItems;
+  const { packItems, dbInvoke } = useDatabase();
 
   async function onChange(e: ChangeEvent<HTMLInputElement>) {
     setNewRowText(e.target.value);
@@ -30,12 +29,12 @@ export function NewPackItemRow({
   async function save() {
     if (newRowText) {
       let rank: number;
-      const batch = writeDb.initBatch();
+      const batch = dbInvoke.initBatch();
       if (packItemToPlaceNewItemAfter) {
         rank = packItemToPlaceNewItemAfter.rank;
         for (const packItem of packItems) {
           packItem.rank = packItem.rank + 1;
-          writeDb.updatePackItemBatch(packItem, batch);
+          dbInvoke.updatePackItemBatch(packItem, batch);
           if (packItem.id === packItemToPlaceNewItemAfter.id) {
             break;
           }
@@ -43,7 +42,7 @@ export function NewPackItemRow({
       } else {
         rank = rankOnTop(packItems);
       }
-      const newId = writeDb.addPackItemBatch(batch, newRowText, [], categoryId, rank, packingList.id);
+      const newId = dbInvoke.addPackItemBatch(batch, newRowText, [], categoryId, rank, packingList.id);
       setNewPackItemRowId(newId);
       await batch.commit();
     }

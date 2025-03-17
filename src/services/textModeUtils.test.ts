@@ -1,17 +1,17 @@
 import { WriteBatch } from 'firebase/firestore';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { getDatabase } from '~/services/database.ts';
 import { NamedEntity } from '~/types/NamedEntity';
 import { PackItem, TextPackItem } from '~/types/PackItem';
-import { writeDb } from './database.ts';
 import { expectDatabaseCallsToThese } from './testUtils.ts';
 import { createTextPackItemsFromText, updateDatabaseFromTextPackItems } from './textModeUtils.ts';
 
 const PACKING_LIST_ID = 'packingListId';
 
 vi.mock('./database.ts');
-
+const database = getDatabase([], () => {});
 const writeBatchMock = { commit: () => {} } as WriteBatch;
-vi.mocked(writeDb.initBatch).mockImplementation(() => {
+vi.mocked(database.initBatch).mockImplementation(() => {
   return writeBatchMock;
 });
 
@@ -96,9 +96,9 @@ describe('textModeUtils', () => {
       const members: NamedEntity[] = [];
       const categories: NamedEntity[] = [];
 
-      await updateDatabaseFromTextPackItems(packItems, textPackItems, members, categories, PACKING_LIST_ID);
+      await updateDatabaseFromTextPackItems(packItems, textPackItems, members, categories, PACKING_LIST_ID, dbInvoke);
 
-      expectDatabaseCallsToThese(writeDb.deletePackItemBatch, writeDb.initBatch);
+      expectDatabaseCallsToThese(database.deletePackItemBatch, database.initBatch);
     });
 
     it('should not update existing pack items', async () => {
@@ -109,9 +109,9 @@ describe('textModeUtils', () => {
       const members: NamedEntity[] = [];
       const categories: NamedEntity[] = [];
 
-      await updateDatabaseFromTextPackItems(packItems, textPackItems, members, categories, PACKING_LIST_ID);
+      await updateDatabaseFromTextPackItems(packItems, textPackItems, members, categories, PACKING_LIST_ID, dbInvoke);
 
-      expectDatabaseCallsToThese(writeDb.initBatch);
+      expectDatabaseCallsToThese(database.initBatch);
     });
 
     it('should update existing pack items', async () => {
@@ -122,9 +122,9 @@ describe('textModeUtils', () => {
       const members: NamedEntity[] = [{ id: '2', name: 'Member 1', rank: 0 }];
       const categories: NamedEntity[] = [];
 
-      await updateDatabaseFromTextPackItems(packItems, textPackItems, members, categories, PACKING_LIST_ID);
+      await updateDatabaseFromTextPackItems(packItems, textPackItems, members, categories, PACKING_LIST_ID, dbInvoke);
 
-      expectDatabaseCallsToThese(writeDb.updatePackItemBatch, writeDb.initBatch);
+      expectDatabaseCallsToThese(database.updatePackItemBatch, database.initBatch);
     });
 
     it('should update existing pack items because category changed', async () => {
@@ -135,9 +135,9 @@ describe('textModeUtils', () => {
       const members: NamedEntity[] = [];
       const categories: NamedEntity[] = [{ id: '2', name: 'Category 2', rank: 0 }];
 
-      await updateDatabaseFromTextPackItems(packItems, textPackItems, members, categories, PACKING_LIST_ID);
+      await updateDatabaseFromTextPackItems(packItems, textPackItems, members, categories, PACKING_LIST_ID, dbInvoke);
 
-      expectDatabaseCallsToThese(writeDb.updatePackItemBatch, writeDb.addCategoryBatch, writeDb.initBatch);
+      expectDatabaseCallsToThese(database.updatePackItemBatch, database.addCategoryBatch, database.initBatch);
     });
 
     it('should add new pack items', async () => {
@@ -146,9 +146,9 @@ describe('textModeUtils', () => {
       const members: NamedEntity[] = [];
       const categories: NamedEntity[] = [];
 
-      await updateDatabaseFromTextPackItems(packItems, textPackItems, members, categories, PACKING_LIST_ID);
+      await updateDatabaseFromTextPackItems(packItems, textPackItems, members, categories, PACKING_LIST_ID, dbInvoke);
 
-      expectDatabaseCallsToThese(writeDb.addPackItemBatch, writeDb.initBatch);
+      expectDatabaseCallsToThese(database.addPackItemBatch, database.initBatch);
     });
 
     it('should add 3 new pack items, update 2 pack items, delete 5 pack items, add one new category, add 2 members', async () => {
@@ -183,12 +183,12 @@ describe('textModeUtils', () => {
       ];
       const categories: NamedEntity[] = [{ id: '2', name: 'Category 2', rank: 0 }];
 
-      vi.mocked(writeDb.addMemberBatch).mockImplementation((name: string) => `added${name}`);
-      vi.mocked(writeDb.addCategoryBatch).mockImplementation((name: string) => `added${name}`);
+      vi.mocked(database.addMemberBatch).mockImplementation((name: string) => `added${name}`);
+      vi.mocked(database.addCategoryBatch).mockImplementation((name: string) => `added${name}`);
 
-      await updateDatabaseFromTextPackItems(packItems, textPackItems, members, categories, PACKING_LIST_ID);
-      expect(writeDb.addPackItemBatch).toHaveBeenCalledTimes(3);
-      expect(writeDb.addPackItemBatch).toHaveBeenNthCalledWith(
+      await updateDatabaseFromTextPackItems(packItems, textPackItems, members, categories, PACKING_LIST_ID, dbInvoke);
+      expect(database.addPackItemBatch).toHaveBeenCalledTimes(3);
+      expect(database.addPackItemBatch).toHaveBeenNthCalledWith(
         1,
         writeBatchMock,
         'Item 3',
@@ -197,7 +197,7 @@ describe('textModeUtils', () => {
         3,
         PACKING_LIST_ID
       );
-      expect(writeDb.addPackItemBatch).toHaveBeenNthCalledWith(
+      expect(database.addPackItemBatch).toHaveBeenNthCalledWith(
         2,
         writeBatchMock,
         'Item 4',
@@ -206,7 +206,7 @@ describe('textModeUtils', () => {
         2,
         PACKING_LIST_ID
       );
-      expect(writeDb.addPackItemBatch).toHaveBeenNthCalledWith(
+      expect(database.addPackItemBatch).toHaveBeenNthCalledWith(
         3,
         writeBatchMock,
         'Item 5',
@@ -218,8 +218,8 @@ describe('textModeUtils', () => {
         1,
         PACKING_LIST_ID
       );
-      expect(writeDb.updatePackItemBatch).toHaveBeenCalledTimes(2);
-      expect(writeDb.updatePackItemBatch).toHaveBeenNthCalledWith(
+      expect(database.updatePackItemBatch).toHaveBeenCalledTimes(2);
+      expect(database.updatePackItemBatch).toHaveBeenNthCalledWith(
         1,
         {
           id: '1',
@@ -232,7 +232,7 @@ describe('textModeUtils', () => {
         },
         writeBatchMock
       );
-      expect(writeDb.updatePackItemBatch).toHaveBeenNthCalledWith(
+      expect(database.updatePackItemBatch).toHaveBeenNthCalledWith(
         2,
         {
           id: '2',
@@ -248,13 +248,13 @@ describe('textModeUtils', () => {
         },
         writeBatchMock
       );
-      expect(writeDb.addCategoryBatch).toHaveBeenCalledTimes(1);
-      expect(writeDb.addCategoryBatch).toHaveBeenCalledWith('Category 1', writeBatchMock);
-      expect(writeDb.addMemberBatch).toHaveBeenCalledTimes(2);
-      expect(writeDb.addMemberBatch).toHaveBeenNthCalledWith(1, 'Member 1', writeBatchMock);
-      expect(writeDb.addMemberBatch).toHaveBeenNthCalledWith(2, 'Member 3', writeBatchMock);
+      expect(database.addCategoryBatch).toHaveBeenCalledTimes(1);
+      expect(database.addCategoryBatch).toHaveBeenCalledWith('Category 1', writeBatchMock);
+      expect(database.addMemberBatch).toHaveBeenCalledTimes(2);
+      expect(database.addMemberBatch).toHaveBeenNthCalledWith(1, 'Member 1', writeBatchMock);
+      expect(database.addMemberBatch).toHaveBeenNthCalledWith(2, 'Member 3', writeBatchMock);
 
-      expect(writeDb.deletePackItemBatch).toHaveBeenCalledTimes(5);
+      expect(database.deletePackItemBatch).toHaveBeenCalledTimes(5);
     });
   });
 });

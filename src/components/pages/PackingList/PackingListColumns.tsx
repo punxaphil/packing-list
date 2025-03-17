@@ -3,7 +3,6 @@ import { DragDropContext, DragUpdate } from '@hello-pangea/dnd';
 import { useMemo } from 'react';
 import { useDatabase } from '~/providers/DatabaseContext.ts';
 import { NewPackItemRowIdProvider } from '~/providers/NewPackItemRowIdProvider.tsx';
-import { writeDb } from '~/services/database.ts';
 import { UNCATEGORIZED } from '~/services/utils.ts';
 import { PackingListRow } from '~/types/Column.ts';
 import { PackingListColumn } from './PackingListColumn.tsx';
@@ -14,19 +13,19 @@ export function PackingListColumns({
 }: {
   filteredMembers: string[];
 }) {
-  const { columns: initialColumns, nbrOfColumns } = useDatabase();
+  const { columns: initialColumns, nbrOfColumns, dbInvoke } = useDatabase();
   const columns = useMemo(() => initialColumns, [initialColumns]);
 
   async function saveReorderedList(rows: PackingListRow[]) {
-    const batch = writeDb.initBatch();
+    const batch = dbInvoke.initBatch();
     let currentCategory = '';
     for (const [index, row] of rows.entries()) {
       row.setRank(rows.length - index);
       if (row.packItem) {
         row.packItem.category = currentCategory;
-        writeDb.updatePackItemBatch(row.packItem, batch);
+        dbInvoke.updatePackItemBatch(row.packItem, batch);
       } else if (row.category && row.category !== UNCATEGORIZED) {
-        writeDb.updateCategoryBatch(row.category, batch);
+        dbInvoke.updateCategoryBatch(row.category, batch);
         currentCategory = row.category.id;
       }
     }

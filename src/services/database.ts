@@ -22,6 +22,7 @@ import {
   writeBatch,
 } from 'firebase/firestore';
 import { ArrayError } from '~/types/ArrayError.ts';
+import { HistoryItem } from '~/types/HistoryItem.ts';
 import { Image } from '~/types/Image.ts';
 import { MemberPackItem } from '~/types/MemberPackItem.ts';
 import { NamedEntity } from '~/types/NamedEntity.ts';
@@ -59,234 +60,229 @@ function unsubscribeAll() {
   subs.length = 0;
 }
 
-export const readDb = {
-  getUserCollectionsAndSubscribe: async (
-    setMembers: (members: NamedEntity[]) => void,
-    setCategories: (categories: NamedEntity[]) => void,
-    setPackItems: (packItems: PackItem[]) => void,
-    setImages: (images: Image[]) => void,
-    setPackingLists: (packingLists: NamedEntity[]) => void,
-    packingListId: string
-  ) => {
-    const userId = getUserId();
-    const memberQuery = collection(firestore, USERS_KEY, userId, MEMBERS_KEY);
-    const itemsQuery = query(
-      collection(firestore, USERS_KEY, userId, PACK_ITEMS_KEY),
-      where('packingList', '==', packingListId)
-    );
-    const categoriesQuery = collection(firestore, USERS_KEY, userId, CATEGORIES_KEY);
-    const imagesQuery = collection(firestore, USERS_KEY, userId, IMAGES_KEY);
-    const packingListsQuery = collection(firestore, USERS_KEY, userId, PACKING_LISTS_KEY);
+export type DbInvoke = ReturnType<typeof getDatabase>;
 
-    await getInitialData();
-    createSubscriptions();
+export const getDatabase = (changeHistory: HistoryItem[], setChangeHistory: (changeHistory: HistoryItem[]) => void) => {
+  const db = {
+    getUserCollectionsAndSubscribe: async (
+      setMembers: (members: NamedEntity[]) => void,
+      setCategories: (categories: NamedEntity[]) => void,
+      setPackItems: (packItems: PackItem[]) => void,
+      setImages: (images: Image[]) => void,
+      setPackingLists: (packingLists: NamedEntity[]) => void,
+      packingListId: string
+    ) => {
+      const userId = getUserId();
+      const memberQuery = collection(firestore, USERS_KEY, userId, MEMBERS_KEY);
+      const itemsQuery = query(
+        collection(firestore, USERS_KEY, userId, PACK_ITEMS_KEY),
+        where('packingList', '==', packingListId)
+      );
+      const categoriesQuery = collection(firestore, USERS_KEY, userId, CATEGORIES_KEY);
+      const imagesQuery = collection(firestore, USERS_KEY, userId, IMAGES_KEY);
+      const packingListsQuery = collection(firestore, USERS_KEY, userId, PACKING_LISTS_KEY);
 
-    async function getInitialData() {
-      setMembers(fromQueryResult(await getDocs(memberQuery)));
-      setCategories(fromQueryResult(await getDocs(categoriesQuery)));
-      setPackItems(fromQueryResult(await getDocs(itemsQuery)));
-      setImages(fromQueryResult(await getDocs(imagesQuery)));
-      setPackingLists(fromQueryResult(await getDocs(packingListsQuery)));
-    }
+      await getInitialData();
+      createSubscriptions();
 
-    function createSubscriptions() {
-      unsubscribeAll();
-      subs.push(onSnapshot(memberQuery, (res) => setMembers(fromQueryResult(res))));
-      subs.push(onSnapshot(categoriesQuery, (res) => setCategories(fromQueryResult(res))));
-      subs.push(onSnapshot(itemsQuery, (res) => setPackItems(fromQueryResult<PackItem>(res))));
-      subs.push(onSnapshot(imagesQuery, (res) => setImages(fromQueryResult(res))));
-      subs.push(onSnapshot(packingListsQuery, (res) => setPackingLists(fromQueryResult(res))));
-    }
-  },
-};
-
-interface HistoryItem {
-  type: 'deleted';
-  packItem: PackItem;
-}
-
-const changeHistory: HistoryItem[] = [];
-
-export const hasChangeHistory = () => changeHistory.length > 0;
-
-export const writeDb = {
-  addPackItem: async (
-    name: string,
-    members: MemberPackItem[],
-    category: string,
-    packingList: string,
-    rank: number
-  ): Promise<PackItem> => {
-    const docRef = await add(PACK_ITEMS_KEY, { name, members, checked: false, category, packingList, rank });
-    return { id: docRef.id, checked: false, members, name, category, packingList, rank };
-  },
-  updatePackItem: async (packItem: PackItem) => {
-    await update(PACK_ITEMS_KEY, packItem.id, packItem);
-  },
-  deletePackItem: async (packItem: PackItem) => {
-    await del(PACK_ITEMS_KEY, packItem.id);
-    changeHistory.push({ type: 'deleted', packItem });
-  },
-  addMember: async (name: string): Promise<string> => {
-    const docRef = await add(MEMBERS_KEY, { name });
-    return docRef.id;
-  },
-  updateMembers: async (toUpdate: NamedEntity[] | NamedEntity) => {
-    if (Array.isArray(toUpdate)) {
-      await updateInBatch(MEMBERS_KEY, toUpdate);
-    } else {
-      await update(MEMBERS_KEY, toUpdate.id, toUpdate);
-    }
-  },
-  addCategory: async (name: string): Promise<string> => {
-    const docRef = await add(CATEGORIES_KEY, { name });
-    return docRef.id;
-  },
-  updateCategories: async (categories: NamedEntity[] | NamedEntity) => {
-    if (Array.isArray(categories)) {
-      await updateInBatch(CATEGORIES_KEY, categories);
-    } else {
-      await update(CATEGORIES_KEY, categories.id, categories);
-    }
-  },
-  updatePackingLists: async (packingLists: NamedEntity[] | NamedEntity) => {
-    if (Array.isArray(packingLists)) {
-      await updateInBatch(PACKING_LISTS_KEY, packingLists);
-    } else {
-      await update(PACKING_LISTS_KEY, packingLists.id, packingLists);
-    }
-  },
-  addImage: async (type: string, typeId: string, url: string): Promise<void> => {
-    await add(IMAGES_KEY, { type, typeId, url });
-  },
-  async updateImage(imageId: string, fileUrl: string) {
-    await update(IMAGES_KEY, imageId, { url: fileUrl });
-  },
-  async deleteImage(imageId: string) {
-    await del(IMAGES_KEY, imageId);
-  },
-  initBatch: () => {
-    return writeBatch(firestore);
-  },
-  deletePackItemBatch(id: string, writeBatch: WriteBatch) {
-    writeBatch.delete(doc(firestore, USERS_KEY, getUserId(), PACK_ITEMS_KEY, id));
-  },
-  addCategoryBatch(category: string, writeBatch: WriteBatch) {
-    return addBatch(CATEGORIES_KEY, writeBatch, { name: category });
-  },
-  addMemberBatch(member: string, writeBatch: WriteBatch) {
-    return addBatch(MEMBERS_KEY, writeBatch, { name: member });
-  },
-  updatePackItemBatch<K extends DocumentData>(data: WithFieldValue<K>, writeBatch: WriteBatch) {
-    writeBatch.update(doc(firestore, USERS_KEY, getUserId(), PACK_ITEMS_KEY, data.id), data);
-  },
-  addPackItemBatch(
-    writeBatch: WriteBatch,
-    name: string,
-    members: MemberPackItem[],
-    category: string,
-    rank: number,
-    packingList: string
-  ) {
-    return addBatch(PACK_ITEMS_KEY, writeBatch, {
-      name,
-      members,
-      checked: false,
-      category,
-      packingList,
-      rank,
-    });
-  },
-  async deleteCategory(id: string, packingLists: NamedEntity[], deleteEvenIfUsed = false) {
-    const packItemsQuery = query(
-      collection(firestore, USERS_KEY, getUserId(), PACK_ITEMS_KEY),
-      where('category', '==', id)
-    );
-    const packItems: PackItem[] = fromQueryResult(await getDocs(packItemsQuery));
-    if (packItems.length) {
-      if (!deleteEvenIfUsed) {
-        throwNamedEntityArrayError('Category', packItems, packingLists);
+      async function getInitialData() {
+        setMembers(fromQueryResult(await getDocs(memberQuery)));
+        setCategories(fromQueryResult(await getDocs(categoriesQuery)));
+        setPackItems(fromQueryResult(await getDocs(itemsQuery)));
+        setImages(fromQueryResult(await getDocs(imagesQuery)));
+        setPackingLists(fromQueryResult(await getDocs(packingListsQuery)));
       }
-      const batch = writeBatch(firestore);
-      for (const packItem of packItems) {
-        packItem.category = '';
-        writeDb.updatePackItemBatch(packItem, batch);
-      }
-      await batch.commit();
-    }
-    await del(CATEGORIES_KEY, id);
-  },
-  async deleteMember(id: string, packingLists: NamedEntity[], deleteEvenIfUsed = false) {
-    const packItemsQuery = query(
-      collection(firestore, USERS_KEY, getUserId(), PACK_ITEMS_KEY),
-      where('members', '!=', [])
-    );
-    let packItems: PackItem[] = fromQueryResult(await getDocs(packItemsQuery));
-    packItems = packItems.filter((t) => t.members.find((m) => m.id === id));
 
-    if (packItems.length) {
-      if (!deleteEvenIfUsed) {
-        throwNamedEntityArrayError('Member', packItems, packingLists);
+      function createSubscriptions() {
+        unsubscribeAll();
+        subs.push(onSnapshot(memberQuery, (res) => setMembers(fromQueryResult(res))));
+        subs.push(onSnapshot(categoriesQuery, (res) => setCategories(fromQueryResult(res))));
+        subs.push(onSnapshot(itemsQuery, (res) => setPackItems(fromQueryResult<PackItem>(res))));
+        subs.push(onSnapshot(imagesQuery, (res) => setImages(fromQueryResult(res))));
+        subs.push(onSnapshot(packingListsQuery, (res) => setPackingLists(fromQueryResult(res))));
       }
-      const batch = writeBatch(firestore);
-      for (const packItem of packItems) {
-        packItem.members = packItem.members.filter((m) => m.id !== id);
-        writeDb.updatePackItemBatch(packItem, batch);
+    },
+
+    addPackItem: async (
+      name: string,
+      members: MemberPackItem[],
+      category: string,
+      packingList: string,
+      rank: number
+    ): Promise<PackItem> => {
+      const docRef = await add(PACK_ITEMS_KEY, { name, members, checked: false, category, packingList, rank });
+      return { id: docRef.id, checked: false, members, name, category, packingList, rank };
+    },
+    updatePackItem: async (packItem: PackItem) => {
+      await update(PACK_ITEMS_KEY, packItem.id, packItem);
+    },
+    deletePackItem: async (packItem: PackItem) => {
+      await del(PACK_ITEMS_KEY, packItem.id);
+      const newHistory: HistoryItem[] = [...changeHistory, { type: 'deleted', packItem }];
+      setChangeHistory(newHistory);
+    },
+    addMember: async (name: string): Promise<string> => {
+      const docRef = await add(MEMBERS_KEY, { name });
+      return docRef.id;
+    },
+    updateMembers: async (toUpdate: NamedEntity[] | NamedEntity) => {
+      if (Array.isArray(toUpdate)) {
+        await updateInBatch(MEMBERS_KEY, toUpdate);
+      } else {
+        await update(MEMBERS_KEY, toUpdate.id, toUpdate);
       }
-      await batch.commit();
-    }
-    await del(MEMBERS_KEY, id);
-  },
-  async getFirstPackingList(): Promise<NamedEntity | undefined> {
-    const userId = getUserId();
-    const query = collection(firestore, USERS_KEY, userId, PACKING_LISTS_KEY);
-    const packingLists = fromQueryResult(await getDocs(query)) as NamedEntity[];
-    return packingLists.length ? packingLists[0] : undefined;
-  },
-  async addPackingList(name: string, rank: number) {
-    const docRef = await add(PACKING_LISTS_KEY, { name: name, rank });
-    return docRef.id;
-  },
-  async getPackingList(id: string) {
-    const res = await getDoc(doc(firestore, USERS_KEY, getUserId(), PACKING_LISTS_KEY, id));
-    if (res.exists()) {
-      return { id: res.id, ...res.data() } as NamedEntity;
-    }
-    return undefined;
-  },
-  updatePackingList(packingList: NamedEntity) {
-    return update(PACKING_LISTS_KEY, packingList.id, packingList);
-  },
-  deletePackingListBatch(id: string, batch: WriteBatch) {
-    batch.delete(doc(firestore, USERS_KEY, getUserId(), PACKING_LISTS_KEY, id));
-  },
-  addPackingListBatch(name: string, writeBatch: WriteBatch, rank: number) {
-    return addBatch(PACKING_LISTS_KEY, writeBatch, { name, rank });
-  },
-  updateCategoryBatch<K extends DocumentData>(data: WithFieldValue<K>, batch: WriteBatch) {
-    batch.update(doc(firestore, USERS_KEY, getUserId(), CATEGORIES_KEY, data.id), data);
-  },
-  getPackItemsForAllPackingLists: async () => {
-    const userId = getUserId();
-    const q = query(collection(firestore, USERS_KEY, userId, PACK_ITEMS_KEY));
-    const allPackItems = fromQueryResult<PackItem>(await getDocs(q));
-    sortEntities(allPackItems);
-    return allPackItems;
-  },
-  undo: async () => {
-    const last = changeHistory.pop();
-    if (!last) {
-      return;
-    }
-    if (last.type === 'deleted') {
-      if (last.packItem) {
-        const docRef = await add(PACK_ITEMS_KEY, last.packItem);
-        if (docRef) {
-          await update(PACK_ITEMS_KEY, docRef.id, { ...last.packItem, id: docRef.id });
+    },
+    addCategory: async (name: string): Promise<string> => {
+      const docRef = await add(CATEGORIES_KEY, { name });
+      return docRef.id;
+    },
+    updateCategories: async (categories: NamedEntity[] | NamedEntity) => {
+      if (Array.isArray(categories)) {
+        await updateInBatch(CATEGORIES_KEY, categories);
+      } else {
+        await update(CATEGORIES_KEY, categories.id, categories);
+      }
+    },
+    updatePackingLists: async (packingLists: NamedEntity[] | NamedEntity) => {
+      if (Array.isArray(packingLists)) {
+        await updateInBatch(PACKING_LISTS_KEY, packingLists);
+      } else {
+        await update(PACKING_LISTS_KEY, packingLists.id, packingLists);
+      }
+    },
+    addImage: async (type: string, typeId: string, url: string): Promise<void> => {
+      await add(IMAGES_KEY, { type, typeId, url });
+    },
+    async updateImage(imageId: string, fileUrl: string) {
+      await update(IMAGES_KEY, imageId, { url: fileUrl });
+    },
+    async deleteImage(imageId: string) {
+      await del(IMAGES_KEY, imageId);
+    },
+    initBatch: () => {
+      return writeBatch(firestore);
+    },
+    deletePackItemBatch(id: string, writeBatch: WriteBatch) {
+      writeBatch.delete(doc(firestore, USERS_KEY, getUserId(), PACK_ITEMS_KEY, id));
+    },
+    addCategoryBatch(category: string, writeBatch: WriteBatch) {
+      return addBatch(CATEGORIES_KEY, writeBatch, { name: category });
+    },
+    addMemberBatch(member: string, writeBatch: WriteBatch) {
+      return addBatch(MEMBERS_KEY, writeBatch, { name: member });
+    },
+    updatePackItemBatch<K extends DocumentData>(data: WithFieldValue<K>, writeBatch: WriteBatch) {
+      writeBatch.update(doc(firestore, USERS_KEY, getUserId(), PACK_ITEMS_KEY, data.id), data);
+    },
+    addPackItemBatch(
+      writeBatch: WriteBatch,
+      name: string,
+      members: MemberPackItem[],
+      category: string,
+      rank: number,
+      packingList: string
+    ) {
+      return addBatch(PACK_ITEMS_KEY, writeBatch, {
+        name,
+        members,
+        checked: false,
+        category,
+        packingList,
+        rank,
+      });
+    },
+    async deleteCategory(id: string, packingLists: NamedEntity[], deleteEvenIfUsed = false) {
+      const packItemsQuery = query(
+        collection(firestore, USERS_KEY, getUserId(), PACK_ITEMS_KEY),
+        where('category', '==', id)
+      );
+      const packItems: PackItem[] = fromQueryResult(await getDocs(packItemsQuery));
+      if (packItems.length) {
+        if (!deleteEvenIfUsed) {
+          throwNamedEntityArrayError('Category', packItems, packingLists);
+        }
+        const batch = writeBatch(firestore);
+        for (const packItem of packItems) {
+          packItem.category = '';
+          db.updatePackItemBatch(packItem, batch);
+        }
+        await batch.commit();
+      }
+      await del(CATEGORIES_KEY, id);
+    },
+    async deleteMember(id: string, packingLists: NamedEntity[], deleteEvenIfUsed = false) {
+      const packItemsQuery = query(
+        collection(firestore, USERS_KEY, getUserId(), PACK_ITEMS_KEY),
+        where('members', '!=', [])
+      );
+      let packItems: PackItem[] = fromQueryResult(await getDocs(packItemsQuery));
+      packItems = packItems.filter((t) => t.members.find((m) => m.id === id));
+
+      if (packItems.length) {
+        if (!deleteEvenIfUsed) {
+          throwNamedEntityArrayError('Member', packItems, packingLists);
+        }
+        const batch = writeBatch(firestore);
+        for (const packItem of packItems) {
+          packItem.members = packItem.members.filter((m) => m.id !== id);
+          db.updatePackItemBatch(packItem, batch);
+        }
+        await batch.commit();
+      }
+      await del(MEMBERS_KEY, id);
+    },
+    async getFirstPackingList(): Promise<NamedEntity | undefined> {
+      const userId = getUserId();
+      const query = collection(firestore, USERS_KEY, userId, PACKING_LISTS_KEY);
+      const packingLists = fromQueryResult(await getDocs(query)) as NamedEntity[];
+      return packingLists.length ? packingLists[0] : undefined;
+    },
+    async addPackingList(name: string, rank: number) {
+      const docRef = await add(PACKING_LISTS_KEY, { name: name, rank });
+      return docRef.id;
+    },
+    async getPackingList(id: string) {
+      const res = await getDoc(doc(firestore, USERS_KEY, getUserId(), PACKING_LISTS_KEY, id));
+      if (res.exists()) {
+        return { id: res.id, ...res.data() } as NamedEntity;
+      }
+      return undefined;
+    },
+    updatePackingList(packingList: NamedEntity) {
+      return update(PACKING_LISTS_KEY, packingList.id, packingList);
+    },
+    deletePackingListBatch(id: string, batch: WriteBatch) {
+      batch.delete(doc(firestore, USERS_KEY, getUserId(), PACKING_LISTS_KEY, id));
+    },
+    addPackingListBatch(name: string, writeBatch: WriteBatch, rank: number) {
+      return addBatch(PACKING_LISTS_KEY, writeBatch, { name, rank });
+    },
+    updateCategoryBatch<K extends DocumentData>(data: WithFieldValue<K>, batch: WriteBatch) {
+      batch.update(doc(firestore, USERS_KEY, getUserId(), CATEGORIES_KEY, data.id), data);
+    },
+    getPackItemsForAllPackingLists: async () => {
+      const userId = getUserId();
+      const q = query(collection(firestore, USERS_KEY, userId, PACK_ITEMS_KEY));
+      const allPackItems = fromQueryResult<PackItem>(await getDocs(q));
+      sortEntities(allPackItems);
+      return allPackItems;
+    },
+    undo: async () => {
+      const last = changeHistory.pop();
+      if (!last) {
+        return;
+      }
+      if (last.type === 'deleted') {
+        if (last.packItem) {
+          const docRef = await add(PACK_ITEMS_KEY, last.packItem);
+          if (docRef) {
+            await update(PACK_ITEMS_KEY, docRef.id, { ...last.packItem, id: docRef.id });
+          }
         }
       }
-    }
-  },
+    },
+  };
+  return db;
 };
 
 function getUserId() {

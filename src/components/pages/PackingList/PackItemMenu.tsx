@@ -4,7 +4,6 @@ import { AiOutlineCopy, AiOutlineDelete, AiOutlineUsergroupAdd } from 'react-ico
 import { TbStatusChange } from 'react-icons/tb';
 import { DeleteDialog } from '~/components/shared/DeleteDialog.tsx';
 import { useDatabase } from '~/providers/DatabaseContext.ts';
-import { writeDb } from '~/services/database.ts';
 import { PackItem } from '~/types/PackItem.ts';
 import { ConnectMembersToPackItemModal } from './ConnectMembersToPackItemModal.tsx';
 import { ContextMenu } from './ContextMenu.tsx';
@@ -16,14 +15,14 @@ export function PackItemMenu({
 }: {
   packItem: PackItem;
 }) {
-  const { packingLists } = useDatabase();
+  const { packingLists, dbInvoke } = useDatabase();
   const copyDisclosure = useDisclosure();
   const deleteDisclosure = useDisclosure();
   const moveDisclosure = useDisclosure();
   const membersDisclosure = useDisclosure();
 
   async function onConfirmDelete() {
-    await writeDb.deletePackItem(packItem);
+    await dbInvoke.deletePackItem(packItem);
   }
 
   return (
