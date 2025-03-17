@@ -7,7 +7,6 @@ import { DragHandle } from '~/components/shared/DragHandle.tsx';
 import { PLInput } from '~/components/shared/PLInput.tsx';
 import { useDatabase } from '~/providers/DatabaseContext.ts';
 import { useNewPackItemRowId } from '~/providers/NewPackItemRowIdContext.ts';
-import { writeDb } from '~/services/database.ts';
 import { UNCATEGORIZED, getPackItemGroup } from '~/services/utils.ts';
 import { NamedEntity } from '~/types/NamedEntity.ts';
 import { PackItem } from '~/types/PackItem.ts';
@@ -22,7 +21,7 @@ export function PackingListCategory({
   dragHandleProps?: DraggableProvidedDragHandleProps | null;
   sx?: SystemStyleObject;
 }) {
-  const { images, groupedPackItems } = useDatabase();
+  const { images, groupedPackItems, dbInvoke } = useDatabase();
   const { newPackItemRowId, setNewPackItemRowId } = useNewPackItemRowId();
   const [checked, setChecked] = useState(false);
   const [isIndeterminate, setIsIndeterminate] = useState(false);
@@ -46,19 +45,19 @@ export function PackingListCategory({
 
   async function onChangeCategory(name: string) {
     category.name = name;
-    await writeDb.updateCategories(category);
+    await dbInvoke.updateCategories(category);
   }
 
   async function toggleItem() {
     const newState = !checked;
-    const batch = writeDb.initBatch();
+    const batch = dbInvoke.initBatch();
     for (const t of packItemsInCat) {
       if (t.checked !== newState) {
         t.checked = newState;
         for (const member of t.members) {
           member.checked = newState;
         }
-        writeDb.updatePackItemBatch(t, batch);
+        dbInvoke.updatePackItemBatch(t, batch);
       }
     }
     await batch.commit();

@@ -8,7 +8,6 @@ import { MultiCheckbox } from '~/components/shared/MultiCheckbox.tsx';
 import { PLInput } from '~/components/shared/PLInput.tsx';
 import { useDatabase } from '~/providers/DatabaseContext.ts';
 import { useNewPackItemRowId } from '~/providers/NewPackItemRowIdContext.ts';
-import { writeDb } from '~/services/database.ts';
 import { PackItem } from '~/types/PackItem.ts';
 import { MemberPackItemRow } from './MemberPackItemRow.tsx';
 import { NewPackItemRow } from './NewPackItemRow.tsx';
@@ -30,7 +29,7 @@ export function PackItemRow({
   isLastItemInCategory: boolean;
   isFirstItemInCategory?: boolean;
 }) {
-  const members = useDatabase().members;
+  const { members, dbInvoke } = useDatabase();
   const { newPackItemRowId, setNewPackItemRowId } = useNewPackItemRowId();
 
   const memberRows = useMemo(() => {
@@ -43,7 +42,7 @@ export function PackItemRow({
   }
 
   async function onUpdate(packItem: PackItem) {
-    await writeDb.updatePackItem(packItem);
+    await dbInvoke.updatePackItem(packItem);
   }
 
   async function onChangeText(name: string) {

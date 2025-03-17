@@ -1,7 +1,5 @@
 import { expect } from 'vitest';
 
-import { writeDb } from './database.ts';
-
 export function expectDatabaseCallsToThese(...newParam: DatabaseMethod[]) {
   for (const mockFn of Object.values(writeDb)) {
     if (
@@ -17,8 +15,8 @@ export function expectDatabaseCallsToThese(...newParam: DatabaseMethod[]) {
 }
 
 type DatabaseMethod =
-  | typeof writeDb.updatePackItemBatch
-  | typeof writeDb.addCategoryBatch
-  | typeof writeDb.deletePackItemBatch
-  | typeof writeDb.addPackItemBatch
-  | typeof writeDb.addMemberBatch;
+  | typeof DbInvoke.prototype.addCategory
+  | typeof dbInvoke.addCategoryBatch
+  | typeof dbInvoke.deletePackItemBatch
+  | typeof dbInvoke.addPackItemBatch
+  | typeof dbInvoke.addMemberBatch;

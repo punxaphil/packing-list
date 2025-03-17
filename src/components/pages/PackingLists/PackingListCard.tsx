@@ -7,7 +7,6 @@ import { DragHandle } from '~/components/shared/DragHandle.tsx';
 import { PLIconButton } from '~/components/shared/PLIconButton.tsx';
 import { useDatabase } from '~/providers/DatabaseContext.ts';
 import { usePackingList } from '~/providers/PackingListContext.ts';
-import { writeDb } from '~/services/database.ts';
 import { findUniqueName, rankOnTop } from '~/services/utils.ts';
 import { NamedEntity } from '~/types/NamedEntity.ts';
 import { PackItem } from '~/types/PackItem.ts';
@@ -27,7 +26,7 @@ export function PackingListCard({
 }) {
   const deleteDialog = useDisclosure();
   const navigate = useNavigate();
-  const { packingLists, groupedPackItems } = useDatabase();
+  const { packingLists, groupedPackItems, dbInvoke } = useDatabase();
   const { setPackingListId } = usePackingList();
   const toast = useToast();
 
@@ -45,11 +44,11 @@ export function PackingListCard({
   }
 
   async function confirmDelete() {
-    const batch = writeDb.initBatch();
+    const batch = dbInvoke.initBatch();
     for (const packItem of packItems) {
-      writeDb.deletePackItemBatch(packItem.id, batch);
+      dbInvoke.deletePackItemBatch(packItem.id, batch);
     }
-    writeDb.deletePackingListBatch(packingList.id, batch);
+    dbInvoke.deletePackingListBatch(packingList.id, batch);
     await batch.commit();
     const filtered = packingLists.filter((l) => l.id !== packingList.id);
     const selectedPackingList = filtered[0];
@@ -75,11 +74,18 @@ export function PackingListCard({
       throw new Error('Grouped pack items not loaded');
     }
     const name = findUniqueName(`${packingList.name} - Copy`, packingLists);
-    const batch = writeDb.initBatch();
+    const batch = dbInvoke.initBatch();
     const rank = rankOnTop(packingLists);
-    const packingListId = writeDb.addPackingListBatch(name, batch, rank);
+    const packingListId = dbInvoke.addPackingListBatch(name, batch, rank);
     for (const packItem of packItems) {
-      writeDb.addPackItemBatch(batch, packItem.name, packItem.members, packItem.category, packItem.rank, packingListId);
+      dbInvoke.addPackItemBatch(
+        batch,
+        packItem.name,
+        packItem.members,
+        packItem.category,
+        packItem.rank,
+        packingListId
+      );
     }
     await batch.commit();
     toast({

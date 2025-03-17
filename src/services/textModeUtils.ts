@@ -4,7 +4,7 @@ import { MemberPackItem } from '~/types/MemberPackItem.ts';
 import { NamedEntity } from '~/types/NamedEntity.ts';
 import { PackItem, TextPackItem } from '~/types/PackItem.ts';
 
-import { writeDb } from './database.ts';
+import { DbInvoke } from '~/services/database.ts';
 import { UNCATEGORIZED, getMemberName, rankOnTop } from './utils.ts';
 
 export function getGroupedAsText(grouped: GroupedPackItem[], members: NamedEntity[]) {
@@ -50,28 +50,34 @@ export async function updateDatabaseFromTextPackItems(
   textPackItems: TextPackItem[],
   members: NamedEntity[],
   categories: NamedEntity[],
-  packingListId: string
+  packingListId: string,
+  dbInvoke: DbInvoke
 ) {
-  const writeBatch = writeDb.initBatch();
-  deleteRemovedPackItems(textPackItems, packItems, writeBatch);
+  const writeBatch = dbInvoke.initBatch();
+  deleteRemovedPackItems(textPackItems, packItems, writeBatch, dbInvoke);
   let rank = textPackItems.length;
   for (const t of textPackItems) {
     const packItem = packItems.find((pi) => pi.name === t.name);
     if (packItem) {
-      updateExistingPackItem(t, members, packItem, categories, writeBatch, rank);
+      updateExistingPackItem(t, members, packItem, categories, writeBatch, rank, dbInvoke);
     } else {
-      addNewPackItem(t, members, categories, writeBatch, packingListId, rank);
+      addNewPackItem(t, members, categories, writeBatch, packingListId, rank, dbInvoke);
     }
     rank--;
   }
   await writeBatch.commit();
 }
 
-function deleteRemovedPackItems(textPackItems: TextPackItem[], packItems: PackItem[], writeBatch: WriteBatch) {
+function deleteRemovedPackItems(
+  textPackItems: TextPackItem[],
+  packItems: PackItem[],
+  writeBatch: WriteBatch,
+  dbInvoke: DbInvoke
+) {
   const existingPackItemNames = textPackItems.map((t) => t.name);
   for (const packItem of packItems) {
     if (!existingPackItemNames.includes(packItem.name)) {
-      writeDb.deletePackItemBatch(packItem.id, writeBatch);
+      dbInvoke.deletePackItemBatch(packItem.id, writeBatch);
     }
   }
 }
@@ -82,21 +88,28 @@ function updateExistingPackItem(
   packItem: PackItem,
   categories: NamedEntity[],
   writeBatch: WriteBatch,
-  rank: number
+  rank: number,
+  dbInvoke: DbInvoke
 ) {
-  const memberPackItems = getMemberPackItems(t, members, packItem, writeBatch);
-  const category = addCategoryIfNew(categories, t, writeBatch);
-  updatePackItemIfChanged(packItem, category, memberPackItems, rank, writeBatch);
+  const memberPackItems = getMemberPackItems(t, members, packItem, writeBatch, dbInvoke);
+  const category = addCategoryIfNew(categories, t, writeBatch, dbInvoke);
+  updatePackItemIfChanged(packItem, category, memberPackItems, rank, writeBatch, dbInvoke);
 }
 
-function getMemberPackItems(t: TextPackItem, members: NamedEntity[], packItem: PackItem, writeBatch: WriteBatch) {
+function getMemberPackItems(
+  t: TextPackItem,
+  members: NamedEntity[],
+  packItem: PackItem,
+  writeBatch: WriteBatch,
+  dbInvoke: DbInvoke
+) {
   let memberPackItems: MemberPackItem[] = [];
   if (t.members) {
     memberPackItems = [];
     for (const textPackItemMember of t.members) {
       const member = members.find((member) => member.name === textPackItemMember);
       const checked = packItem.members.find((mpi) => mpi.id === member?.id)?.checked ?? false;
-      const id = addMemberIfNew(textPackItemMember, members, member, writeBatch);
+      const id = addMemberIfNew(textPackItemMember, members, member, writeBatch, dbInvoke);
       memberPackItems.push({ id, checked });
     }
   }
@@ -107,25 +120,26 @@ function addMemberIfNew(
   textPackItemMember: string,
   members: NamedEntity[],
   member: NamedEntity | undefined,
-  writeBatch: WriteBatch
+  writeBatch: WriteBatch,
+  dbInvoke: DbInvoke
 ) {
   let id: string;
   if (member) {
     id = member.id;
   } else {
-    id = writeDb.addMemberBatch(textPackItemMember, writeBatch);
+    id = dbInvoke.addMemberBatch(textPackItemMember, writeBatch);
     members.push({ id, name: textPackItemMember, rank: members.length });
   }
   return id;
 }
 
-function addCategoryIfNew(categories: NamedEntity[], t: TextPackItem, writeBatch: WriteBatch) {
+function addCategoryIfNew(categories: NamedEntity[], t: TextPackItem, writeBatch: WriteBatch, dbInvoke: DbInvoke) {
   if (!t.category) {
     return UNCATEGORIZED;
   }
   let category = categories.find((cat) => cat.name === t.category);
   if (!category) {
-    const id = writeDb.addCategoryBatch(t.category, writeBatch);
+    const id = dbInvoke.addCategoryBatch(t.category, writeBatch);
     category = { id, name: t.category, rank: rankOnTop(categories) };
     categories.push(category);
   }
@@ -137,7 +151,8 @@ function updatePackItemIfChanged(
   category: NamedEntity,
   memberPackItems: MemberPackItem[],
   rank: number,
-  writeBatch: WriteBatch
+  writeBatch: WriteBatch,
+  dbInvoke: DbInvoke
 ) {
   const memberPackItemsChanged = JSON.stringify(memberPackItems) !== JSON.stringify(packItem.members);
   if (category.id !== packItem.category || memberPackItemsChanged || rank !== packItem.rank) {
@@ -145,7 +160,7 @@ function updatePackItemIfChanged(
     updated.category = category.id;
     updated.members = memberPackItems;
     updated.rank = rank;
-    writeDb.updatePackItemBatch(updated, writeBatch);
+    dbInvoke.updatePackItemBatch(updated, writeBatch);
   }
 }
 
@@ -155,13 +170,14 @@ function addNewPackItem(
   categories: NamedEntity[],
   writeBatch: WriteBatch,
   packingListId: string,
-  rank: number
+  rank: number,
+  dbInvoke: DbInvoke
 ) {
   const memberPackItems = [];
   if (t.members) {
     for (const textPackItemMember of t.members) {
       const member = members.find((member) => member.name === textPackItemMember);
-      const id = addMemberIfNew(textPackItemMember, members, member, writeBatch);
+      const id = addMemberIfNew(textPackItemMember, members, member, writeBatch, dbInvoke);
       memberPackItems.push({ id, checked: false });
     }
   }
@@ -169,10 +185,10 @@ function addNewPackItem(
   if (t.category) {
     category = categories.find((cat) => cat.name === t.category);
     if (!category) {
-      const newId = writeDb.addCategoryBatch(t.category, writeBatch);
+      const newId = dbInvoke.addCategoryBatch(t.category, writeBatch);
       category = { id: newId, name: t.category, rank: rankOnTop(categories) };
       categories.push(category);
     }
   }
-  writeDb.addPackItemBatch(writeBatch, t.name, memberPackItems, category?.id ?? '', rank, packingListId);
+  dbInvoke.addPackItemBatch(writeBatch, t.name, memberPackItems, category?.id ?? '', rank, packingListId);
 }

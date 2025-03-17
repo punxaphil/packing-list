@@ -6,7 +6,6 @@ import { TbCategoryPlus } from 'react-icons/tb';
 import { DeleteDialog } from '~/components/shared/DeleteDialog.tsx';
 import { useDatabase } from '~/providers/DatabaseContext.ts';
 import { useNewPackItemRowId } from '~/providers/NewPackItemRowIdContext.ts';
-import { writeDb } from '~/services/database.ts';
 import { NamedEntity } from '~/types/NamedEntity.ts';
 import { PackItem } from '~/types/PackItem.ts';
 import { ColorPicker } from './ColorPicker.tsx';
@@ -21,7 +20,7 @@ export function CategoryMenu({
   category: NamedEntity;
 }) {
   const { setNewPackItemRowId } = useNewPackItemRowId();
-  const { packingLists } = useDatabase();
+  const { packingLists, dbInvoke } = useDatabase();
   const copyDisclosure = useDisclosure();
   const deleteDisclosure = useDisclosure();
   const colorDisclosure = useDisclosure();
@@ -31,10 +30,10 @@ export function CategoryMenu({
   }
 
   async function onConfirmDelete() {
-    const batch = writeDb.initBatch();
+    const batch = dbInvoke.initBatch();
     for (const packItem of packItemsInCat) {
       if (packItem.category === category.id) {
-        writeDb.deletePackItemBatch(packItem.id, batch);
+        dbInvoke.deletePackItemBatch(packItem.id, batch);
       }
     }
     await batch.commit();
