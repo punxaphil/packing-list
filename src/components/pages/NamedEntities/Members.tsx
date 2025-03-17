@@ -1,15 +1,15 @@
 import { NamedEntities } from '~/components/pages/NamedEntities/NamedEntities.tsx';
-import { useFirebase } from '~/providers/FirebaseContext.ts';
-import { firebase } from '~/services/firebase.ts';
+import { useDatabase } from '~/providers/DatabaseContext.ts';
+import { writeDb } from '~/services/database.ts';
 
 export function Members() {
   return (
     <NamedEntities
-      namedEntities={useFirebase().members}
+      namedEntities={useDatabase().members}
       type="members"
-      dbAdd={firebase.addMember}
-      dbUpdate={firebase.updateMembers}
-      dbDelete={firebase.deleteMember}
+      dbAdd={writeDb.addMember}
+      dbUpdate={writeDb.updateMembers}
+      dbDelete={writeDb.deleteMember}
     />
   );
 }

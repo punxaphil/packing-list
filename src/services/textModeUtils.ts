@@ -4,7 +4,7 @@ import { MemberPackItem } from '~/types/MemberPackItem.ts';
 import { NamedEntity } from '~/types/NamedEntity.ts';
 import { PackItem, TextPackItem } from '~/types/PackItem.ts';
 
-import { firebase } from './firebase.ts';
+import { writeDb } from './database.ts';
 import { UNCATEGORIZED, getMemberName, rankOnTop } from './utils.ts';
 
 export function getGroupedAsText(grouped: GroupedPackItem[], members: NamedEntity[]) {
@@ -45,14 +45,14 @@ export function createTextPackItemsFromText(groupedAsText: string): TextPackItem
   return items;
 }
 
-export async function updateFirebaseFromTextPackItems(
+export async function updateDatabaseFromTextPackItems(
   packItems: PackItem[],
   textPackItems: TextPackItem[],
   members: NamedEntity[],
   categories: NamedEntity[],
   packingListId: string
 ) {
-  const writeBatch = firebase.initBatch();
+  const writeBatch = writeDb.initBatch();
   deleteRemovedPackItems(textPackItems, packItems, writeBatch);
   let rank = textPackItems.length;
   for (const t of textPackItems) {
@@ -71,7 +71,7 @@ function deleteRemovedPackItems(textPackItems: TextPackItem[], packItems: PackIt
   const existingPackItemNames = textPackItems.map((t) => t.name);
   for (const packItem of packItems) {
     if (!existingPackItemNames.includes(packItem.name)) {
-      firebase.deletePackItemBatch(packItem.id, writeBatch);
+      writeDb.deletePackItemBatch(packItem.id, writeBatch);
     }
   }
 }
@@ -113,7 +113,7 @@ function addMemberIfNew(
   if (member) {
     id = member.id;
   } else {
-    id = firebase.addMemberBatch(textPackItemMember, writeBatch);
+    id = writeDb.addMemberBatch(textPackItemMember, writeBatch);
     members.push({ id, name: textPackItemMember, rank: members.length });
   }
   return id;
@@ -125,7 +125,7 @@ function addCategoryIfNew(categories: NamedEntity[], t: TextPackItem, writeBatch
   }
   let category = categories.find((cat) => cat.name === t.category);
   if (!category) {
-    const id = firebase.addCategoryBatch(t.category, writeBatch);
+    const id = writeDb.addCategoryBatch(t.category, writeBatch);
     category = { id, name: t.category, rank: rankOnTop(categories) };
     categories.push(category);
   }
@@ -145,7 +145,7 @@ function updatePackItemIfChanged(
     updated.category = category.id;
     updated.members = memberPackItems;
     updated.rank = rank;
-    firebase.updatePackItemBatch(updated, writeBatch);
+    writeDb.updatePackItemBatch(updated, writeBatch);
   }
 }
 
@@ -169,10 +169,10 @@ function addNewPackItem(
   if (t.category) {
     category = categories.find((cat) => cat.name === t.category);
     if (!category) {
-      const newId = firebase.addCategoryBatch(t.category, writeBatch);
+      const newId = writeDb.addCategoryBatch(t.category, writeBatch);
       category = { id: newId, name: t.category, rank: rankOnTop(categories) };
       categories.push(category);
     }
   }
-  firebase.addPackItemBatch(writeBatch, t.name, memberPackItems, category?.id ?? '', rank, packingListId);
+  writeDb.addPackItemBatch(writeBatch, t.name, memberPackItems, category?.id ?? '', rank, packingListId);
 }

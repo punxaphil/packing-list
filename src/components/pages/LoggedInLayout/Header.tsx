@@ -2,7 +2,7 @@ import { Flex, HStack, Input, Stack } from '@chakra-ui/react';
 import { useMemo, useState } from 'react';
 import { ProfileAvatar } from '~/components/auth/ProfileAvatar.tsx';
 import { usePackingList } from '~/providers/PackingListContext.ts';
-import { firebase } from '~/services/firebase.ts';
+import { writeDb } from '~/services/database.ts';
 import { NavButton } from './NavButton.tsx';
 
 export function Header() {
@@ -15,7 +15,7 @@ export function Header() {
   async function savePackingListName(name: string) {
     setPackingListName(name);
     packingList.name = name;
-    await firebase.updatePackingList(packingList);
+    await writeDb.updatePackingList(packingList);
   }
 
   return (

@@ -4,9 +4,9 @@ import { AiOutlineCopy, AiOutlineDelete } from 'react-icons/ai';
 import { IoColorPaletteOutline } from 'react-icons/io5';
 import { TbCategoryPlus } from 'react-icons/tb';
 import { DeleteDialog } from '~/components/shared/DeleteDialog.tsx';
-import { useFirebase } from '~/providers/FirebaseContext.ts';
+import { useDatabase } from '~/providers/DatabaseContext.ts';
 import { useNewPackItemRowId } from '~/providers/NewPackItemRowIdContext.ts';
-import { firebase } from '~/services/firebase.ts';
+import { writeDb } from '~/services/database.ts';
 import { NamedEntity } from '~/types/NamedEntity.ts';
 import { PackItem } from '~/types/PackItem.ts';
 import { ColorPicker } from './ColorPicker.tsx';
@@ -21,7 +21,7 @@ export function CategoryMenu({
   category: NamedEntity;
 }) {
   const { setNewPackItemRowId } = useNewPackItemRowId();
-  const { packingLists } = useFirebase();
+  const { packingLists } = useDatabase();
   const copyDisclosure = useDisclosure();
   const deleteDisclosure = useDisclosure();
   const colorDisclosure = useDisclosure();
@@ -31,10 +31,10 @@ export function CategoryMenu({
   }
 
   async function onConfirmDelete() {
-    const batch = firebase.initBatch();
+    const batch = writeDb.initBatch();
     for (const packItem of packItemsInCat) {
       if (packItem.category === category.id) {
-        firebase.deletePackItemBatch(packItem.id, batch);
+        writeDb.deletePackItemBatch(packItem.id, batch);
       }
     }
     await batch.commit();

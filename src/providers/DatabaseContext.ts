@@ -5,7 +5,7 @@ import { Image } from '~/types/Image.ts';
 import { NamedEntity } from '~/types/NamedEntity.ts';
 import { PackItem } from '~/types/PackItem.ts';
 
-interface FirebaseData {
+interface ContextType {
   members: NamedEntity[];
   packItems: PackItem[];
   categories: NamedEntity[];
@@ -23,12 +23,12 @@ interface FirebaseData {
   }: { showTheseCategories: string[]; showTheseMembers: string[]; showTheseStates: string[] }) => void;
 }
 
-export const FirebaseContext = createContext<FirebaseData | undefined>(undefined);
+export const DatabaseContext = createContext<ContextType | undefined>(undefined);
 
-export function useFirebase() {
-  const firebaseContext = useContext(FirebaseContext);
-  if (firebaseContext === undefined) {
-    throw new Error('useFirebase must be used within a FirebaseContext.Provider');
+export function useDatabase() {
+  const context = useContext(DatabaseContext);
+  if (context === undefined) {
+    throw new Error('useDatabase must be used within a DatabaseContext.Provider');
   }
-  return firebaseContext;
+  return context;
 }

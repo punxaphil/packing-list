@@ -1,5 +1,5 @@
 import { ReactNode, useEffect, useState } from 'react';
-import { firebase } from '~/services/firebase.ts';
+import { writeDb } from '~/services/database.ts';
 import { NamedEntity } from '~/types/NamedEntity.ts';
 import { PackingListContext } from './PackingListContext.ts';
 
@@ -12,20 +12,20 @@ export function PackingListProvider({ children }: { children: ReactNode }) {
     (async () => {
       let initialId = localStorage.getItem(LOCAL_STORAGE_KEY) as string;
       if (initialId) {
-        const list = await firebase.getPackingList(initialId);
+        const list = await writeDb.getPackingList(initialId);
         if (list) {
           setPackingList(list);
           return;
         }
       }
-      const list = await firebase.getFirstPackingList();
+      const list = await writeDb.getFirstPackingList();
       if (list) {
         initialId = list.id;
         setPackingList(list);
       } else {
         const name = 'My Packing List';
         const rank = 0;
-        initialId = await firebase.addPackingList(name, rank);
+        initialId = await writeDb.addPackingList(name, rank);
         setPackingList({ id: initialId, name, rank });
       }
       localStorage.setItem(LOCAL_STORAGE_KEY, initialId);
@@ -33,7 +33,7 @@ export function PackingListProvider({ children }: { children: ReactNode }) {
   }, []);
 
   async function onIdChanged(id: string) {
-    const list = await firebase.getPackingList(id);
+    const list = await writeDb.getPackingList(id);
     setPackingList(list);
     localStorage.setItem(LOCAL_STORAGE_KEY, id);
   }

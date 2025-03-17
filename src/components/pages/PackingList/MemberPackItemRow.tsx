@@ -1,6 +1,6 @@
 import { Checkbox, Flex, Spacer } from '@chakra-ui/react';
 import { PLInput } from '~/components/shared/PLInput.tsx';
-import { firebase } from '~/services/firebase.ts';
+import { writeDb } from '~/services/database.ts';
 import { allChecked } from '~/services/utils.ts';
 import { MemberPackItem } from '~/types/MemberPackItem.ts';
 import { NamedEntity } from '~/types/NamedEntity.ts';
@@ -20,13 +20,13 @@ export function MemberPackItemRow({
     if (find) {
       find.checked = !find.checked;
       parent.checked = allChecked(parent);
-      await firebase.updatePackItem(parent);
+      await writeDb.updatePackItem(parent);
     }
   }
 
   async function onSave(name: string) {
     member.name = name;
-    await firebase.updateMembers(member);
+    await writeDb.updateMembers(member);
   }
 
   return (

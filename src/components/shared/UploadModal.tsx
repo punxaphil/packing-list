@@ -15,8 +15,8 @@ import {
   Switch,
 } from '@chakra-ui/react';
 import { ChangeEvent, useState } from 'react';
-import { useFirebase } from '~/providers/FirebaseContext.ts';
-import { firebase } from '~/services/firebase.ts';
+import { useDatabase } from '~/providers/DatabaseContext.ts';
+import { writeDb } from '~/services/database.ts';
 import { cropImage, resizeImageFromFile } from '~/services/imageUtils.ts';
 import { Image } from '~/types/Image.ts';
 
@@ -35,7 +35,7 @@ export function UploadModal({
   onClose: () => void;
   imageFinder: (image: Image) => boolean;
 }) {
-  const images = useFirebase().images;
+  const images = useDatabase().images;
   const entityImage = images.find(imageFinder);
   const [fileUrl, setFileUrl] = useState(entityImage?.url);
   const [pasteImage, setPasteImage] = useState(false);
@@ -58,9 +58,9 @@ export function UploadModal({
   async function handleUpload() {
     if (fileUrl) {
       if (entityImage) {
-        await firebase.updateImage(typeId, fileUrl);
+        await writeDb.updateImage(typeId, fileUrl);
       } else {
-        await firebase.addImage(type, typeId, fileUrl);
+        await writeDb.addImage(type, typeId, fileUrl);
       }
     }
     onClose();
@@ -68,7 +68,7 @@ export function UploadModal({
 
   async function handleDelete() {
     if (entityImage) {
-      await firebase.deleteImage(entityImage.id);
+      await writeDb.deleteImage(entityImage.id);
     }
     resetAndClose();
   }
@@ -128,7 +128,7 @@ export function UploadModal({
               ) : (
                 fileUrl === undefined && <Input type="file" onChange={onFileSelected} accept="/image/*" p="1" />
               )}
-              {fileUrl && <img src={fileUrl} alt="firebase" />}
+              {fileUrl && <img src={fileUrl} alt="uploaded" />}
             </Stack>
           </ModalBody>
 

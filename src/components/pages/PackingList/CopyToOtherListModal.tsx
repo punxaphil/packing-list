@@ -8,9 +8,9 @@ import {
   ModalOverlay,
   useToast,
 } from '@chakra-ui/react';
-import { useFirebase } from '~/providers/FirebaseContext.ts';
+import { useDatabase } from '~/providers/DatabaseContext.ts';
 import { usePackingList } from '~/providers/PackingListContext.ts';
-import { firebase } from '~/services/firebase.ts';
+import { writeDb } from '~/services/database.ts';
 import { COLUMN_COLORS } from '~/types/Column.ts';
 import { NamedEntity } from '~/types/NamedEntity.ts';
 import { PackItem } from '~/types/PackItem.ts';
@@ -28,7 +28,7 @@ export function CopyToOtherListModal({
   category?: NamedEntity;
   packItem?: PackItem;
 }) {
-  const packingLists = useFirebase().packingLists;
+  const packingLists = useDatabase().packingLists;
   const { packingList } = usePackingList();
   const toast = useToast();
 
@@ -41,7 +41,7 @@ export function CopyToOtherListModal({
       });
     }
     if (packItem) {
-      await firebase.addPackItem(packItem.name, packItem.members, packItem.category, packingList.id, packItem.rank);
+      await writeDb.addPackItem(packItem.name, packItem.members, packItem.category, packingList.id, packItem.rank);
       toast({
         title: `Pack item ${packItem.name} copied to ${packingList.name}`,
         status: 'success',
@@ -51,10 +51,10 @@ export function CopyToOtherListModal({
   }
 
   async function copyCategory(packItemsInCat: PackItem[], category: NamedEntity, packingList: NamedEntity) {
-    const batch = firebase.initBatch();
+    const batch = writeDb.initBatch();
     for (const packItem of packItemsInCat) {
       if (packItem.category === category.id) {
-        firebase.addPackItemBatch(
+        writeDb.addPackItemBatch(
           batch,
           packItem.name,
           packItem.members,

@@ -3,19 +3,19 @@ import { useState } from 'react';
 import { PackItemsTextMode } from '~/components/pages/PackingList/PackItemsTextMode.tsx';
 import { PackingListColumns } from '~/components/pages/PackingList/PackingListColumns.tsx';
 import { PackingListControls } from '~/components/pages/PackingList/PackingListControls.tsx';
-import { useFirebase } from '~/providers/FirebaseContext.ts';
+import { useDatabase } from '~/providers/DatabaseContext.ts';
 import { usePackingList } from '~/providers/PackingListContext.ts';
-import { firebase } from '~/services/firebase.ts';
+import { writeDb } from '~/services/database.ts';
 
 export function PackingList() {
-  const { packItems, groupedPackItems } = useFirebase();
+  const { packItems, groupedPackItems } = useDatabase();
   const [filteredMembers, setFilteredMembers] = useState<string[]>([]);
   const [textMode, setTextMode] = useState(false);
   const { packingList } = usePackingList();
   const width = useBreakpointValue({ base: 320, sm: 400, md: 650, lg: 970 });
 
   async function addFirstPackItem() {
-    await firebase.addPackItem('Toothbrush', [], '', packingList.id, 0);
+    await writeDb.addPackItem('Toothbrush', [], '', packingList.id, 0);
   }
 
   return (

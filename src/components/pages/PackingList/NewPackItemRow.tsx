@@ -1,10 +1,10 @@
 import { Input } from '@chakra-ui/react';
 import { ChangeEvent, useState } from 'react';
 import { KeyboardEvent } from 'react';
-import { useFirebase } from '~/providers/FirebaseContext.ts';
+import { useDatabase } from '~/providers/DatabaseContext.ts';
 import { useNewPackItemRowId } from '~/providers/NewPackItemRowIdContext.ts';
 import { usePackingList } from '~/providers/PackingListContext.ts';
-import { firebase } from '~/services/firebase.ts';
+import { writeDb } from '~/services/database.ts';
 import { handleEnter, rankOnTop } from '~/services/utils.ts';
 import { PackItem } from '~/types/PackItem.ts';
 import { PackItemRowWrapper } from './PackItemRowWrapper.tsx';
@@ -21,7 +21,7 @@ export function NewPackItemRow({
   const [newRowText, setNewRowText] = useState('');
   const { packingList } = usePackingList();
   const { setNewPackItemRowId } = useNewPackItemRowId();
-  const packItems = useFirebase().packItems;
+  const packItems = useDatabase().packItems;
 
   async function onChange(e: ChangeEvent<HTMLInputElement>) {
     setNewRowText(e.target.value);
@@ -30,12 +30,12 @@ export function NewPackItemRow({
   async function save() {
     if (newRowText) {
       let rank: number;
-      const batch = firebase.initBatch();
+      const batch = writeDb.initBatch();
       if (packItemToPlaceNewItemAfter) {
         rank = packItemToPlaceNewItemAfter.rank;
         for (const packItem of packItems) {
           packItem.rank = packItem.rank + 1;
-          firebase.updatePackItemBatch(packItem, batch);
+          writeDb.updatePackItemBatch(packItem, batch);
           if (packItem.id === packItemToPlaceNewItemAfter.id) {
             break;
           }
@@ -43,7 +43,7 @@ export function NewPackItemRow({
       } else {
         rank = rankOnTop(packItems);
       }
-      const newId = firebase.addPackItemBatch(batch, newRowText, [], categoryId, rank, packingList.id);
+      const newId = writeDb.addPackItemBatch(batch, newRowText, [], categoryId, rank, packingList.id);
       setNewPackItemRowId(newId);
       await batch.commit();
     }

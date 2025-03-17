@@ -6,9 +6,9 @@ import { PackItemMenu } from '~/components/pages/PackingList/PackItemMenu.tsx';
 import { DragHandle } from '~/components/shared/DragHandle.tsx';
 import { MultiCheckbox } from '~/components/shared/MultiCheckbox.tsx';
 import { PLInput } from '~/components/shared/PLInput.tsx';
-import { useFirebase } from '~/providers/FirebaseContext.ts';
+import { useDatabase } from '~/providers/DatabaseContext.ts';
 import { useNewPackItemRowId } from '~/providers/NewPackItemRowIdContext.ts';
-import { firebase } from '~/services/firebase.ts';
+import { writeDb } from '~/services/database.ts';
 import { PackItem } from '~/types/PackItem.ts';
 import { MemberPackItemRow } from './MemberPackItemRow.tsx';
 import { NewPackItemRow } from './NewPackItemRow.tsx';
@@ -30,7 +30,7 @@ export function PackItemRow({
   isLastItemInCategory: boolean;
   isFirstItemInCategory?: boolean;
 }) {
-  const members = useFirebase().members;
+  const members = useDatabase().members;
   const { newPackItemRowId, setNewPackItemRowId } = useNewPackItemRowId();
 
   const memberRows = useMemo(() => {
@@ -43,7 +43,7 @@ export function PackItemRow({
   }
 
   async function onUpdate(packItem: PackItem) {
-    await firebase.updatePackItem(packItem);
+    await writeDb.updatePackItem(packItem);
   }
 
   async function onChangeText(name: string) {

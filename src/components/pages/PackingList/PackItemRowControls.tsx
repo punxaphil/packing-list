@@ -3,8 +3,8 @@ import { AiOutlineCopy, AiOutlineDelete, AiOutlineUsergroupAdd } from 'react-ico
 import { TbStatusChange } from 'react-icons/tb';
 import { IconSelect } from '~/components/shared/IconSelect.tsx';
 import { PLIconButton } from '~/components/shared/PLIconButton.tsx';
-import { useFirebase } from '~/providers/FirebaseContext.ts';
-import { firebase } from '~/services/firebase.ts';
+import { useDatabase } from '~/providers/DatabaseContext.ts';
+import { writeDb } from '~/services/database.ts';
 import { PackItem } from '~/types/PackItem.ts';
 
 const ICON_SIZE = 'sm';
@@ -16,7 +16,7 @@ export function PackItemRowControls({
   packItem: PackItem;
   onUpdate: (packItem: PackItem) => Promise<void>;
 }) {
-  const { packingLists, categories, members } = useFirebase();
+  const { packingLists, categories, members } = useDatabase();
   const toast = useToast();
 
   async function setCategory(id: string) {
@@ -37,7 +37,7 @@ export function PackItemRowControls({
   }
 
   async function copyToOtherList(id: string, name: string) {
-    await firebase.addPackItem(packItem.name, packItem.members, packItem.category, id, packItem.rank);
+    await writeDb.addPackItem(packItem.name, packItem.members, packItem.category, id, packItem.rank);
     toast({
       title: `${packItem.name} copied to ${name}`,
       status: 'success',
@@ -45,7 +45,7 @@ export function PackItemRowControls({
   }
 
   async function deleteItem() {
-    await firebase.deletePackItem(packItem.id);
+    await writeDb.deletePackItem(packItem.id);
   }
 
   return (

@@ -1,6 +1,6 @@
 import { Outlet } from 'react-router';
 import { Header } from '~/components/pages/LoggedInLayout/Header.tsx';
-import { FirebaseProvider } from '~/providers/FirebaseProvider.tsx';
+import { DatabaseProvider } from '~/providers/DatabaseProvider.tsx';
 import { useFullscreenMode } from '~/providers/FullscreenModeContext.ts';
 import { PackingListProvider } from '~/providers/PackingListProvider.tsx';
 
@@ -8,10 +8,10 @@ export function LoggedInLayout() {
   const { fullscreenMode } = useFullscreenMode();
   return (
     <PackingListProvider>
-      <FirebaseProvider>
+      <DatabaseProvider>
         {!fullscreenMode && <Header />}
         <Outlet />
-      </FirebaseProvider>
+      </DatabaseProvider>
     </PackingListProvider>
   );
 }

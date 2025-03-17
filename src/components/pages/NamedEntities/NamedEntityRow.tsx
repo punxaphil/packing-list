@@ -15,8 +15,8 @@ import { AiOutlineCloudUpload, AiOutlineDelete } from 'react-icons/ai';
 import { DragHandle } from '~/components/shared/DragHandle.tsx';
 import { PLIconButton } from '~/components/shared/PLIconButton.tsx';
 import { UploadModal } from '~/components/shared/UploadModal.tsx';
+import { useDatabase } from '~/providers/DatabaseContext.ts';
 import { useError } from '~/providers/ErrorContext.ts';
-import { useFirebase } from '~/providers/FirebaseContext.ts';
 import { NamedEntity } from '~/types/NamedEntity.ts';
 
 export function NamedEntityRow({
@@ -50,7 +50,7 @@ export function NamedEntityRow({
     })().catch(setError);
   }
 
-  const images = useFirebase().images;
+  const images = useDatabase().images;
   const image = images.find((t) => t.type === type && t.typeId === namedEntity.id);
   const imageUrl = image?.url;
   return (
