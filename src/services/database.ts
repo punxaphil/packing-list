@@ -99,6 +99,16 @@ export const readDb = {
     }
   },
 };
+
+interface HistoryItem {
+  type: 'deleted';
+  packItem: PackItem;
+}
+
+const changeHistory: HistoryItem[] = [];
+
+export const hasChangeHistory = () => changeHistory.length > 0;
+
 export const writeDb = {
   addPackItem: async (
     name: string,
@@ -113,8 +123,9 @@ export const writeDb = {
   updatePackItem: async (packItem: PackItem) => {
     await update(PACK_ITEMS_KEY, packItem.id, packItem);
   },
-  deletePackItem: async (id: string) => {
-    await del(PACK_ITEMS_KEY, id);
+  deletePackItem: async (packItem: PackItem) => {
+    await del(PACK_ITEMS_KEY, packItem.id);
+    changeHistory.push({ type: 'deleted', packItem });
   },
   addMember: async (name: string): Promise<string> => {
     const docRef = await add(MEMBERS_KEY, { name });
@@ -261,6 +272,20 @@ export const writeDb = {
     const allPackItems = fromQueryResult<PackItem>(await getDocs(q));
     sortEntities(allPackItems);
     return allPackItems;
+  },
+  undo: async () => {
+    const last = changeHistory.pop();
+    if (!last) {
+      return;
+    }
+    if (last.type === 'deleted') {
+      if (last.packItem) {
+        const docRef = await add(PACK_ITEMS_KEY, last.packItem);
+        if (docRef) {
+          await update(PACK_ITEMS_KEY, docRef.id, { ...last.packItem, id: docRef.id });
+        }
+      }
+    }
   },
 };
 

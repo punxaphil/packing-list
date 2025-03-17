@@ -1,9 +1,10 @@
-import { Flex, HStack, Link, Spacer } from '@chakra-ui/react';
-import { AiOutlineEdit, AiOutlineFullscreen, AiOutlineFullscreenExit } from 'react-icons/ai';
+import { HStack, Spacer } from '@chakra-ui/react';
+import { AiOutlineEdit, AiOutlineFullscreen, AiOutlineFullscreenExit, AiOutlineUndo } from 'react-icons/ai';
 import { Filter } from '~/components/pages/PackingList/Filter.tsx';
 import { PLIconButton } from '~/components/shared/PLIconButton.tsx';
 import { useDatabase } from '~/providers/DatabaseContext.ts';
 import { useFullscreenMode } from '~/providers/FullscreenModeContext.ts';
+import { hasChangeHistory, writeDb } from '~/services/database.ts';
 
 export function PackingListControls({
   onTextMode,
@@ -30,15 +31,16 @@ export function PackingListControls({
     onTextMode();
   }
 
+  async function onUndo() {
+    await writeDb.undo();
+  }
+
   return (
     <HStack justifyContent="space-between" alignItems="center">
       <Filter onFilter={onFilter} />
       <Spacer />
-      <Link onClick={onEditClick} variant="outline" m="3">
-        <Flex alignItems="center" gap="1">
-          <AiOutlineEdit />
-        </Flex>
-      </Link>
+      <PLIconButton aria-label="Undo" icon={<AiOutlineUndo />} onClick={onUndo} disabled={!hasChangeHistory()} />
+      <PLIconButton aria-label="Edit" icon={<AiOutlineEdit />} onClick={onEditClick} />
       <PLIconButton
         aria-label="Full screen"
         icon={fullscreenMode ? <AiOutlineFullscreenExit /> : <AiOutlineFullscreen />}
