@@ -23,7 +23,7 @@ export function PackItemMenu({
   const membersDisclosure = useDisclosure();
 
   async function onConfirmDelete() {
-    await writeDb.deletePackItem(packItem.id);
+    await writeDb.deletePackItem(packItem);
   }
 
   return (
