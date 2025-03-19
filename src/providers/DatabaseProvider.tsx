@@ -4,7 +4,7 @@ import { ReactNode, useEffect, useState } from 'react';
 import { CHECKED_FILTER_STATE, UNCHECKED_FILTER_STATE } from '~/components/pages/PackingList/Filter.tsx';
 import { createColumns, flattenGroupedPackItems } from '~/components/pages/PackingList/packingListUtils.ts';
 import { TextProgress } from '~/components/shared/TextProgress.tsx';
-import { getDatabase } from '~/services/database.ts';
+import { Database } from '~/services/database.ts';
 import { groupByCategories, sortAll } from '~/services/utils.ts';
 import { ColumnList } from '~/types/Column.ts';
 import { GroupedPackItem } from '~/types/GroupedPackItem.ts';
@@ -29,7 +29,7 @@ export function DatabaseProvider({ children }: { children: ReactNode }) {
   } | null>(null);
   const nbrOfColumns: 1 | 2 | 3 = useBreakpointValue({ base: 1, sm: 1, md: 2, lg: 3 }) ?? 3;
   const [changeHistory, setChangeHistory] = useState<HistoryItem[]>([]);
-  const db = getDatabase(changeHistory, setChangeHistory);
+  const db = new Database(changeHistory, setChangeHistory, packingList.id);
   useEffect(() => {
     (async () => {
       const userId = getAuth().currentUser?.uid;
@@ -37,14 +37,7 @@ export function DatabaseProvider({ children }: { children: ReactNode }) {
         throw new Error('No user logged in');
       }
       if (packingList) {
-        await db.getUserCollectionsAndSubscribe(
-          setMembers,
-          setCategories,
-          setPackItems,
-          setImages,
-          setPackingLists,
-          packingList.id
-        );
+        await db.getUserCollectionsAndSubscribe(setMembers, setCategories, setPackItems, setImages, setPackingLists);
       }
     })().catch(console.error);
   }, [packingList, db]);

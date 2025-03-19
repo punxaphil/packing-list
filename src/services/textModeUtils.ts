@@ -4,7 +4,7 @@ import { MemberPackItem } from '~/types/MemberPackItem.ts';
 import { NamedEntity } from '~/types/NamedEntity.ts';
 import { PackItem, TextPackItem } from '~/types/PackItem.ts';
 
-import { DbInvoke } from '~/services/database.ts';
+import { Database } from '~/services/database.ts';
 import { UNCATEGORIZED, getMemberName, rankOnTop } from './utils.ts';
 
 export function getGroupedAsText(grouped: GroupedPackItem[], members: NamedEntity[]) {
@@ -51,7 +51,7 @@ export async function updateDatabaseFromTextPackItems(
   members: NamedEntity[],
   categories: NamedEntity[],
   packingListId: string,
-  dbInvoke: DbInvoke
+  dbInvoke: Database
 ) {
   const writeBatch = dbInvoke.initBatch();
   deleteRemovedPackItems(textPackItems, packItems, writeBatch, dbInvoke);
@@ -72,7 +72,7 @@ function deleteRemovedPackItems(
   textPackItems: TextPackItem[],
   packItems: PackItem[],
   writeBatch: WriteBatch,
-  dbInvoke: DbInvoke
+  dbInvoke: Database
 ) {
   const existingPackItemNames = textPackItems.map((t) => t.name);
   for (const packItem of packItems) {
@@ -89,7 +89,7 @@ function updateExistingPackItem(
   categories: NamedEntity[],
   writeBatch: WriteBatch,
   rank: number,
-  dbInvoke: DbInvoke
+  dbInvoke: Database
 ) {
   const memberPackItems = getMemberPackItems(t, members, packItem, writeBatch, dbInvoke);
   const category = addCategoryIfNew(categories, t, writeBatch, dbInvoke);
@@ -101,7 +101,7 @@ function getMemberPackItems(
   members: NamedEntity[],
   packItem: PackItem,
   writeBatch: WriteBatch,
-  dbInvoke: DbInvoke
+  dbInvoke: Database
 ) {
   let memberPackItems: MemberPackItem[] = [];
   if (t.members) {
@@ -121,7 +121,7 @@ function addMemberIfNew(
   members: NamedEntity[],
   member: NamedEntity | undefined,
   writeBatch: WriteBatch,
-  dbInvoke: DbInvoke
+  dbInvoke: Database
 ) {
   let id: string;
   if (member) {
@@ -133,7 +133,7 @@ function addMemberIfNew(
   return id;
 }
 
-function addCategoryIfNew(categories: NamedEntity[], t: TextPackItem, writeBatch: WriteBatch, dbInvoke: DbInvoke) {
+function addCategoryIfNew(categories: NamedEntity[], t: TextPackItem, writeBatch: WriteBatch, dbInvoke: Database) {
   if (!t.category) {
     return UNCATEGORIZED;
   }
@@ -152,7 +152,7 @@ function updatePackItemIfChanged(
   memberPackItems: MemberPackItem[],
   rank: number,
   writeBatch: WriteBatch,
-  dbInvoke: DbInvoke
+  dbInvoke: Database
 ) {
   const memberPackItemsChanged = JSON.stringify(memberPackItems) !== JSON.stringify(packItem.members);
   if (category.id !== packItem.category || memberPackItemsChanged || rank !== packItem.rank) {
@@ -171,7 +171,7 @@ function addNewPackItem(
   writeBatch: WriteBatch,
   packingListId: string,
   rank: number,
-  dbInvoke: DbInvoke
+  dbInvoke: Database
 ) {
   const memberPackItems = [];
   if (t.members) {

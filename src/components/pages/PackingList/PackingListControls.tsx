@@ -4,7 +4,6 @@ import { Filter } from '~/components/pages/PackingList/Filter.tsx';
 import { PLIconButton } from '~/components/shared/PLIconButton.tsx';
 import { useDatabase } from '~/providers/DatabaseContext.ts';
 import { useFullscreenMode } from '~/providers/FullscreenModeContext.ts';
-import { hasChangeHistory } from '~/services/database.ts';
 
 export function PackingListControls({
   onTextMode,
@@ -13,7 +12,7 @@ export function PackingListControls({
   onTextMode: () => void;
   onMemberFilter: (memberIds: string[]) => void;
 }) {
-  const setFilter = useDatabase().setFilter;
+  const { setFilter, dbInvoke, changeHistory } = useDatabase();
   const { fullscreenMode, setFullscreenMode } = useFullscreenMode();
 
   function onFilter(showTheseCategories: string[], showTheseMembers: string[], showTheseStates: string[]) {
@@ -39,7 +38,7 @@ export function PackingListControls({
     <HStack justifyContent="space-between" alignItems="center">
       <Filter onFilter={onFilter} />
       <Spacer />
-      <PLIconButton aria-label="Undo" icon={<AiOutlineUndo />} onClick={onUndo} disabled={!hasChangeHistory()} />
+      <PLIconButton aria-label="Undo" icon={<AiOutlineUndo />} onClick={onUndo} disabled={changeHistory.length === 0} />
       <PLIconButton aria-label="Edit" icon={<AiOutlineEdit />} onClick={onEditClick} />
       <PLIconButton
         aria-label="Full screen"
