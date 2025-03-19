@@ -50,259 +50,239 @@ const USERS_KEY = 'users';
 const IMAGES_KEY = 'images';
 const PACKING_LISTS_KEY = 'packingLists';
 
-const subs: (() => void)[] = [];
+export class Database {
+  private readonly changeHistory: HistoryItem[];
+  private readonly setChangeHistory: (changeHistory: HistoryItem[]) => void;
+  private subs: (() => void)[] = [];
+  private readonly userId;
+  private readonly memberQuery;
+  private readonly itemsQuery;
+  private readonly categoriesQuery;
+  private readonly imagesQuery;
+  private readonly packingListsQuery;
 
-function unsubscribeAll() {
-  for (const unsubscribe of subs) {
-    unsubscribe();
-  }
-  subs.length = 0;
-}
-
-function getUserId() {
-  const userId = getAuth().currentUser?.uid;
-  if (!userId) {
-    throw new Error('No user logged in');
-  }
-  return userId;
-}
-
-function fromQueryResult<K>(res: QuerySnapshot) {
-  return res.docs.map((doc: QueryDocumentSnapshot) => ({ id: doc.id, ...doc.data() })) as K[];
-}
-
-async function add<K extends DocumentData>(userColl: string, data: WithFieldValue<K>) {
-  const coll = collection(firestore, USERS_KEY, getUserId(), userColl);
-  const docRef = await addDoc(coll, data);
-  if (docRef) {
-    return docRef;
-  }
-  throw new Error('Unable to add to database');
-}
-
-async function updateInBatch<K extends DocumentData>(userColl: string, data: WithFieldValue<K>[]) {
-  const batch = writeBatch(firestore);
-  const coll = collection(firestore, USERS_KEY, getUserId(), userColl);
-  for (const d of data) {
-    batch.update(doc(coll, d.id), d);
-  }
-  await batch.commit();
-}
-
-async function update<K extends DocumentData>(userColl: string, id: string, data: WithFieldValue<K>) {
-  const coll = collection(firestore, USERS_KEY, getUserId(), userColl);
-  await updateDoc(doc(coll, id), data);
-}
-
-async function del(userColl: string, id: string) {
-  await deleteDoc(doc(firestore, USERS_KEY, getUserId(), userColl, id));
-}
-
-function addBatch<K extends DocumentData>(userColl: string, writeBatch: WriteBatch, data: WithFieldValue<K>) {
-  const docRef = doc(collection(firestore, USERS_KEY, getUserId(), userColl));
-  writeBatch.set(docRef, data);
-  return docRef.id;
-}
-
-function throwNamedEntityArrayError(type: string, packItems: PackItem[], packingLists: NamedEntity[]) {
-  throw new ArrayError([
-    `${type} was not deleted. It's in use by the following pack items:`,
-    ...packItems.slice(0, 5).map((t) => {
-      const packingListName = packingLists.find((pl) => pl.id === t.packingList)?.name;
-      return t.name + (packingListName ? ` (in ${packingListName})` : '');
-    }),
-    packItems.length > 5 ? ' and more...' : '',
-  ]);
-}
-
-class Database {
-  private changeHistory: HistoryItem[];
-  private setChangeHistory: (changeHistory: HistoryItem[]) => void;
-
-  constructor(changeHistory: HistoryItem[], setChangeHistory: (changeHistory: HistoryItem[]) => void) {
-    this.changeHistory = changeHistory;
-    this.setChangeHistory = setChangeHistory;
-  }
-
-  async getUserCollectionsAndSubscribe(
-    setMembers: (members: NamedEntity[]) => void,
-    setCategories: (categories: NamedEntity[]) => void,
-    setPackItems: (packItems: PackItem[]) => void,
-    setImages: (images: Image[]) => void,
-    setPackingLists: (packingLists: NamedEntity[]) => void,
+  constructor(
+    changeHistory: HistoryItem[],
+    setChangeHistory: (changeHistory: HistoryItem[]) => void,
     packingListId: string
   ) {
-    const userId = getUserId();
-    const memberQuery = collection(firestore, USERS_KEY, userId, MEMBERS_KEY);
-    const itemsQuery = query(
-      collection(firestore, USERS_KEY, userId, PACK_ITEMS_KEY),
+    this.changeHistory = changeHistory;
+    this.setChangeHistory = setChangeHistory;
+    this.userId = this.getUserId();
+    this.memberQuery = collection(firestore, USERS_KEY, this.userId, MEMBERS_KEY);
+    this.itemsQuery = query(
+      collection(firestore, USERS_KEY, this.userId, PACK_ITEMS_KEY),
       where('packingList', '==', packingListId)
     );
-    const categoriesQuery = collection(firestore, USERS_KEY, userId, CATEGORIES_KEY);
-    const imagesQuery = collection(firestore, USERS_KEY, userId, IMAGES_KEY);
-    const packingListsQuery = collection(firestore, USERS_KEY, userId, PACKING_LISTS_KEY);
-
-    await this.getInitialData(
-      setMembers,
-      setCategories,
-      setPackItems,
-      setImages,
-      setPackingLists,
-      memberQuery,
-      itemsQuery,
-      categoriesQuery,
-      imagesQuery,
-      packingListsQuery
-    );
-    this.createSubscriptions(
-      setMembers,
-      setCategories,
-      setPackItems,
-      setImages,
-      setPackingLists,
-      memberQuery,
-      itemsQuery,
-      categoriesQuery,
-      imagesQuery,
-      packingListsQuery
-    );
+    this.categoriesQuery = collection(firestore, USERS_KEY, this.userId, CATEGORIES_KEY);
+    this.imagesQuery = collection(firestore, USERS_KEY, this.userId, IMAGES_KEY);
+    this.packingListsQuery = collection(firestore, USERS_KEY, this.userId, PACKING_LISTS_KEY);
   }
 
-  private async getInitialData(
+  unsubscribeAll = () => {
+    for (const unsubscribe of this.subs) {
+      unsubscribe();
+    }
+    this.subs.length = 0;
+  };
+
+  getUserId = () => {
+    const userId = getAuth().currentUser?.uid;
+    if (!userId) {
+      throw new Error('No user logged in');
+    }
+    return userId;
+  };
+
+  fromQueryResult = <K>(res: QuerySnapshot) => {
+    return res.docs.map((doc: QueryDocumentSnapshot) => ({ id: doc.id, ...doc.data() })) as K[];
+  };
+
+  add = async <K extends DocumentData>(userColl: string, data: WithFieldValue<K>) => {
+    const coll = collection(firestore, USERS_KEY, this.getUserId(), userColl);
+    const docRef = await addDoc(coll, data);
+    if (docRef) {
+      return docRef;
+    }
+    throw new Error('Unable to add to database');
+  };
+
+  updateInBatch = async <K extends DocumentData>(userColl: string, data: WithFieldValue<K>[]) => {
+    const batch = writeBatch(firestore);
+    const coll = collection(firestore, USERS_KEY, this.getUserId(), userColl);
+    for (const d of data) {
+      batch.update(doc(coll, d.id), d);
+    }
+    await batch.commit();
+  };
+
+  update = async <K extends DocumentData>(userColl: string, id: string, data: WithFieldValue<K>) => {
+    const coll = collection(firestore, USERS_KEY, this.getUserId(), userColl);
+    await updateDoc(doc(coll, id), data);
+  };
+
+  del = async (userColl: string, id: string) => {
+    await deleteDoc(doc(firestore, USERS_KEY, this.getUserId(), userColl, id));
+  };
+
+  addBatch = <K extends DocumentData>(userColl: string, writeBatch: WriteBatch, data: WithFieldValue<K>) => {
+    const docRef = doc(collection(firestore, USERS_KEY, this.getUserId(), userColl));
+    writeBatch.set(docRef, data);
+    return docRef.id;
+  };
+
+  throwNamedEntityArrayError = (type: string, packItems: PackItem[], packingLists: NamedEntity[]) => {
+    throw new ArrayError([
+      `${type} was not deleted. It's in use by the following pack items:`,
+      ...packItems.slice(0, 5).map((t) => {
+        const packingListName = packingLists.find((pl) => pl.id === t.packingList)?.name;
+        return t.name + (packingListName ? ` (in ${packingListName})` : '');
+      }),
+      packItems.length > 5 ? ' and more...' : '',
+    ]);
+  };
+
+  getUserCollectionsAndSubscribe = async (
     setMembers: (members: NamedEntity[]) => void,
     setCategories: (categories: NamedEntity[]) => void,
     setPackItems: (packItems: PackItem[]) => void,
     setImages: (images: Image[]) => void,
-    setPackingLists: (packingLists: NamedEntity[]) => void,
-    memberQuery: any,
-    itemsQuery: any,
-    categoriesQuery: any,
-    imagesQuery: any,
-    packingListsQuery: any
-  ) {
-    setMembers(fromQueryResult(await getDocs(memberQuery)));
-    setCategories(fromQueryResult(await getDocs(categoriesQuery)));
-    setPackItems(fromQueryResult(await getDocs(itemsQuery)));
-    setImages(fromQueryResult(await getDocs(imagesQuery)));
-    setPackingLists(fromQueryResult(await getDocs(packingListsQuery)));
-  }
+    setPackingLists: (packingLists: NamedEntity[]) => void
+  ) => {
+    await this.getInitialData(setMembers, setCategories, setPackItems, setImages, setPackingLists);
+    this.createSubscriptions(setMembers, setCategories, setPackItems, setImages, setPackingLists);
+  };
 
-  private createSubscriptions(
+  private getInitialData = async (
     setMembers: (members: NamedEntity[]) => void,
     setCategories: (categories: NamedEntity[]) => void,
     setPackItems: (packItems: PackItem[]) => void,
     setImages: (images: Image[]) => void,
-    setPackingLists: (packingLists: NamedEntity[]) => void,
-    memberQuery: any,
-    itemsQuery: any,
-    categoriesQuery: any,
-    imagesQuery: any,
-    packingListsQuery: any
-  ) {
-    unsubscribeAll();
-    subs.push(onSnapshot(memberQuery, (res) => setMembers(fromQueryResult(res))));
-    subs.push(onSnapshot(categoriesQuery, (res) => setCategories(fromQueryResult(res))));
-    subs.push(onSnapshot(itemsQuery, (res) => setPackItems(fromQueryResult<PackItem>(res))));
-    subs.push(onSnapshot(imagesQuery, (res) => setImages(fromQueryResult(res))));
-    subs.push(onSnapshot(packingListsQuery, (res) => setPackingLists(fromQueryResult(res))));
-  }
+    setPackingLists: (packingLists: NamedEntity[]) => void
+  ) => {
+    setMembers(this.fromQueryResult(await getDocs(this.memberQuery)));
+    setCategories(this.fromQueryResult(await getDocs(this.categoriesQuery)));
+    setPackItems(this.fromQueryResult(await getDocs(this.itemsQuery)));
+    setImages(this.fromQueryResult(await getDocs(this.imagesQuery)));
+    setPackingLists(this.fromQueryResult(await getDocs(this.packingListsQuery)));
+  };
 
-  async addPackItem(
+  private createSubscriptions = (
+    setMembers: (members: NamedEntity[]) => void,
+    setCategories: (categories: NamedEntity[]) => void,
+    setPackItems: (packItems: PackItem[]) => void,
+    setImages: (images: Image[]) => void,
+    setPackingLists: (packingLists: NamedEntity[]) => void
+  ) => {
+    this.unsubscribeAll();
+
+    this.subs.push(onSnapshot(this.memberQuery, (res: QuerySnapshot) => setMembers(this.fromQueryResult(res))));
+    this.subs.push(onSnapshot(this.categoriesQuery, (res: QuerySnapshot) => setCategories(this.fromQueryResult(res))));
+    this.subs.push(
+      onSnapshot(this.itemsQuery, (res: QuerySnapshot) => setPackItems(this.fromQueryResult<PackItem>(res)))
+    );
+    this.subs.push(onSnapshot(this.imagesQuery, (res: QuerySnapshot) => setImages(this.fromQueryResult(res))));
+    this.subs.push(
+      onSnapshot(this.packingListsQuery, (res: QuerySnapshot) => setPackingLists(this.fromQueryResult(res)))
+    );
+  };
+
+  addPackItem = async (
     name: string,
     members: MemberPackItem[],
     category: string,
     packingList: string,
     rank: number
-  ): Promise<PackItem> {
-    const docRef = await add(PACK_ITEMS_KEY, { name, members, checked: false, category, packingList, rank });
+  ): Promise<PackItem> => {
+    const docRef = await this.add(PACK_ITEMS_KEY, { name, members, checked: false, category, packingList, rank });
     return { id: docRef.id, checked: false, members, name, category, packingList, rank };
-  }
+  };
 
-  async updatePackItem(packItem: PackItem) {
-    await update(PACK_ITEMS_KEY, packItem.id, packItem);
-  }
+  updatePackItem = async (packItem: PackItem) => {
+    await this.update(PACK_ITEMS_KEY, packItem.id, packItem);
+  };
 
-  async deletePackItem(packItem: PackItem) {
-    await del(PACK_ITEMS_KEY, packItem.id);
+  deletePackItem = async (packItem: PackItem) => {
+    await this.del(PACK_ITEMS_KEY, packItem.id);
     const newHistory: HistoryItem[] = [...this.changeHistory, { type: 'deleted', packItem }];
     this.setChangeHistory(newHistory);
-  }
+  };
 
-  async addMember(name: string): Promise<string> {
-    const docRef = await add(MEMBERS_KEY, { name });
+  addMember = async (name: string): Promise<string> => {
+    const docRef = await this.add(MEMBERS_KEY, { name });
     return docRef.id;
-  }
+  };
 
-  async updateMembers(toUpdate: NamedEntity[] | NamedEntity) {
+  updateMembers = async (toUpdate: NamedEntity[] | NamedEntity) => {
     if (Array.isArray(toUpdate)) {
-      await updateInBatch(MEMBERS_KEY, toUpdate);
+      await this.updateInBatch(MEMBERS_KEY, toUpdate);
     } else {
-      await update(MEMBERS_KEY, toUpdate.id, toUpdate);
+      await this.update(MEMBERS_KEY, toUpdate.id, toUpdate);
     }
-  }
+  };
 
-  async addCategory(name: string): Promise<string> {
-    const docRef = await add(CATEGORIES_KEY, { name });
+  addCategory = async (name: string): Promise<string> => {
+    const docRef = await this.add(CATEGORIES_KEY, { name });
     return docRef.id;
-  }
+  };
 
-  async updateCategories(categories: NamedEntity[] | NamedEntity) {
+  updateCategories = async (categories: NamedEntity[] | NamedEntity) => {
     if (Array.isArray(categories)) {
-      await updateInBatch(CATEGORIES_KEY, categories);
+      await this.updateInBatch(CATEGORIES_KEY, categories);
     } else {
-      await update(CATEGORIES_KEY, categories.id, categories);
+      await this.update(CATEGORIES_KEY, categories.id, categories);
     }
-  }
+  };
 
-  async updatePackingLists(packingLists: NamedEntity[] | NamedEntity) {
+  updatePackingLists = async (packingLists: NamedEntity[] | NamedEntity) => {
     if (Array.isArray(packingLists)) {
-      await updateInBatch(PACKING_LISTS_KEY, packingLists);
+      await this.updateInBatch(PACKING_LISTS_KEY, packingLists);
     } else {
-      await update(PACKING_LISTS_KEY, packingLists.id, packingLists);
+      await this.update(PACKING_LISTS_KEY, packingLists.id, packingLists);
     }
-  }
+  };
 
-  async addImage(type: string, typeId: string, url: string): Promise<void> {
-    await add(IMAGES_KEY, { type, typeId, url });
-  }
+  addImage = async (type: string, typeId: string, url: string): Promise<void> => {
+    await this.add(IMAGES_KEY, { type, typeId, url });
+  };
 
-  async updateImage(imageId: string, fileUrl: string) {
-    await update(IMAGES_KEY, imageId, { url: fileUrl });
-  }
+  updateImage = async (imageId: string, fileUrl: string) => {
+    await this.update(IMAGES_KEY, imageId, { url: fileUrl });
+  };
 
-  async deleteImage(imageId: string) {
-    await del(IMAGES_KEY, imageId);
-  }
+  deleteImage = async (imageId: string) => {
+    await this.del(IMAGES_KEY, imageId);
+  };
 
-  initBatch() {
+  initBatch = () => {
     return writeBatch(firestore);
-  }
+  };
 
-  deletePackItemBatch(id: string, writeBatch: WriteBatch) {
-    writeBatch.delete(doc(firestore, USERS_KEY, getUserId(), PACK_ITEMS_KEY, id));
-  }
+  deletePackItemBatch = (id: string, writeBatch: WriteBatch) => {
+    writeBatch.delete(doc(firestore, USERS_KEY, this.getUserId(), PACK_ITEMS_KEY, id));
+  };
 
-  addCategoryBatch(category: string, writeBatch: WriteBatch) {
-    return addBatch(CATEGORIES_KEY, writeBatch, { name: category });
-  }
+  addCategoryBatch = (category: string, writeBatch: WriteBatch) => {
+    return this.addBatch(CATEGORIES_KEY, writeBatch, { name: category });
+  };
 
-  addMemberBatch(member: string, writeBatch: WriteBatch) {
-    return addBatch(MEMBERS_KEY, writeBatch, { name: member });
-  }
+  addMemberBatch = (member: string, writeBatch: WriteBatch) => {
+    return this.addBatch(MEMBERS_KEY, writeBatch, { name: member });
+  };
 
-  updatePackItemBatch<K extends DocumentData>(data: WithFieldValue<K>, writeBatch: WriteBatch) {
-    writeBatch.update(doc(firestore, USERS_KEY, getUserId(), PACK_ITEMS_KEY, data.id), data);
-  }
+  updatePackItemBatch = <K extends DocumentData>(data: WithFieldValue<K>, writeBatch: WriteBatch) => {
+    writeBatch.update(doc(firestore, USERS_KEY, this.getUserId(), PACK_ITEMS_KEY, data.id), data);
+  };
 
-  addPackItemBatch(
+  addPackItemBatch = (
     writeBatch: WriteBatch,
     name: string,
     members: MemberPackItem[],
     category: string,
     rank: number,
     packingList: string
-  ) {
-    return addBatch(PACK_ITEMS_KEY, writeBatch, {
+  ) => {
+    return this.addBatch(PACK_ITEMS_KEY, writeBatch, {
       name,
       members,
       checked: false,
@@ -310,17 +290,17 @@ class Database {
       packingList,
       rank,
     });
-  }
+  };
 
-  async deleteCategory(id: string, packingLists: NamedEntity[], deleteEvenIfUsed = false) {
+  deleteCategory = async (id: string, packingLists: NamedEntity[], deleteEvenIfUsed = false) => {
     const packItemsQuery = query(
-      collection(firestore, USERS_KEY, getUserId(), PACK_ITEMS_KEY),
+      collection(firestore, USERS_KEY, this.getUserId(), PACK_ITEMS_KEY),
       where('category', '==', id)
     );
-    const packItems: PackItem[] = fromQueryResult(await getDocs(packItemsQuery));
+    const packItems: PackItem[] = this.fromQueryResult(await getDocs(packItemsQuery));
     if (packItems.length) {
       if (!deleteEvenIfUsed) {
-        throwNamedEntityArrayError('Category', packItems, packingLists);
+        this.throwNamedEntityArrayError('Category', packItems, packingLists);
       }
       const batch = writeBatch(firestore);
       for (const packItem of packItems) {
@@ -329,20 +309,20 @@ class Database {
       }
       await batch.commit();
     }
-    await del(CATEGORIES_KEY, id);
-  }
+    await this.del(CATEGORIES_KEY, id);
+  };
 
-  async deleteMember(id: string, packingLists: NamedEntity[], deleteEvenIfUsed = false) {
+  deleteMember = async (id: string, packingLists: NamedEntity[], deleteEvenIfUsed = false) => {
     const packItemsQuery = query(
-      collection(firestore, USERS_KEY, getUserId(), PACK_ITEMS_KEY),
+      collection(firestore, USERS_KEY, this.getUserId(), PACK_ITEMS_KEY),
       where('members', '!=', [])
     );
-    let packItems: PackItem[] = fromQueryResult(await getDocs(packItemsQuery));
+    let packItems: PackItem[] = this.fromQueryResult(await getDocs(packItemsQuery));
     packItems = packItems.filter((t) => t.members.find((m) => m.id === id));
 
     if (packItems.length) {
       if (!deleteEvenIfUsed) {
-        throwNamedEntityArrayError('Member', packItems, packingLists);
+        this.throwNamedEntityArrayError('Member', packItems, packingLists);
       }
       const batch = writeBatch(firestore);
       for (const packItem of packItems) {
@@ -351,70 +331,65 @@ class Database {
       }
       await batch.commit();
     }
-    await del(MEMBERS_KEY, id);
-  }
+    await this.del(MEMBERS_KEY, id);
+  };
 
-  async getFirstPackingList(): Promise<NamedEntity | undefined> {
-    const userId = getUserId();
+  getFirstPackingList = async (): Promise<NamedEntity | undefined> => {
+    const userId = this.getUserId();
     const query = collection(firestore, USERS_KEY, userId, PACKING_LISTS_KEY);
-    const packingLists = fromQueryResult(await getDocs(query)) as NamedEntity[];
+    const packingLists = this.fromQueryResult(await getDocs(query)) as NamedEntity[];
     return packingLists.length ? packingLists[0] : undefined;
-  }
+  };
 
-  async addPackingList(name: string, rank: number) {
-    const docRef = await add(PACKING_LISTS_KEY, { name: name, rank });
+  addPackingList = async (name: string, rank: number) => {
+    const docRef = await this.add(PACKING_LISTS_KEY, { name: name, rank });
     return docRef.id;
-  }
+  };
 
-  async getPackingList(id: string) {
-    const res = await getDoc(doc(firestore, USERS_KEY, getUserId(), PACKING_LISTS_KEY, id));
+  getPackingList = async (id: string) => {
+    const res = await getDoc(doc(firestore, USERS_KEY, this.getUserId(), PACKING_LISTS_KEY, id));
     if (res.exists()) {
       return { id: res.id, ...res.data() } as NamedEntity;
     }
     return undefined;
-  }
+  };
 
-  updatePackingList(packingList: NamedEntity) {
-    return update(PACKING_LISTS_KEY, packingList.id, packingList);
-  }
+  updatePackingList = (packingList: NamedEntity) => {
+    return this.update(PACKING_LISTS_KEY, packingList.id, packingList);
+  };
 
-  deletePackingListBatch(id: string, batch: WriteBatch) {
-    batch.delete(doc(firestore, USERS_KEY, getUserId(), PACKING_LISTS_KEY, id));
-  }
+  deletePackingListBatch = (id: string, batch: WriteBatch) => {
+    batch.delete(doc(firestore, USERS_KEY, this.getUserId(), PACKING_LISTS_KEY, id));
+  };
 
-  addPackingListBatch(name: string, writeBatch: WriteBatch, rank: number) {
-    return addBatch(PACKING_LISTS_KEY, writeBatch, { name, rank });
-  }
+  addPackingListBatch = (name: string, writeBatch: WriteBatch, rank: number) => {
+    return this.addBatch(PACKING_LISTS_KEY, writeBatch, { name, rank });
+  };
 
-  updateCategoryBatch<K extends DocumentData>(data: WithFieldValue<K>, batch: WriteBatch) {
-    batch.update(doc(firestore, USERS_KEY, getUserId(), CATEGORIES_KEY, data.id), data);
-  }
+  updateCategoryBatch = <K extends DocumentData>(data: WithFieldValue<K>, batch: WriteBatch) => {
+    batch.update(doc(firestore, USERS_KEY, this.getUserId(), CATEGORIES_KEY, data.id), data);
+  };
 
-  async getPackItemsForAllPackingLists() {
-    const userId = getUserId();
+  getPackItemsForAllPackingLists = async () => {
+    const userId = this.getUserId();
     const q = query(collection(firestore, USERS_KEY, userId, PACK_ITEMS_KEY));
-    const allPackItems = fromQueryResult<PackItem>(await getDocs(q));
+    const allPackItems = this.fromQueryResult<PackItem>(await getDocs(q));
     sortEntities(allPackItems);
     return allPackItems;
-  }
+  };
 
-  async undo() {
+  undo = async () => {
     const last = this.changeHistory.pop();
     if (!last) {
       return;
     }
     if (last.type === 'deleted') {
       if (last.packItem) {
-        const docRef = await add(PACK_ITEMS_KEY, last.packItem);
+        const docRef = await this.add(PACK_ITEMS_KEY, last.packItem);
         if (docRef) {
-          await update(PACK_ITEMS_KEY, docRef.id, { ...last.packItem, id: docRef.id });
+          await this.update(PACK_ITEMS_KEY, docRef.id, { ...last.packItem, id: docRef.id });
         }
       }
     }
-  }
+  };
 }
-
-export type DbInvoke = Database;
-export const getDatabase = (changeHistory: HistoryItem[], setChangeHistory: (changeHistory: HistoryItem[]) => void) => {
-  return new Database(changeHistory, setChangeHistory);
-};

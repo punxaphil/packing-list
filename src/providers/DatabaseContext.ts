@@ -1,11 +1,11 @@
 import { createContext, useContext } from 'react';
-import { DbInvoke } from '~/services/database.ts';
 import { ColumnList } from '~/types/Column.ts';
 import { GroupedPackItem } from '~/types/GroupedPackItem.ts';
 import { HistoryItem } from '~/types/HistoryItem.ts';
 import { Image } from '~/types/Image.ts';
 import { NamedEntity } from '~/types/NamedEntity.ts';
 import { PackItem } from '~/types/PackItem.ts';
+import type { Database } from '~/services/database.ts';
 
 interface ContextType {
   members: NamedEntity[];
@@ -23,7 +23,7 @@ interface ContextType {
     showTheseMembers,
     showTheseStates,
   }: { showTheseCategories: string[]; showTheseMembers: string[]; showTheseStates: string[] }) => void;
-  dbInvoke: DbInvoke;
+  dbInvoke: Database;
   changeHistory: HistoryItem[];
 }
 
