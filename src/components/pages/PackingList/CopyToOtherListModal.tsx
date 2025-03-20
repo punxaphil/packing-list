@@ -8,8 +8,8 @@ import {
   ModalOverlay,
   useToast,
 } from '@chakra-ui/react';
-import { useDatabase } from '~/providers/DatabaseContext.ts';
-import { usePackingList } from '~/providers/PackingListContext.ts';
+import { useApi } from '~/providers/ApiContext.ts';
+import { useModel } from '~/providers/ModelContext.ts';
 import { COLUMN_COLORS } from '~/types/Column.ts';
 import { NamedEntity } from '~/types/NamedEntity.ts';
 import { PackItem } from '~/types/PackItem.ts';
@@ -27,8 +27,8 @@ export function CopyToOtherListModal({
   category?: NamedEntity;
   packItem?: PackItem;
 }) {
-  const { packingLists, dbInvoke } = useDatabase();
-  const { packingList } = usePackingList();
+  const { packingLists, packingList } = useModel();
+  const { api } = useApi();
   const toast = useToast();
 
   async function onClick(packingList: NamedEntity) {
@@ -40,7 +40,7 @@ export function CopyToOtherListModal({
       });
     }
     if (packItem) {
-      await dbInvoke.addPackItem(packItem.name, packItem.members, packItem.category, packingList.id, packItem.rank);
+      await api.addPackItem(packItem.name, packItem.members, packItem.category, packingList.id, packItem.rank);
       toast({
         title: `Pack item ${packItem.name} copied to ${packingList.name}`,
         status: 'success',
@@ -50,17 +50,10 @@ export function CopyToOtherListModal({
   }
 
   async function copyCategory(packItemsInCat: PackItem[], category: NamedEntity, packingList: NamedEntity) {
-    const batch = dbInvoke.initBatch();
+    const batch = api.initBatch();
     for (const packItem of packItemsInCat) {
       if (packItem.category === category.id) {
-        dbInvoke.addPackItemBatch(
-          batch,
-          packItem.name,
-          packItem.members,
-          packItem.category,
-          packItem.rank,
-          packingList.id
-        );
+        api.addPackItemBatch(batch, packItem.name, packItem.members, packItem.category, packItem.rank, packingList.id);
       }
     }
     await batch.commit();

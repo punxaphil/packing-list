@@ -1,14 +1,14 @@
 import { Flex, HStack, Input, Stack } from '@chakra-ui/react';
 import { useMemo, useState } from 'react';
 import { ProfileAvatar } from '~/components/auth/ProfileAvatar.tsx';
-import { useDatabase } from '~/providers/DatabaseContext.ts';
-import { usePackingList } from '~/providers/PackingListContext.ts';
+import { useApi } from '~/providers/ApiContext.ts';
+import { useModel } from '~/providers/ModelContext.ts';
 import { NavButton } from './NavButton.tsx';
 
 export function Header() {
-  const { packingList } = usePackingList();
+  const { packingList } = useModel();
   const [packingListName, setPackingListName] = useState('');
-  const { dbInvoke } = useDatabase();
+  const { api } = useApi();
 
   useMemo(() => {
     setPackingListName(packingList.name);
@@ -17,7 +17,7 @@ export function Header() {
   async function savePackingListName(name: string) {
     setPackingListName(name);
     packingList.name = name;
-    await dbInvoke.updatePackingList(packingList);
+    await api.updatePackingList(packingList);
   }
 
   return (

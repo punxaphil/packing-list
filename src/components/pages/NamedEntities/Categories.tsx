@@ -1,15 +1,16 @@
 import { NamedEntities } from '~/components/pages/NamedEntities/NamedEntities.tsx';
-import { useDatabase } from '~/providers/DatabaseContext.ts';
+import { useApi } from '~/providers/ApiContext.ts';
+import { useModel } from '~/providers/ModelContext.ts';
 
 export function Categories() {
-  const { dbInvoke } = useDatabase();
+  const { api } = useApi();
   return (
     <NamedEntities
-      namedEntities={useDatabase().categories}
+      namedEntities={useModel().categories}
       type="categories"
-      dbAdd={dbInvoke.addCategory}
-      dbUpdate={dbInvoke.updateCategories}
-      dbDelete={dbInvoke.deleteCategory}
+      dbAdd={api.addCategory.bind(api)}
+      dbUpdate={api.updateCategories.bind(api)}
+      dbDelete={api.deleteCategory.bind(api)}
     />
   );
 }

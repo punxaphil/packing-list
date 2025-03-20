@@ -13,8 +13,8 @@ import {
   useDisclosure,
 } from '@chakra-ui/react';
 import { ChangeEvent, useEffect, useState } from 'react';
-import { useDatabase } from '~/providers/DatabaseContext.ts';
-import { usePackingList } from '~/providers/PackingListContext.ts';
+import { useApi } from '~/providers/ApiContext.ts';
+import { useModel } from '~/providers/ModelContext.ts';
 import {
   createTextPackItemsFromText,
   getGroupedAsText,
@@ -26,10 +26,10 @@ export function PackItemsTextMode({
 }: {
   onDone: () => void;
 }) {
-  const { categories, members, packItems, groupedPackItems, dbInvoke } = useDatabase();
+  const { categories, members, packItems, groupedPackItems, packingList } = useModel();
+  const { api } = useApi();
   const [groupedAsText, setGroupedAsText] = useState('');
   const [saving, setSaving] = useState(false);
-  const packingList = usePackingList().packingList;
 
   useEffect(() => {
     const text = getGroupedAsText(groupedPackItems, members);
@@ -43,7 +43,7 @@ export function PackItemsTextMode({
   async function save() {
     setSaving(true);
     const textPackItems = createTextPackItemsFromText(groupedAsText);
-    await updateDatabaseFromTextPackItems(packItems, textPackItems, members, categories, packingList.id, dbInvoke);
+    await updateDatabaseFromTextPackItems(packItems, textPackItems, members, categories, packingList.id, api);
     setSaving(false);
     onDone();
   }

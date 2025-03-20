@@ -1,6 +1,6 @@
 import { Checkbox, Flex, Spacer } from '@chakra-ui/react';
 import { PLInput } from '~/components/shared/PLInput.tsx';
-import { useDatabase } from '~/providers/DatabaseContext.ts';
+import { useApi } from '~/providers/ApiContext.ts';
 import { allChecked } from '~/services/utils.ts';
 import { MemberPackItem } from '~/types/MemberPackItem.ts';
 import { NamedEntity } from '~/types/NamedEntity.ts';
@@ -15,20 +15,20 @@ export function MemberPackItemRow({
   parent: PackItem;
   member: NamedEntity;
 }) {
-  const { dbInvoke } = useDatabase();
+  const { api } = useApi();
 
   async function toggleMember() {
     const find = parent.members.find((t) => t.id === id);
     if (find) {
       find.checked = !find.checked;
       parent.checked = allChecked(parent);
-      await dbInvoke.updatePackItem(parent);
+      await api.updatePackItem(parent);
     }
   }
 
   async function onSave(name: string) {
     member.name = name;
-    await dbInvoke.updateMembers(member);
+    await api.updateMembers(member);
   }
 
   return (

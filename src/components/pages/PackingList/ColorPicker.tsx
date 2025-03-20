@@ -13,7 +13,7 @@ import {
 } from '@chakra-ui/react';
 import { useState } from 'react';
 import { HexColorPicker } from 'react-colorful';
-import { useDatabase } from '~/providers/DatabaseContext.ts';
+import { useApi } from '~/providers/ApiContext.ts';
 import { NamedEntity } from '~/types/NamedEntity.ts';
 
 export function ColorPicker({
@@ -27,12 +27,12 @@ export function ColorPicker({
 }) {
   const [color, setColor] = useState(category.color || undefined);
   const toast = useToast();
-  const { dbInvoke } = useDatabase();
+  const { api } = useApi();
 
   async function saveColor() {
     onClose();
     category.color = color;
-    await dbInvoke.updateCategories(category);
+    await api.updateCategories(category);
     toast({
       title: 'Color saved!',
       status: 'success',
@@ -42,7 +42,7 @@ export function ColorPicker({
   async function resetColor() {
     onClose();
     category.color = '';
-    await dbInvoke.updateCategories(category);
+    await api.updateCategories(category);
   }
 
   return (

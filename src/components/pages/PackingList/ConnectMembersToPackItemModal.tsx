@@ -9,7 +9,8 @@ import {
   Stack,
   useToast,
 } from '@chakra-ui/react';
-import { useDatabase } from '~/providers/DatabaseContext.ts';
+import { useApi } from '~/providers/ApiContext.ts';
+import { useModel } from '~/providers/ModelContext.ts';
 import { COLUMN_COLORS } from '~/types/Column.ts';
 import { NamedEntity } from '~/types/NamedEntity.ts';
 import { PackItem } from '~/types/PackItem.ts';
@@ -23,7 +24,8 @@ export function ConnectMembersToPackItemModal({
   onClose: () => void;
   packItem: PackItem;
 }) {
-  const { members, dbInvoke } = useDatabase();
+  const { members } = useModel();
+  const { api } = useApi();
   const toast = useToast();
 
   async function onClick(member: NamedEntity) {
@@ -36,7 +38,7 @@ export function ConnectMembersToPackItemModal({
       packItem.members.push({ id: member.id, checked: false });
       title = `Added ${member.name} to ${packItem.name}`;
     }
-    await dbInvoke.updatePackItem(packItem);
+    await api.updatePackItem(packItem);
     toast({
       title: title,
       status: 'success',

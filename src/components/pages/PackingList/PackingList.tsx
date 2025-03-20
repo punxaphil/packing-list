@@ -3,18 +3,18 @@ import { useState } from 'react';
 import { PackItemsTextMode } from '~/components/pages/PackingList/PackItemsTextMode.tsx';
 import { PackingListColumns } from '~/components/pages/PackingList/PackingListColumns.tsx';
 import { PackingListControls } from '~/components/pages/PackingList/PackingListControls.tsx';
-import { useDatabase } from '~/providers/DatabaseContext.ts';
-import { usePackingList } from '~/providers/PackingListContext.ts';
+import { useApi } from '~/providers/ApiContext.ts';
+import { useModel } from '~/providers/ModelContext.ts';
 
 export function PackingList() {
-  const { packItems, groupedPackItems, dbInvoke } = useDatabase();
+  const { packItems, groupedPackItems, packingList } = useModel();
   const [filteredMembers, setFilteredMembers] = useState<string[]>([]);
   const [textMode, setTextMode] = useState(false);
-  const { packingList } = usePackingList();
+  const { api } = useApi();
   const width = useBreakpointValue({ base: 320, sm: 400, md: 650, lg: 970 });
 
   async function addFirstPackItem() {
-    await dbInvoke.addPackItem('Toothbrush', [], '', packingList.id, 0);
+    await api.addPackItem('Toothbrush', [], '', packingList.id, 0);
   }
 
   return (

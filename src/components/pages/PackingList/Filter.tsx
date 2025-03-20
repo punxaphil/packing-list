@@ -2,7 +2,7 @@ import { Menu, MenuButton, MenuDivider, MenuList, SmallCloseIcon, Text } from '@
 import { Button, HStack, MenuItemOption, MenuOptionGroup, useBreakpointValue } from '@chakra-ui/react';
 import { useState } from 'react';
 import { AiOutlineFilter } from 'react-icons/ai';
-import { useDatabase } from '~/providers/DatabaseContext.ts';
+import { useModel } from '~/providers/ModelContext.ts';
 import { UNCATEGORIZED } from '~/services/utils.ts';
 import { COLUMN_COLORS } from '~/types/Column.ts';
 
@@ -14,7 +14,7 @@ export function Filter({
 }: {
   onFilter: (filterCategories: string[], filterMembers: string[], filterPackItemState: string[]) => void;
 }) {
-  const { categoriesInPackingList, membersInPackingList } = useDatabase();
+  const { categoriesInPackingList, membersInPackingList } = useModel();
   const categories = [UNCATEGORIZED, ...categoriesInPackingList];
   const members = [{ id: '', name: 'Without members', rank: 0 }, ...membersInPackingList];
   const [filteredCategories, setFilteredCategories] = useState<string[]>([]);

@@ -4,12 +4,14 @@ import { getAuth, signOut } from 'firebase/auth';
 import { useCurrentUser } from '~/components/auth/Auth.tsx';
 import { ProfileAvatar } from '~/components/auth/ProfileAvatar.tsx';
 import { UploadModal } from '~/components/shared/UploadModal.tsx';
-import { useDatabase } from '~/providers/DatabaseContext.ts';
+import { useApi } from '~/providers/ApiContext.ts';
 import { useError } from '~/providers/ErrorContext.ts';
+import { useModel } from '~/providers/ModelContext.ts';
 import { getProfileImage } from '~/services/utils.ts';
 
 export function Profile() {
-  const { images, dbInvoke } = useDatabase();
+  const { images } = useModel();
+  const { api } = useApi();
   const profileImage = getProfileImage(images);
   const { isOpen, onOpen, onClose } = useDisclosure();
 
@@ -23,7 +25,7 @@ export function Profile() {
   function onDelete() {
     (async () => {
       if (profileImage) {
-        await dbInvoke.deleteImage(profileImage.id);
+        await api.deleteImage(profileImage.id);
       }
     })().catch(setError);
   }

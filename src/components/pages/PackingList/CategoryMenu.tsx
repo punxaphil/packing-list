@@ -4,7 +4,8 @@ import { AiOutlineCopy, AiOutlineDelete } from 'react-icons/ai';
 import { IoColorPaletteOutline } from 'react-icons/io5';
 import { TbCategoryPlus } from 'react-icons/tb';
 import { DeleteDialog } from '~/components/shared/DeleteDialog.tsx';
-import { useDatabase } from '~/providers/DatabaseContext.ts';
+import { useApi } from '~/providers/ApiContext.ts';
+import { useModel } from '~/providers/ModelContext.ts';
 import { useNewPackItemRowId } from '~/providers/NewPackItemRowIdContext.ts';
 import { NamedEntity } from '~/types/NamedEntity.ts';
 import { PackItem } from '~/types/PackItem.ts';
@@ -20,7 +21,8 @@ export function CategoryMenu({
   category: NamedEntity;
 }) {
   const { setNewPackItemRowId } = useNewPackItemRowId();
-  const { packingLists, dbInvoke } = useDatabase();
+  const { packingLists } = useModel();
+  const { api } = useApi();
   const copyDisclosure = useDisclosure();
   const deleteDisclosure = useDisclosure();
   const colorDisclosure = useDisclosure();
@@ -30,10 +32,10 @@ export function CategoryMenu({
   }
 
   async function onConfirmDelete() {
-    const batch = dbInvoke.initBatch();
+    const batch = api.initBatch();
     for (const packItem of packItemsInCat) {
       if (packItem.category === category.id) {
-        dbInvoke.deletePackItemBatch(packItem.id, batch);
+        api.deletePackItemBatch(packItem.id, batch);
       }
     }
     await batch.commit();

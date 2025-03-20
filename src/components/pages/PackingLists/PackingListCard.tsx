@@ -5,8 +5,9 @@ import { useNavigate } from 'react-router';
 import { DeleteDialog } from '~/components/shared/DeleteDialog.tsx';
 import { DragHandle } from '~/components/shared/DragHandle.tsx';
 import { PLIconButton } from '~/components/shared/PLIconButton.tsx';
-import { useDatabase } from '~/providers/DatabaseContext.ts';
-import { usePackingList } from '~/providers/PackingListContext.ts';
+import { useApi } from '~/providers/ApiContext.ts';
+import { useLocalStorage } from '~/providers/LocalStorageContext.ts';
+import { useModel } from '~/providers/ModelContext.ts';
 import { findUniqueName, rankOnTop } from '~/services/utils.ts';
 import { NamedEntity } from '~/types/NamedEntity.ts';
 import { PackItem } from '~/types/PackItem.ts';
@@ -26,8 +27,9 @@ export function PackingListCard({
 }) {
   const deleteDialog = useDisclosure();
   const navigate = useNavigate();
-  const { packingLists, groupedPackItems, dbInvoke } = useDatabase();
-  const { setPackingListId } = usePackingList();
+  const { packingLists, groupedPackItems } = useModel();
+  const { api } = useApi();
+  const { setPackingListId } = useLocalStorage();
   const toast = useToast();
 
   function onListClick() {
@@ -44,11 +46,11 @@ export function PackingListCard({
   }
 
   async function confirmDelete() {
-    const batch = dbInvoke.initBatch();
+    const batch = api.initBatch();
     for (const packItem of packItems) {
-      dbInvoke.deletePackItemBatch(packItem.id, batch);
+      api.deletePackItemBatch(packItem.id, batch);
     }
-    dbInvoke.deletePackingListBatch(packingList.id, batch);
+    api.deletePackingListBatch(packingList.id, batch);
     await batch.commit();
     const filtered = packingLists.filter((l) => l.id !== packingList.id);
     const selectedPackingList = filtered[0];
@@ -74,18 +76,11 @@ export function PackingListCard({
       throw new Error('Grouped pack items not loaded');
     }
     const name = findUniqueName(`${packingList.name} - Copy`, packingLists);
-    const batch = dbInvoke.initBatch();
+    const batch = api.initBatch();
     const rank = rankOnTop(packingLists);
-    const packingListId = dbInvoke.addPackingListBatch(name, batch, rank);
+    const packingListId = api.addPackingListBatch(name, batch, rank);
     for (const packItem of packItems) {
-      dbInvoke.addPackItemBatch(
-        batch,
-        packItem.name,
-        packItem.members,
-        packItem.category,
-        packItem.rank,
-        packingListId
-      );
+      api.addPackItemBatch(batch, packItem.name, packItem.members, packItem.category, packItem.rank, packingListId);
     }
     await batch.commit();
     toast({

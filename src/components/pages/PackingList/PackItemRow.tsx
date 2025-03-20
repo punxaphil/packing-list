@@ -6,7 +6,8 @@ import { PackItemMenu } from '~/components/pages/PackingList/PackItemMenu.tsx';
 import { DragHandle } from '~/components/shared/DragHandle.tsx';
 import { MultiCheckbox } from '~/components/shared/MultiCheckbox.tsx';
 import { PLInput } from '~/components/shared/PLInput.tsx';
-import { useDatabase } from '~/providers/DatabaseContext.ts';
+import { useApi } from '~/providers/ApiContext.ts';
+import { useModel } from '~/providers/ModelContext.ts';
 import { useNewPackItemRowId } from '~/providers/NewPackItemRowIdContext.ts';
 import { PackItem } from '~/types/PackItem.ts';
 import { MemberPackItemRow } from './MemberPackItemRow.tsx';
@@ -29,7 +30,8 @@ export function PackItemRow({
   isLastItemInCategory: boolean;
   isFirstItemInCategory?: boolean;
 }) {
-  const { members, dbInvoke } = useDatabase();
+  const { members } = useModel();
+  const { api } = useApi();
   const { newPackItemRowId, setNewPackItemRowId } = useNewPackItemRowId();
 
   const memberRows = useMemo(() => {
@@ -42,7 +44,7 @@ export function PackItemRow({
   }
 
   async function onUpdate(packItem: PackItem) {
-    await dbInvoke.updatePackItem(packItem);
+    await api.updatePackItem(packItem);
   }
 
   async function onChangeText(name: string) {

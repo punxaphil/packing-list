@@ -1,13 +1,13 @@
 import { Avatar } from '@chakra-ui/react';
 import { NavLink } from 'react-router';
 import { THEME_COLOR } from '~/main.tsx';
-import { useDatabase } from '~/providers/DatabaseContext.ts';
+import { useModel } from '~/providers/ModelContext.ts';
 import { getProfileImage } from '~/services/utils.ts';
 import { useCurrentUser } from './Auth.tsx';
 
 export function ProfileAvatar({ shouldNavigate = true, size }: { shouldNavigate?: boolean; size: string }) {
   const currentUser = useCurrentUser();
-  const images = useDatabase().images;
+  const images = useModel().images;
   const profileImage = getProfileImage(images);
 
   return (
