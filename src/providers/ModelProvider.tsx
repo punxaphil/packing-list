@@ -4,43 +4,66 @@ import { ReactNode, useEffect, useState } from 'react';
 import { CHECKED_FILTER_STATE, UNCHECKED_FILTER_STATE } from '~/components/pages/PackingList/Filter.tsx';
 import { createColumns, flattenGroupedPackItems } from '~/components/pages/PackingList/packingListUtils.ts';
 import { TextProgress } from '~/components/shared/TextProgress.tsx';
-import { Database } from '~/services/database.ts';
+import { useApi } from '~/providers/ApiContext.ts';
 import { groupByCategories, sortAll } from '~/services/utils.ts';
 import { ColumnList } from '~/types/Column.ts';
 import { GroupedPackItem } from '~/types/GroupedPackItem.ts';
-import { HistoryItem } from '~/types/HistoryItem.ts';
 import { Image } from '~/types/Image.ts';
 import { NamedEntity } from '~/types/NamedEntity.ts';
 import { PackItem } from '~/types/PackItem.ts';
-import { DatabaseContext } from './DatabaseContext.ts';
-import { usePackingList } from './PackingListContext.ts';
+import { useLocalStorage } from './LocalStorageContext.ts';
+import { ModelContext } from './ModelContext.ts';
 
-export function DatabaseProvider({ children }: { children: ReactNode }) {
+export function ModelProvider({ children }: { children: ReactNode }) {
+  const { api } = useApi();
+
   const [members, setMembers] = useState<NamedEntity[]>();
   const [categories, setCategories] = useState<NamedEntity[]>();
   const [packItems, setPackItems] = useState<PackItem[]>();
   const [images, setImages] = useState<Image[]>();
   const [packingLists, setPackingLists] = useState<NamedEntity[]>();
-  const { packingList } = usePackingList();
+  const [packingList, setPackingList] = useState<NamedEntity | undefined>();
+  const { packingListId, setPackingListId } = useLocalStorage();
   const [filter, setFilter] = useState<{
     showTheseCategories: string[];
     showTheseMembers: string[];
     showTheseStates: string[];
   } | null>(null);
   const nbrOfColumns: 1 | 2 | 3 = useBreakpointValue({ base: 1, sm: 1, md: 2, lg: 3 }) ?? 3;
-  const [changeHistory, setChangeHistory] = useState<HistoryItem[]>([]);
-  const db = new Database(changeHistory, setChangeHistory, packingList.id);
   useEffect(() => {
     (async () => {
       const userId = getAuth().currentUser?.uid;
       if (!userId) {
         throw new Error('No user logged in');
       }
-      if (packingList) {
-        await db.getUserCollectionsAndSubscribe(setMembers, setCategories, setPackItems, setImages, setPackingLists);
+      if (packingListId) {
+        await api.getUserCollectionsAndSubscribe(
+          setMembers,
+          setCategories,
+          setPackItems,
+          setImages,
+          setPackingLists,
+          packingListId
+        );
+        const list = await api.getPackingList(packingListId);
+        if (list) {
+          setPackingList(list);
+        } else {
+          const list = await api.getFirstPackingList();
+          if (list) {
+            setPackingList(list);
+            setPackingListId(list.id);
+          } else {
+            const name = 'My Packing List';
+            const rank = 0;
+            const newId = await api.addPackingList(name, rank);
+            setPackingList({ id: newId, name, rank });
+            setPackingListId(newId);
+          }
+        }
       }
     })().catch(console.error);
-  }, [packingList, db]);
+  }, [api, packingListId, setPackingListId]);
 
   let groupedPackItems: GroupedPackItem[] = [];
   let columns: ColumnList[] = [];
@@ -89,12 +112,13 @@ export function DatabaseProvider({ children }: { children: ReactNode }) {
   return (
     <>
       {isInitialized ? (
-        <DatabaseContext.Provider
+        <ModelContext.Provider
           value={{
             members,
             categories,
             packItems,
             images,
+            packingList,
             packingLists,
             groupedPackItems,
             columns,
@@ -102,12 +126,10 @@ export function DatabaseProvider({ children }: { children: ReactNode }) {
             categoriesInPackingList,
             membersInPackingList,
             setFilter,
-            dbInvoke: db,
-            changeHistory,
           }}
         >
           {children}
-        </DatabaseContext.Provider>
+        </ModelContext.Provider>
       ) : (
         <TextProgress text="Loading your packing lists" />
       )}

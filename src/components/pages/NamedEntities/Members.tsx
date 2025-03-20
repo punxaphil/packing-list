@@ -1,15 +1,16 @@
 import { NamedEntities } from '~/components/pages/NamedEntities/NamedEntities.tsx';
-import { useDatabase } from '~/providers/DatabaseContext.ts';
+import { useApi } from '~/providers/ApiContext.ts';
+import { useModel } from '~/providers/ModelContext.ts';
 
 export function Members() {
-  const { dbInvoke } = useDatabase();
+  const { api } = useApi();
   return (
     <NamedEntities
-      namedEntities={useDatabase().members}
+      namedEntities={useModel().members}
       type="members"
-      dbAdd={dbInvoke.addMember}
-      dbUpdate={dbInvoke.updateMembers}
-      dbDelete={dbInvoke.deleteMember}
+      dbAdd={api.addMember.bind(api)}
+      dbUpdate={api.updateMembers.bind(api)}
+      dbDelete={api.deleteMember.bind(api)}
     />
   );
 }

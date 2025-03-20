@@ -1,6 +1,6 @@
 import { Box } from '@chakra-ui/react';
 import { Draggable, Droppable } from '@hello-pangea/dnd';
-import { useDatabase } from '~/providers/DatabaseContext.ts';
+import { useModel } from '~/providers/ModelContext.ts';
 import { UNCATEGORIZED } from '~/services/utils.ts';
 import { PackingListRow } from '~/types/Column.ts';
 import { PackItemRow } from './PackItemRow.tsx';
@@ -15,7 +15,7 @@ export function PackingListColumn({
   id: string;
   filteredMembers: string[];
 }) {
-  const categoriesInPackingList = useDatabase().categoriesInPackingList;
+  const categoriesInPackingList = useModel().categoriesInPackingList;
   return (
     <Droppable droppableId={id}>
       {(provided) => (

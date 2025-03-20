@@ -2,8 +2,9 @@ import { HStack, Spacer } from '@chakra-ui/react';
 import { AiOutlineEdit, AiOutlineFullscreen, AiOutlineFullscreenExit, AiOutlineUndo } from 'react-icons/ai';
 import { Filter } from '~/components/pages/PackingList/Filter.tsx';
 import { PLIconButton } from '~/components/shared/PLIconButton.tsx';
-import { useDatabase } from '~/providers/DatabaseContext.ts';
+import { useApi } from '~/providers/ApiContext.ts';
 import { useFullscreenMode } from '~/providers/FullscreenModeContext.ts';
+import { useModel } from '~/providers/ModelContext.ts';
 
 export function PackingListControls({
   onTextMode,
@@ -12,7 +13,8 @@ export function PackingListControls({
   onTextMode: () => void;
   onMemberFilter: (memberIds: string[]) => void;
 }) {
-  const { setFilter, dbInvoke, changeHistory } = useDatabase();
+  const { setFilter } = useModel();
+  const { api, changeHistory } = useApi();
   const { fullscreenMode, setFullscreenMode } = useFullscreenMode();
 
   function onFilter(showTheseCategories: string[], showTheseMembers: string[], showTheseStates: string[]) {
@@ -31,7 +33,7 @@ export function PackingListControls({
   }
 
   async function onUndo() {
-    await dbInvoke.undo();
+    await api.undo();
   }
 
   return (

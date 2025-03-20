@@ -8,7 +8,8 @@ import {
   ModalOverlay,
   useToast,
 } from '@chakra-ui/react';
-import { useDatabase } from '~/providers/DatabaseContext.ts';
+import { useApi } from '~/providers/ApiContext.ts';
+import { useModel } from '~/providers/ModelContext.ts';
 import { COLUMN_COLORS } from '~/types/Column.ts';
 import { NamedEntity } from '~/types/NamedEntity.ts';
 import { PackItem } from '~/types/PackItem.ts';
@@ -22,12 +23,13 @@ export function MoveToCategoryModal({
   onClose: () => void;
   packItem: PackItem;
 }) {
-  const { categories, dbInvoke } = useDatabase();
+  const { categories } = useModel();
+  const { api } = useApi();
   const toast = useToast();
 
   async function onClick(category: NamedEntity) {
     const updatedPackItem = { ...packItem, category: category.id };
-    await dbInvoke.updatePackItem(updatedPackItem);
+    await api.updatePackItem(updatedPackItem);
     toast({
       title: `Moved ${packItem.name} to ${category.name}`,
       status: 'success',

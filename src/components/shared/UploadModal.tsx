@@ -15,7 +15,8 @@ import {
   Switch,
 } from '@chakra-ui/react';
 import { ChangeEvent, useState } from 'react';
-import { useDatabase } from '~/providers/DatabaseContext.ts';
+import { useApi } from '~/providers/ApiContext.ts';
+import { useModel } from '~/providers/ModelContext.ts';
 import { cropImage, resizeImageFromFile } from '~/services/imageUtils.ts';
 import { Image } from '~/types/Image.ts';
 
@@ -34,7 +35,8 @@ export function UploadModal({
   onClose: () => void;
   imageFinder: (image: Image) => boolean;
 }) {
-  const { images, dbInvoke } = useDatabase();
+  const { images } = useModel();
+  const { api } = useApi();
   const entityImage = images.find(imageFinder);
   const [fileUrl, setFileUrl] = useState(entityImage?.url);
   const [pasteImage, setPasteImage] = useState(false);
@@ -57,9 +59,9 @@ export function UploadModal({
   async function handleUpload() {
     if (fileUrl) {
       if (entityImage) {
-        await dbInvoke.updateImage(typeId, fileUrl);
+        await api.updateImage(typeId, fileUrl);
       } else {
-        await dbInvoke.addImage(type, typeId, fileUrl);
+        await api.addImage(type, typeId, fileUrl);
       }
     }
     onClose();
@@ -67,7 +69,7 @@ export function UploadModal({
 
   async function handleDelete() {
     if (entityImage) {
-      await dbInvoke.deleteImage(entityImage.id);
+      await api.deleteImage(entityImage.id);
     }
     resetAndClose();
   }

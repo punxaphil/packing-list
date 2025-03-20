@@ -1,17 +1,20 @@
 import { Outlet } from 'react-router';
 import { Header } from '~/components/pages/LoggedInLayout/Header.tsx';
-import { DatabaseProvider } from '~/providers/DatabaseProvider.tsx';
+import { ApiProvider } from '~/providers/ApiProvider.tsx';
 import { useFullscreenMode } from '~/providers/FullscreenModeContext.ts';
-import { PackingListProvider } from '~/providers/PackingListProvider.tsx';
+import { LocalStorageProvider } from '~/providers/LocalStorageProvider.tsx';
+import { ModelProvider } from '~/providers/ModelProvider.tsx';
 
 export function LoggedInLayout() {
   const { fullscreenMode } = useFullscreenMode();
   return (
-    <PackingListProvider>
-      <DatabaseProvider>
-        {!fullscreenMode && <Header />}
-        <Outlet />
-      </DatabaseProvider>
-    </PackingListProvider>
+    <LocalStorageProvider>
+      <ApiProvider>
+        <ModelProvider>
+          {!fullscreenMode && <Header />}
+          <Outlet />
+        </ModelProvider>
+      </ApiProvider>
+    </LocalStorageProvider>
   );
 }

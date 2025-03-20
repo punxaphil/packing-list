@@ -9,7 +9,8 @@
     "build": "npm run lint && tsc -b && vite build",
     "preview": "vite preview",
     "test": "vitest run",
-    "lint": "biome check src"
+    "lint": "biome check src",
+    "lint:fix": "biome check src --fix"
   },
   "dependencies": {
     "@chakra-ui/icons": "^2.2.4",

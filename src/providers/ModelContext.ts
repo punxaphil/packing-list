@@ -1,17 +1,16 @@
 import { createContext, useContext } from 'react';
 import { ColumnList } from '~/types/Column.ts';
 import { GroupedPackItem } from '~/types/GroupedPackItem.ts';
-import { HistoryItem } from '~/types/HistoryItem.ts';
 import { Image } from '~/types/Image.ts';
 import { NamedEntity } from '~/types/NamedEntity.ts';
 import { PackItem } from '~/types/PackItem.ts';
-import type { Database } from '~/services/database.ts';
 
-interface ContextType {
+interface UseModel {
   members: NamedEntity[];
   packItems: PackItem[];
   categories: NamedEntity[];
   images: Image[];
+  packingList: NamedEntity;
   packingLists: NamedEntity[];
   groupedPackItems: GroupedPackItem[];
   columns: ColumnList[];
@@ -23,16 +22,14 @@ interface ContextType {
     showTheseMembers,
     showTheseStates,
   }: { showTheseCategories: string[]; showTheseMembers: string[]; showTheseStates: string[] }) => void;
-  dbInvoke: Database;
-  changeHistory: HistoryItem[];
 }
 
-export const DatabaseContext = createContext<ContextType | undefined>(undefined);
+export const ModelContext = createContext<UseModel | undefined>(undefined);
 
-export function useDatabase() {
-  const context = useContext(DatabaseContext);
+export function useModel() {
+  const context = useContext(ModelContext);
   if (context === undefined) {
-    throw new Error('useDatabase must be used within a DatabaseContext.Provider');
+    throw new Error('use context must be used within a Context component');
   }
   return context;
 }
