@@ -30,13 +30,13 @@
     "@biomejs/biome": "1.9.4",
     "@testing-library/jest-dom": "^6.4.6",
     "@testing-library/react": "^16.2.0",
-    "@types/react": "^19.0.10",
+    "@types/react": "^19.0.12",
     "@types/react-dom": "^19.0.4",
     "@vitejs/plugin-react": "^4.3.1",
     "globals": "^16.0.0",
     "jsdom": "^26.0.0",
     "typescript": "^5.8.2",
-    "vite": "^6.2.2",
+    "vite": "^6.2.3",
     "vitest": "^3.0.9"
   }
 }
