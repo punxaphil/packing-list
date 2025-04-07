@@ -21,6 +21,7 @@ export function PackingListColumns({
   async function saveReorderedList(rows: PackingListRow[]) {
     const batch = api.initBatch();
     let currentCategory = '';
+    const deepClonedRows = JSON.parse(JSON.stringify(rows));
     for (const [index, row] of rows.entries()) {
       row.setRank(rows.length - index);
       if (row.packItem) {
@@ -32,6 +33,7 @@ export function PackingListColumns({
       }
     }
     await batch.commit();
+    api.addRowsToHistory(deepClonedRows);
   }
 
   async function onDragEnd(result: DragUpdate) {

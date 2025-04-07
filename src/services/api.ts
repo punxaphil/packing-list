@@ -17,6 +17,7 @@ import {
   persistentLocalCache,
   persistentMultipleTabManager,
   query,
+  setDoc,
   updateDoc,
   where,
   writeBatch,
@@ -27,7 +28,8 @@ import { Image } from '~/types/Image.ts';
 import { MemberPackItem } from '~/types/MemberPackItem.ts';
 import { NamedEntity } from '~/types/NamedEntity.ts';
 import { PackItem } from '~/types/PackItem.ts';
-import { sortEntities } from './utils.ts';
+import { sortEntities, UNCATEGORIZED } from './utils.ts';
+import { PackingListRow } from '~/types/Column.ts';
 
 const firebaseConfig = {
   apiKey: 'AIzaSyBB37kGiEQ2NBhHf9voJ6ugGRkUIyaOYAE',
@@ -387,6 +389,17 @@ export class Api {
         }
       }
     }
+    if (last.type === 'prevRows') {
+      const batch = this.initBatch();
+      for (const row of last.rows) {
+        if (row.packItem) {
+          this.updatePackItemBatch(row.packItem, batch);
+        } else if (row.category && row.category.id !== UNCATEGORIZED.id) {
+          this.updateCategoryBatch(row.category, batch);
+        }
+      }
+      await batch.commit();
+    }
   }
 
   itemsQuery(packingListId: string) {
@@ -394,5 +407,10 @@ export class Api {
       collection(firestore, USERS_KEY, this.userId, PACK_ITEMS_KEY),
       where('packingList', '==', packingListId)
     );
+  }
+
+  addRowsToHistory(rows: PackingListRow[]) {
+    const newHistory: HistoryItem[] = [...this.changeHistory, { type: 'prevRows', rows }];
+    this.setChangeHistory(newHistory);
   }
 }
