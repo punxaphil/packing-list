@@ -53,9 +53,16 @@ export function NewPackItemRow({
     handleEnter(e, async () => {
       await save();
     });
-    if (e.key === 'Escape' || e.key === 'Tab') {
+    if (e.key === 'Escape') {
       onHide();
     }
+  }
+
+  function onBlur() {
+    if (newRowText) {
+      save().catch(console.error);
+    }
+    onHide();
   }
 
   return (
@@ -65,7 +72,7 @@ export function NewPackItemRow({
         onChange={onChange}
         autoFocus
         placeholder="What to pack?"
-        onBlur={onHide}
+        onBlur={onBlur}
         onKeyDown={onKeyDown}
         mt="1"
       />
