@@ -100,6 +100,11 @@ export class Api {
     throw new Error('Unable to add to database');
   }
 
+  async set<K extends DocumentData>(userColl: string, id: string, data: WithFieldValue<K>) {
+    const coll = collection(firestore, USERS_KEY, this.getUserId(), userColl);
+    await setDoc(doc(coll, id), data);
+  }
+
   async updateInBatch<K extends DocumentData>(userColl: string, data: WithFieldValue<K>[]) {
     const batch = writeBatch(firestore);
     const coll = collection(firestore, USERS_KEY, this.getUserId(), userColl);
@@ -383,10 +388,7 @@ export class Api {
     }
     if (last.type === 'deleted') {
       if (last.packItem) {
-        const docRef = await this.add(PACK_ITEMS_KEY, last.packItem);
-        if (docRef) {
-          await this.update(PACK_ITEMS_KEY, docRef.id, { ...last.packItem, id: docRef.id });
-        }
+        await this.set(PACK_ITEMS_KEY, last.packItem.id, { ...last.packItem });
       }
     }
     if (last.type === 'prevRows') {
