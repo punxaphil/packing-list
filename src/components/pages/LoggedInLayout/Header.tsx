@@ -32,6 +32,10 @@ export function Header() {
           p={0}
           variant="unstyled"
           flexGrow={1}
+          overflow="hidden"
+          textOverflow="ellipsis"
+          whiteSpace="nowrap"
+          mx="2"
         />
         <HStack w="50px" justifyContent="flex-end">
           <ProfileAvatar size="sm" />

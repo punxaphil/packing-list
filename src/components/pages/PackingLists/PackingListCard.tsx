@@ -109,19 +109,29 @@ export function PackingListCard({
       <Box cursor="pointer" px={2}>
         <HStack gap="0">
           <DragHandle dragHandleProps={draggableProvided.dragHandleProps} />
-          <Box fontWeight="bold" onClick={onListClick} flexGrow={1}>
-            {packingList.name}
-          </Box>
-          <PLIconButton onClick={onDelete} icon={<AiOutlineDelete />} aria-label="Delete packing list" size="sm" />
-          <PLIconButton onClick={onCopy} icon={<AiOutlineCopy />} aria-label="Copy packing list" size="sm" />
+          <Stack gap="0" flexGrow={1} overflow="hidden">
+            <HStack gap="0">
+              <Box
+                fontWeight="bold"
+                onClick={onListClick}
+                flexGrow={1}
+                textOverflow="ellipsis"
+                whiteSpace="nowrap"
+                overflow="hidden"
+              >
+                {packingList.name}
+              </Box>
+              <Spacer />
+              <PLIconButton onClick={onDelete} icon={<AiOutlineDelete />} aria-label="Delete packing list" size="sm" />
+              <PLIconButton onClick={onCopy} icon={<AiOutlineCopy />} aria-label="Copy packing list" size="sm" />
+            </HStack>
+            <Box overflow="hidden" whiteSpace="nowrap" textOverflow="ellipsis" onClick={onListClick}>
+              {!packItems.length
+                ? 'No items'
+                : `${packItems.length} items (${packItems.filter((item) => item.checked).length} packed)`}
+            </Box>
+          </Stack>
         </HStack>
-        <Box overflow="hidden" whiteSpace="nowrap" textOverflow="ellipsis" onClick={onListClick}>
-          {packItems
-            .slice(0, 10)
-            .map((item) => item.name)
-            .join(', ')}
-          {!packItems.length ? 'No items' : ''}
-        </Box>
       </Box>
       <Spacer />
       <DeleteDialog
