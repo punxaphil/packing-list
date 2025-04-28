@@ -1,14 +1,5 @@
-import {
-  Button,
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalHeader,
-  ModalOverlay,
-  Stack,
-  useToast,
-} from '@chakra-ui/react';
+import { Button, Stack, useToast } from '@chakra-ui/react';
+import { BaseModal } from '~/components/shared/BaseModal.tsx';
 import { useDatabase } from '~/providers/DatabaseContext.ts';
 import { writeDb } from '~/services/database.ts';
 import { COLUMN_COLORS } from '~/types/Column.ts';
@@ -47,37 +38,28 @@ export function ConnectMembersToPackItemModal({
   }
 
   return (
-    <>
-      <Modal isOpen={isOpen} onClose={onClose}>
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>Connect members to pack item</ModalHeader>
-          <ModalCloseButton />
-          <ModalBody>
-            <Stack direction="row" flexWrap="wrap" justifyContent="center">
-              {members.map((l, index) => {
-                const memberIsInPackItem = packItem.members.some((m) => m.id === l.id);
-                const color = COLUMN_COLORS[index % COLUMN_COLORS.length];
-                return (
-                  <Button
-                    key={l.id}
-                    onClick={() => onClick(l)}
-                    m="3"
-                    bg={memberIsInPackItem ? color : ''}
-                    borderColor={memberIsInPackItem ? 'black' : color}
-                    borderWidth={memberIsInPackItem ? 2 : 4}
-                  >
-                    {l.name}
-                  </Button>
-                );
-              })}
-            </Stack>
-            <Button onClick={onClose} w="100%" mb={2}>
-              Done
+    <BaseModal isOpen={isOpen} onClose={onClose} title="Connect members to pack item">
+      <Stack direction="row" flexWrap="wrap" justifyContent="center">
+        {members.map((l, index) => {
+          const memberIsInPackItem = packItem.members.some((m) => m.id === l.id);
+          const color = COLUMN_COLORS[index % COLUMN_COLORS.length];
+          return (
+            <Button
+              key={l.id}
+              onClick={() => onClick(l)}
+              m="3"
+              bg={memberIsInPackItem ? color : ''}
+              borderColor={memberIsInPackItem ? 'black' : color}
+              borderWidth={memberIsInPackItem ? 2 : 4}
+            >
+              {l.name}
             </Button>
-          </ModalBody>
-        </ModalContent>
-      </Modal>
-    </>
+          );
+        })}
+      </Stack>
+      <Button onClick={onClose} w="100%" mb={2} mt={4}>
+        Done
+      </Button>
+    </BaseModal>
   );
 }

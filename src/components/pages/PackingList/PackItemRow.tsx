@@ -6,8 +6,10 @@ import { PackItemMenu } from '~/components/pages/PackingList/PackItemMenu.tsx';
 import { DragHandle } from '~/components/shared/DragHandle.tsx';
 import { MultiCheckbox } from '~/components/shared/MultiCheckbox.tsx';
 import { PLInput } from '~/components/shared/PLInput.tsx';
+import { RadioCheckbox } from '~/components/shared/RadioCheckbox.tsx';
 import { useDatabase } from '~/providers/DatabaseContext.ts';
 import { useNewPackItemRowId } from '~/providers/NewPackItemRowIdContext.ts';
+import { useSelectMode } from '~/providers/SelectModeContext.ts';
 import { writeDb } from '~/services/database.ts';
 import { PackItem } from '~/types/PackItem.ts';
 import { MemberPackItemRow } from './MemberPackItemRow.tsx';
@@ -32,6 +34,7 @@ export function PackItemRow({
 }) {
   const members = useDatabase().members;
   const { newPackItemRowId, setNewPackItemRowId } = useNewPackItemRowId();
+  const { isSelectMode, toggleItemSelection, isItemSelected } = useSelectMode();
 
   const memberRows = useMemo(() => {
     return getMemberRows(packItem.members, filteredMembers, members);
@@ -51,6 +54,10 @@ export function PackItemRow({
     await onUpdate(packItem);
   }
 
+  function handleSelect() {
+    toggleItemSelection(packItem);
+  }
+
   return (
     <Box
       sx={sx}
@@ -60,8 +67,16 @@ export function PackItemRow({
     >
       <PackItemRowWrapper>
         <Flex gap="3" align="center">
-          <DragHandle dragHandleProps={dragHandleProps} />
-          {packItem.members.length > 1 ? (
+          {/* Always show drag handle but pass null props when in select mode */}
+          <DragHandle dragHandleProps={isSelectMode ? null : dragHandleProps} />
+          
+          {isSelectMode ? (
+            <RadioCheckbox 
+              isChecked={isItemSelected(packItem)} 
+              onChange={handleSelect} 
+              colorScheme="blue"
+            />
+          ) : packItem.members.length > 1 ? (
             <MultiCheckbox packItem={packItem} onUpdate={onUpdate} />
           ) : (
             <Checkbox isChecked={packItem.checked} onChange={toggleItem} />
@@ -75,9 +90,10 @@ export function PackItemRow({
               onEnter={() => setNewPackItemRowId(packItem.id)}
             />
           </Flex>
-          <PackItemMenu packItem={packItem} />
+          {!isSelectMode && <PackItemMenu packItem={packItem} />}
         </Flex>
-        {memberRows.map(({ memberItem, member }) => (
+        
+        {!isSelectMode && memberRows.map(({ memberItem, member }) => (
           <MemberPackItemRow
             memberItem={memberItem}
             parent={packItem}
@@ -86,7 +102,8 @@ export function PackItemRow({
           />
         ))}
       </PackItemRowWrapper>
-      {newPackItemRowId === packItem.id && (
+      
+      {!isSelectMode && newPackItemRowId === packItem.id && (
         <NewPackItemRow
           categoryId={packItem.category}
           onHide={() => setNewPackItemRowId()}
