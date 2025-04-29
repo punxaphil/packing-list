@@ -5,6 +5,7 @@ import { PackingListColumns } from '~/components/pages/PackingList/PackingListCo
 import { PackingListControls } from '~/components/pages/PackingList/PackingListControls.tsx';
 import { useDatabase } from '~/providers/DatabaseContext.ts';
 import { usePackingList } from '~/providers/PackingListContext.ts';
+import { SelectModeProvider } from '~/providers/SelectModeProvider.tsx';
 import { writeDb } from '~/services/database.ts';
 
 export function PackingList() {
@@ -19,34 +20,36 @@ export function PackingList() {
   }
 
   return (
-    <Box mx="auto" width={width}>
-      {!textMode && (
-        <PackingListControls onTextMode={() => setTextMode(!textMode)} onMemberFilter={setFilteredMembers} />
-      )}
-      <Card mb="5">
-        <CardBody>
-          {textMode && <PackItemsTextMode onDone={() => setTextMode(false)} />}
-          {!textMode && (
-            <>
-              {groupedPackItems.length > 0 && <PackingListColumns filteredMembers={filteredMembers} />}
+    <SelectModeProvider>
+      <Box mx="auto" width={width}>
+        {!textMode && (
+          <PackingListControls onTextMode={() => setTextMode(!textMode)} onMemberFilter={setFilteredMembers} />
+        )}
+        <Card mb="5">
+          <CardBody>
+            {textMode && <PackItemsTextMode onDone={() => setTextMode(false)} />}
+            {!textMode && (
+              <>
+                {groupedPackItems.length > 0 && <PackingListColumns filteredMembers={filteredMembers} />}
 
-              {groupedPackItems.length === 0 && (
-                <Flex justifyContent="center" minWidth="max-content">
-                  <Text>
-                    {packItems.length > 0 ? (
-                      'No items match the current filter.'
-                    ) : (
-                      <>
-                        No items yet. <Link onClick={addFirstPackItem}>Click here to add one!</Link>
-                      </>
-                    )}
-                  </Text>
-                </Flex>
-              )}
-            </>
-          )}
-        </CardBody>
-      </Card>
-    </Box>
+                {groupedPackItems.length === 0 && (
+                  <Flex justifyContent="center" minWidth="max-content">
+                    <Text>
+                      {packItems.length > 0 ? (
+                        'No items match the current filter.'
+                      ) : (
+                        <>
+                          No items yet. <Link onClick={addFirstPackItem}>Click here to add one!</Link>
+                        </>
+                      )}
+                    </Text>
+                  </Flex>
+                )}
+              </>
+            )}
+          </CardBody>
+        </Card>
+      </Box>
+    </SelectModeProvider>
   );
 }

@@ -7,6 +7,7 @@ import { DragHandle } from '~/components/shared/DragHandle.tsx';
 import { PLInput } from '~/components/shared/PLInput.tsx';
 import { useDatabase } from '~/providers/DatabaseContext.ts';
 import { useNewPackItemRowId } from '~/providers/NewPackItemRowIdContext.ts';
+import { useSelectMode } from '~/providers/SelectModeContext.ts';
 import { writeDb } from '~/services/database.ts';
 import { UNCATEGORIZED, getPackItemGroup } from '~/services/utils.ts';
 import { NamedEntity } from '~/types/NamedEntity.ts';
@@ -24,6 +25,7 @@ export function PackingListCategory({
 }) {
   const { images, groupedPackItems } = useDatabase();
   const { newPackItemRowId, setNewPackItemRowId } = useNewPackItemRowId();
+  const { isSelectMode } = useSelectMode();
   const [checked, setChecked] = useState(false);
   const [isIndeterminate, setIsIndeterminate] = useState(false);
   const [packItemsInCat, setPackItemsInCat] = useState<PackItem[]>([]);
@@ -68,14 +70,15 @@ export function PackingListCategory({
   return (
     <>
       <Flex gap="1" alignItems="center" borderTopRadius="2xl" pt="1" sx={sx} px="2" h="32px">
-        {category.id && <DragHandle dragHandleProps={dragHandleProps} />}
-        <Checkbox isChecked={checked} isIndeterminate={isIndeterminate} onChange={toggleItem} />
+        {/* Always show drag handle when category has ID, but visually disable it in select mode */}
+        {category.id && <DragHandle dragHandleProps={dragHandleProps} disabled={isSelectMode} />}
+        {!isSelectMode && <Checkbox isChecked={checked} isIndeterminate={isIndeterminate} onChange={toggleItem} />}
         {categoryImage && <Image borderRadius="full" boxSize="30px" src={categoryImage} mr="2" />}
         <PLInput bold={true} value={category.name} onUpdate={onChangeCategory} disabled={category === UNCATEGORIZED} />
-        <CategoryMenu packItemsInCat={packItemsInCat} category={category} />
+        {!isSelectMode && <CategoryMenu packItemsInCat={packItemsInCat} category={category} />}
       </Flex>
 
-      {newPackItemRowId === category.id && (
+      {!isSelectMode && newPackItemRowId === category.id && (
         <NewPackItemRow categoryId={category.id} onHide={() => setNewPackItemRowId()} />
       )}
     </>

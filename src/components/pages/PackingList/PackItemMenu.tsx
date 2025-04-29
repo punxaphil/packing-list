@@ -6,10 +6,10 @@ import { DeleteDialog } from '~/components/shared/DeleteDialog.tsx';
 import { useDatabase } from '~/providers/DatabaseContext.ts';
 import { writeDb } from '~/services/database.ts';
 import { PackItem } from '~/types/PackItem.ts';
+import { CategoryModal } from './CategoryModal.tsx';
 import { ConnectMembersToPackItemModal } from './ConnectMembersToPackItemModal.tsx';
 import { ContextMenu } from './ContextMenu.tsx';
 import { CopyToOtherListModal } from './CopyToOtherListModal.tsx';
-import { MoveToCategoryModal } from './MoveToCategoryModal.tsx';
 
 export function PackItemMenu({
   packItem,
@@ -49,7 +49,7 @@ export function PackItemMenu({
         onClose={deleteDisclosure.onClose}
         isOpen={deleteDisclosure.isOpen}
       />
-      <MoveToCategoryModal isOpen={moveDisclosure.isOpen} onClose={moveDisclosure.onClose} packItem={packItem} />
+      <CategoryModal isOpen={moveDisclosure.isOpen} onClose={moveDisclosure.onClose} packItem={packItem} />
       <ConnectMembersToPackItemModal
         isOpen={membersDisclosure.isOpen}
         onClose={membersDisclosure.onClose}

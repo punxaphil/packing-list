@@ -1,18 +1,7 @@
-import {
-  Button,
-  ButtonGroup,
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalHeader,
-  ModalOverlay,
-  Stack,
-  Text,
-  useToast,
-} from '@chakra-ui/react';
+import { Button, ButtonGroup, Stack, Text, useToast } from '@chakra-ui/react';
 import { useState } from 'react';
 import { HexColorPicker } from 'react-colorful';
+import { BaseModal } from '~/components/shared/BaseModal.tsx';
 import { writeDb } from '~/services/database.ts';
 import { NamedEntity } from '~/types/NamedEntity.ts';
 
@@ -45,26 +34,19 @@ export function ColorPicker({
   }
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose}>
-      <ModalOverlay />
-      <ModalContent>
-        <ModalHeader>Set category color</ModalHeader>
-        <ModalCloseButton />
-        <ModalBody>
-          <Stack alignItems="center">
-            <HexColorPicker color={color} onChange={setColor} />
-            <Text mt="1">{color ?? 'No color selected'}</Text>
-            <ButtonGroup>
-              <Button onClick={saveColor} m="3" colorScheme="green">
-                Save
-              </Button>
-              <Button onClick={resetColor} m="3">
-                Reset
-              </Button>
-            </ButtonGroup>
-          </Stack>
-        </ModalBody>
-      </ModalContent>
-    </Modal>
+    <BaseModal isOpen={isOpen} onClose={onClose} title="Set category color">
+      <Stack alignItems="center">
+        <HexColorPicker color={color} onChange={setColor} />
+        <Text mt="1">{color ?? 'No color selected'}</Text>
+        <ButtonGroup>
+          <Button onClick={saveColor} m="3" colorScheme="green">
+            Save
+          </Button>
+          <Button onClick={resetColor} m="3">
+            Reset
+          </Button>
+        </ButtonGroup>
+      </Stack>
+    </BaseModal>
   );
 }
