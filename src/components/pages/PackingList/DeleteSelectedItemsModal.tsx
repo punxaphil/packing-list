@@ -19,7 +19,7 @@ export function DeleteSelectedItemsModal({
   isOpen: boolean;
   onClose: () => void;
 }) {
-  const { selectedItems, clearSelection, setSelectMode } = useSelectMode();
+  const { selectedItems, clearSelection } = useSelectMode();
   const cancelRef = useRef<HTMLButtonElement>(null);
   const toast = useToast();
 
@@ -42,9 +42,8 @@ export function DeleteSelectedItemsModal({
       status: 'success',
     });
 
-    // Clear selections and exit select mode after successful operation
+    // Clear selections but stay in select mode after successful operation
     clearSelection();
-    setSelectMode(false);
     onClose();
   }
 

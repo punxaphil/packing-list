@@ -1,5 +1,7 @@
-import { Box, Button, HStack, Spacer, useDisclosure } from '@chakra-ui/react';
+import { Box, Button, Flex, useBreakpointValue, useDisclosure } from '@chakra-ui/react';
 import {
+  AiOutlineArrowDown,
+  AiOutlineArrowUp,
   AiOutlineDelete,
   AiOutlineEdit,
   AiOutlineFullscreen,
@@ -24,9 +26,14 @@ export function PackingListControls({
 }) {
   const setFilter = useDatabase().setFilter;
   const { fullscreenMode, setFullscreenMode } = useFullscreenMode();
-  const { isSelectMode, setSelectMode, selectedItems } = useSelectMode();
+  const { isSelectMode, setSelectMode, selectedItems, moveSelectedItemsToTop, moveSelectedItemsToBottom } =
+    useSelectMode();
   const moveToCategoryDisclosure = useDisclosure();
   const deleteItemsDisclosure = useDisclosure();
+  // Determine button size based on screen size
+  const buttonSize = useBreakpointValue({ base: 'xs', md: 'sm' });
+  // Use icons only on very small screens
+  const showButtonText = useBreakpointValue({ base: false, sm: true });
 
   function onFilter(showTheseCategories: string[], showTheseMembers: string[], showTheseStates: string[]) {
     setFilter({ showTheseCategories, showTheseMembers, showTheseStates });
@@ -48,46 +55,82 @@ export function PackingListControls({
 
   return (
     <Box mb={2}>
-      <HStack justifyContent="space-between" alignItems="center" wrap="wrap" mb={1}>
-        <Filter onFilter={onFilter} />
-        <Spacer />
-
-        {isSelectMode ? (
-          <HStack>
+      {isSelectMode ? (
+        <Flex
+          direction={{ base: 'column', md: 'row' }}
+          justifyContent="space-between"
+          alignItems={{ base: 'stretch', md: 'center' }}
+          my={1}
+          gap={2}
+        >
+          <Flex
+            wrap="wrap"
+            gap={2}
+            alignItems="center"
+            justifyContent={{ base: 'flex-start', md: 'flex-end' }}
+            width="100%"
+          >
             <Button
-              size="sm"
+              size={buttonSize}
               colorScheme="blue"
               leftIcon={<AiOutlineTags />}
               onClick={moveToCategoryDisclosure.onOpen}
               isDisabled={selectedItems.length === 0}
+              flexGrow={{ base: 1, sm: 0 }}
             >
-              Category
+              {showButtonText ? 'Category' : ''}
             </Button>
             <Button
-              size="sm"
+              size={buttonSize}
+              colorScheme="teal"
+              leftIcon={<AiOutlineArrowUp />}
+              onClick={moveSelectedItemsToTop}
+              isDisabled={selectedItems.length === 0}
+              flexGrow={{ base: 1, sm: 0 }}
+            >
+              {showButtonText ? 'Move to Top' : ''}
+            </Button>
+            <Button
+              size={buttonSize}
+              colorScheme="teal"
+              leftIcon={<AiOutlineArrowDown />}
+              onClick={moveSelectedItemsToBottom}
+              isDisabled={selectedItems.length === 0}
+              flexGrow={{ base: 1, sm: 0 }}
+            >
+              {showButtonText ? 'Move to Bottom' : ''}
+            </Button>
+            <Button
+              size={buttonSize}
               colorScheme="red"
               leftIcon={<AiOutlineDelete />}
               onClick={deleteItemsDisclosure.onOpen}
               isDisabled={selectedItems.length === 0}
+              flexGrow={{ base: 1, sm: 0 }}
             >
-              Delete
+              {showButtonText ? 'Delete' : ''}
             </Button>
-            <Button size="sm" onClick={toggleSelectMode}>
-              Exit select mode
+            <Button size={buttonSize} onClick={toggleSelectMode} flexGrow={{ base: 1, sm: 0 }}>
+              {showButtonText ? 'Exit select mode' : 'Exit'}
             </Button>
-          </HStack>
-        ) : (
-          <>
-            <PLIconButton aria-label="Select mode" icon={<IoMdRadioButtonOn />} onClick={toggleSelectMode} mr={2} />
-            <PLIconButton aria-label="Edit" icon={<AiOutlineEdit />} onClick={onEditClick} mr={2} />
-            <PLIconButton
-              aria-label="Full screen"
-              icon={fullscreenMode ? <AiOutlineFullscreenExit /> : <AiOutlineFullscreen />}
-              onClick={onFullscreen}
-            />
-          </>
-        )}
-      </HStack>
+          </Flex>
+        </Flex>
+      ) : (
+        <Flex direction="row" justifyContent="space-between" alignItems="center" mb={1} wrap="wrap" gap={2}>
+          <Flex justifyContent="space-between" width="100%">
+            <Filter onFilter={onFilter} />
+            <Flex>
+              <PLIconButton aria-label="Select mode" icon={<IoMdRadioButtonOn />} onClick={toggleSelectMode} mr={2} />
+              <PLIconButton aria-label="Edit" icon={<AiOutlineEdit />} onClick={onEditClick} mr={2} />
+              <PLIconButton
+                aria-label="Full screen"
+                icon={fullscreenMode ? <AiOutlineFullscreenExit /> : <AiOutlineFullscreen />}
+                onClick={onFullscreen}
+              />
+            </Flex>
+          </Flex>
+        </Flex>
+      )}
 
       <CategoryModal isOpen={moveToCategoryDisclosure.isOpen} onClose={moveToCategoryDisclosure.onClose} />
 

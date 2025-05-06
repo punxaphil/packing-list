@@ -8,6 +8,8 @@ interface SelectModeContextType {
   toggleItemSelection: (packItem: PackItem) => void;
   clearSelection: () => void;
   isItemSelected: (packItem: PackItem) => boolean;
+  moveSelectedItemsToTop: () => Promise<void>;
+  moveSelectedItemsToBottom: () => Promise<void>;
 }
 
 export const SelectModeContext = createContext<SelectModeContextType | undefined>(undefined);

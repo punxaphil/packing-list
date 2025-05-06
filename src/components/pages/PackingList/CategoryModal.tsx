@@ -15,7 +15,7 @@ interface CategoryModalProps {
 
 export function CategoryModal({ isOpen, onClose, packItem }: CategoryModalProps) {
   const { categories, packItems } = useDatabase();
-  const { selectedItems, clearSelection, setSelectMode } = useSelectMode();
+  const { selectedItems, clearSelection } = useSelectMode();
   const toast = useToast();
 
   // Determine if we're in single or multi mode
@@ -93,9 +93,8 @@ export function CategoryModal({ isOpen, onClose, packItem }: CategoryModalProps)
       });
     }
 
-    // Clear selections and exit select mode after multi-operation
+    // Clear selections but stay in select mode
     clearSelection();
-    setSelectMode(false);
     onClose();
   }
 
