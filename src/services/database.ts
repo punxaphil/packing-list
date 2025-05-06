@@ -121,29 +121,17 @@ export const writeDb = {
     return docRef.id;
   },
   updateMembers: async (toUpdate: NamedEntity[] | NamedEntity) => {
-    if (Array.isArray(toUpdate)) {
-      await updateInBatch(MEMBERS_KEY, toUpdate);
-    } else {
-      await update(MEMBERS_KEY, toUpdate.id, toUpdate);
-    }
+    await updateNamedEntities(MEMBERS_KEY, toUpdate);
   },
   addCategory: async (name: string): Promise<string> => {
     const docRef = await add(CATEGORIES_KEY, { name });
     return docRef.id;
   },
   updateCategories: async (categories: NamedEntity[] | NamedEntity) => {
-    if (Array.isArray(categories)) {
-      await updateInBatch(CATEGORIES_KEY, categories);
-    } else {
-      await update(CATEGORIES_KEY, categories.id, categories);
-    }
+    await updateNamedEntities(CATEGORIES_KEY, categories);
   },
   updatePackingLists: async (packingLists: NamedEntity[] | NamedEntity) => {
-    if (Array.isArray(packingLists)) {
-      await updateInBatch(PACKING_LISTS_KEY, packingLists);
-    } else {
-      await update(PACKING_LISTS_KEY, packingLists.id, packingLists);
-    }
+    await updateNamedEntities(PACKING_LISTS_KEY, packingLists);
   },
   addImage: async (type: string, typeId: string, url: string): Promise<void> => {
     await add(IMAGES_KEY, { type, typeId, url });
@@ -270,6 +258,15 @@ function getUserId() {
     throw new Error('No user logged in');
   }
   return userId;
+}
+
+// Generic function to update one or multiple NamedEntity documents
+async function updateNamedEntities(collectionKey: string, entities: NamedEntity[] | NamedEntity) {
+  if (Array.isArray(entities)) {
+    await updateInBatch(collectionKey, entities);
+  } else {
+    await update(collectionKey, entities.id, entities);
+  }
 }
 
 function fromQueryResult<K>(res: QuerySnapshot) {

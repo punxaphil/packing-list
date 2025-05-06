@@ -24,7 +24,7 @@ export function CategoryModal({ isOpen, onClose, packItem }: CategoryModalProps)
 
   // Check if all selected items are already uncategorized
   const allItemsUncategorized =
-    !isSingleItemMode && selectedItems.length > 0 && selectedItems.every((item) => !item.category);
+    !isSingleItemMode && itemsToMove.length > 0 && itemsToMove.every((item) => !item.category);
 
   // Check if we should show the remove category option
   const showRemoveCategoryOption = isSingleItemMode
@@ -34,79 +34,71 @@ export function CategoryModal({ isOpen, onClose, packItem }: CategoryModalProps)
   // Find the lowest rank in a category (for placing items at the bottom)
   function getBottomRank(categoryId: string): number {
     const itemsInCategory = packItems.filter((item) => item.category === categoryId);
+    // If category is empty, rank is 0, otherwise place below the last item
     return itemsInCategory.length === 0 ? 0 : Math.min(...itemsInCategory.map((item) => item.rank)) - 1;
   }
 
-  // Handle single item category change
-  async function handleSingleItemCategoryChange(category: NamedEntity | null) {
-    if (!packItem) {
-      return;
-    }
-
-    const updatedPackItem: PackItem = {
-      ...packItem,
-      category: category?.id || '',
-    };
-
-    await writeDb.updatePackItem(updatedPackItem);
-
-    const message = category ? `Moved ${packItem.name} to ${category.name}` : `Removed category from ${packItem.name}`;
-
-    toast({ title: message, status: 'success' });
-    onClose();
-  }
-
-  // Handle multiple items category change
-  async function handleMultipleItemsCategoryChange(category: NamedEntity | null) {
-    const batch = writeDb.initBatch();
-
-    if (category === null) {
-      // Remove category from all selected items
-      for (const item of selectedItems) {
-        const updatedItem = { ...item, category: '' };
-        writeDb.updatePackItemBatch(updatedItem, batch);
-      }
-
-      await batch.commit();
-      toast({
-        title: `Removed category from ${selectedItems.length} items`,
-        status: 'success',
-      });
-    } else {
-      // Add items to category, positioning them at the bottom
-      let currentRank = getBottomRank(category.id);
-
-      for (const item of selectedItems) {
-        const updatedItem = {
-          ...item,
-          category: category.id,
-          rank: currentRank,
-        };
-        writeDb.updatePackItemBatch(updatedItem, batch);
-        currentRank--; // Decrement rank to place next item below this one
-      }
-
-      await batch.commit();
-      toast({
-        title: `Moved ${selectedItems.length} items to ${category.name}`,
-        status: 'success',
-      });
-    }
-
-    // Clear selections but stay in select mode
-    clearSelection();
-    onClose();
-  }
-
-  async function onClick(category: NamedEntity | null) {
+  // Handle category change for one or more items
+  async function handleCategoryChange(category: NamedEntity | null) {
     if (itemsToMove.length === 0) {
       onClose();
       return;
     }
 
-    isSingleItemMode
-      ? await handleSingleItemCategoryChange(category)
-      : await handleMultipleItemsCategoryChange(category);
+    const batch = writeDb.initBatch();
+    const newCategoryId = category?.id || '';
+    let message: string;
+
+    if (isSingleItemMode && packItem) {
+      const updatedPackItem: PackItem = {
+        ...packItem,
+        category: newCategoryId,
+      };
+      // For single item, rank is not changed unless moved to a new category where it's placed at bottom
+      if (packItem.category !== newCategoryId && newCategoryId !== '') {
+        updatedPackItem.rank = getBottomRank(newCategoryId);
+      } else if (newCategoryId === '') {
+        // If category is removed, rank might need adjustment if it was based on category context
+        // For now, we keep it, but this could be a point of future refinement.
+      }
+      writeDb.updatePackItemBatch(updatedPackItem, batch); // Use batch even for single item for consistency
+      message = category ? `Moved ${packItem.name} to ${category.name}` : `Removed category from ${packItem.name}`;
+    } else {
+      // Multi-item mode
+      if (newCategoryId === '') {
+        // Remove category from all selected items
+        for (const item of itemsToMove) {
+          const updatedItem = { ...item, category: '' };
+          writeDb.updatePackItemBatch(updatedItem, batch);
+        }
+        message = `Removed category from ${itemsToMove.length} items`;
+      } else {
+        // Add items to a new category, positioning them at the bottom
+        let currentRank = getBottomRank(newCategoryId);
+        for (const item of itemsToMove) {
+          const updatedItem = {
+            ...item,
+            category: newCategoryId,
+            rank: currentRank,
+          };
+          writeDb.updatePackItemBatch(updatedItem, batch);
+          currentRank--; // Decrement rank to place next item below this one
+        }
+        if (category) {
+          // Check if category is not null before accessing its name
+          message = `Moved ${itemsToMove.length} items to ${category.name}`;
+        } else {
+          // This case should ideally not be reached if newCategoryId is not ''
+          // but as a fallback or if logic changes, this handles it.
+          message = `Moved ${itemsToMove.length} items to a new category`;
+        }
+      }
+      clearSelection(); // Clear selections only in multi-item mode
+    }
+
+    await batch.commit();
+    toast({ title: message, status: 'success' });
+    onClose();
   }
 
   // In single mode, exclude the current category from options
@@ -118,7 +110,7 @@ export function CategoryModal({ isOpen, onClose, packItem }: CategoryModalProps)
       <VStack align="stretch" spacing={3}>
         {showRemoveCategoryOption && (
           <>
-            <Button onClick={() => onClick(null)} colorScheme="gray" variant="outline" width="100%">
+            <Button onClick={() => handleCategoryChange(null)} colorScheme="gray" variant="outline" width="100%">
               Remove category
             </Button>
 
@@ -133,7 +125,12 @@ export function CategoryModal({ isOpen, onClose, packItem }: CategoryModalProps)
         {/* Category buttons */}
         <Flex wrap="wrap" justify="center">
           {availableCategories.map((category, index) => (
-            <CategoryButton key={category.id} category={category} index={index} onClick={(c) => onClick(c)} />
+            <CategoryButton
+              key={category.id}
+              category={category}
+              index={index}
+              onClick={(c) => handleCategoryChange(c)}
+            />
           ))}
         </Flex>
       </VStack>
