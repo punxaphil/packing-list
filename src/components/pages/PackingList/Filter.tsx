@@ -1,6 +1,6 @@
 import { Menu, MenuButton, MenuDivider, MenuList, SmallCloseIcon, Text } from '@chakra-ui/icons';
 import { Button, HStack, MenuItemOption, MenuOptionGroup, useBreakpointValue } from '@chakra-ui/react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { AiOutlineFilter } from 'react-icons/ai';
 import { useDatabase } from '~/providers/DatabaseContext.ts';
 import { UNCATEGORIZED } from '~/services/utils.ts';
@@ -8,6 +8,20 @@ import { COLUMN_COLORS } from '~/types/Column.ts';
 
 export const CHECKED_FILTER_STATE = '☑ Checked';
 export const UNCHECKED_FILTER_STATE = '☐ Unchecked';
+
+// Helper function moved outside the component to avoid TSX parsing ambiguity with generics
+function getInitialState<T>(key: string, defaultValue: T): T {
+  const saved = localStorage.getItem(key);
+  if (saved) {
+    try {
+      return JSON.parse(saved) as T;
+    } catch (error) {
+      console.error(`Error parsing localStorage key "${key}":`, error);
+      return defaultValue;
+    }
+  }
+  return defaultValue;
+}
 
 export function Filter({
   onFilter,
@@ -17,9 +31,32 @@ export function Filter({
   const { categoriesInPackingList, membersInPackingList } = useDatabase();
   const categories = [UNCATEGORIZED, ...categoriesInPackingList];
   const members = [{ id: '', name: 'Without members', rank: 0 }, ...membersInPackingList];
-  const [filteredCategories, setFilteredCategories] = useState<string[]>([]);
-  const [filteredMembers, setFilteredMembers] = useState<string[]>([]);
-  const [filteredPackItemState, setFilteredPackItemState] = useState<string[]>([]);
+
+  const [filteredCategories, setFilteredCategories] = useState<string[]>(() =>
+    getInitialState('filteredCategories', []),
+  );
+  const [filteredMembers, setFilteredMembers] = useState<string[]>(() => getInitialState('filteredMembers', []));
+  const [filteredPackItemState, setFilteredPackItemState] = useState<string[]>(() =>
+    getInitialState('filteredPackItemState', []),
+  );
+
+  useEffect(() => {
+    localStorage.setItem('filteredCategories', JSON.stringify(filteredCategories));
+  }, [filteredCategories]);
+
+  useEffect(() => {
+    localStorage.setItem('filteredMembers', JSON.stringify(filteredMembers));
+  }, [filteredMembers]);
+
+  useEffect(() => {
+    localStorage.setItem('filteredPackItemState', JSON.stringify(filteredPackItemState));
+  }, [filteredPackItemState]);
+
+  useEffect(() => {
+    // Apply filters on initial load
+    onFilter(filteredCategories, filteredMembers, filteredPackItemState);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Dependencies are intentionally omitted to run only once on mount with initial localStorage values.
 
   function onChangeCategories(filter: string | string[]) {
     const arr = Array.isArray(filter) ? filter : [filter];
@@ -62,9 +99,9 @@ export function Filter({
   ].filter((e) => !!e);
 
   return (
-    <>
+    <HStack ml="3" spacing={0} alignItems="center">
       <Menu>
-        <MenuButton ml="3">
+        <MenuButton>
           <HStack gap={0}>
             <AiOutlineFilter />
             <Text fontSize="2xs">
@@ -116,6 +153,6 @@ export function Filter({
             {c?.name}
           </Button>
         ))}
-    </>
+    </HStack>
   );
 }
