@@ -1,6 +1,6 @@
 import { Menu, MenuButton, MenuDivider, MenuList, SmallCloseIcon, Text } from '@chakra-ui/icons';
 import { Button, HStack, MenuItemOption, MenuOptionGroup, useBreakpointValue } from '@chakra-ui/react';
-import { useState, useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react'; // Added useRef
 import { AiOutlineFilter } from 'react-icons/ai';
 import { useDatabase } from '~/providers/DatabaseContext.ts';
 import { UNCATEGORIZED } from '~/services/utils.ts';
@@ -33,48 +33,49 @@ export function Filter({
   const members = [{ id: '', name: 'Without members', rank: 0 }, ...membersInPackingList];
 
   const [filteredCategories, setFilteredCategories] = useState<string[]>(() =>
-    getInitialState('filteredCategories', []),
+    getInitialState('filteredCategories', [])
   );
   const [filteredMembers, setFilteredMembers] = useState<string[]>(() => getInitialState('filteredMembers', []));
   const [filteredPackItemState, setFilteredPackItemState] = useState<string[]>(() =>
-    getInitialState('filteredPackItemState', []),
+    getInitialState('filteredPackItemState', [])
   );
+
+  const initialFilterCallDoneRef = useRef(false);
 
   useEffect(() => {
     localStorage.setItem('filteredCategories', JSON.stringify(filteredCategories));
-  }, [filteredCategories]);
-
-  useEffect(() => {
     localStorage.setItem('filteredMembers', JSON.stringify(filteredMembers));
-  }, [filteredMembers]);
-
-  useEffect(() => {
     localStorage.setItem('filteredPackItemState', JSON.stringify(filteredPackItemState));
-  }, [filteredPackItemState]);
+  }, [filteredCategories, filteredMembers, filteredPackItemState]);
 
   useEffect(() => {
-    // Apply filters on initial load
-    onFilter(filteredCategories, filteredMembers, filteredPackItemState);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Dependencies are intentionally omitted to run only once on mount with initial localStorage values.
+    // This effect ensures onFilter is called with initial values from localStorage
+    // while adhering to exhaustive-deps by including all dependencies.
+    // The ref guard ensures the onFilter logic here only executes once.
+    if (!initialFilterCallDoneRef.current) {
+      onFilter(filteredCategories, filteredMembers, filteredPackItemState);
+      initialFilterCallDoneRef.current = true;
+    }
+  }, [onFilter, filteredCategories, filteredMembers, filteredPackItemState]);
 
-  function onChangeCategories(filter: string | string[]) {
-    const arr = Array.isArray(filter) ? filter : [filter];
-    onFilter(arr, filteredMembers, filteredPackItemState);
-    setFilteredCategories(arr);
-  }
+  const handleFilterChange = (value: string | string[], type: 'categories' | 'members' | 'packItemState') => {
+    const newValues = Array.isArray(value) ? value : [value];
+    let updatedCategories = filteredCategories;
+    let updatedMembers = filteredMembers;
+    let updatedPackItemState = filteredPackItemState;
 
-  function onChangeMembers(filter: string | string[]) {
-    const arr = Array.isArray(filter) ? filter : [filter];
-    onFilter(filteredCategories, arr, filteredPackItemState);
-    setFilteredMembers(arr);
-  }
-
-  function onChangePackItemState(filter: string | string[]) {
-    const arr = Array.isArray(filter) ? filter : [filter];
-    onFilter(filteredCategories, filteredMembers, arr);
-    setFilteredPackItemState(arr);
-  }
+    if (type === 'categories') {
+      setFilteredCategories(newValues);
+      updatedCategories = newValues;
+    } else if (type === 'members') {
+      setFilteredMembers(newValues);
+      updatedMembers = newValues;
+    } else if (type === 'packItemState') {
+      setFilteredPackItemState(newValues);
+      updatedPackItemState = newValues;
+    }
+    onFilter(updatedCategories, updatedMembers, updatedPackItemState);
+  };
 
   function removeNamedEntityFilter(id: string) {
     if (filteredCategories.includes(id)) {
@@ -85,7 +86,8 @@ export function Filter({
       const arr = filteredMembers.filter((f) => f !== id);
       onFilter(filteredCategories, arr, filteredPackItemState);
       setFilteredMembers(arr);
-    } else {
+    } else if (filteredPackItemState.includes(id)) {
+      // Explicitly check packItemState
       const arr = filteredPackItemState.filter((f) => f !== id);
       onFilter(filteredCategories, filteredMembers, arr);
       setFilteredPackItemState(arr);
@@ -113,7 +115,7 @@ export function Filter({
           <MenuOptionGroup
             type="checkbox"
             value={filteredPackItemState}
-            onChange={onChangePackItemState}
+            onChange={(value) => handleFilterChange(value, 'packItemState')}
             title="Pack Item state"
           >
             {[CHECKED_FILTER_STATE, UNCHECKED_FILTER_STATE].map((entity) => (
@@ -122,7 +124,12 @@ export function Filter({
               </MenuItemOption>
             ))}
           </MenuOptionGroup>
-          <MenuOptionGroup type="checkbox" value={filteredCategories} onChange={onChangeCategories} title="Categories">
+          <MenuOptionGroup
+            type="checkbox"
+            value={filteredCategories}
+            onChange={(value) => handleFilterChange(value, 'categories')}
+            title="Categories"
+          >
             {categories.map((entity) => (
               <MenuItemOption key={entity.id} value={entity.id}>
                 {entity.name}
@@ -130,7 +137,12 @@ export function Filter({
             ))}
           </MenuOptionGroup>
           <MenuDivider />
-          <MenuOptionGroup type="checkbox" value={filteredMembers} onChange={onChangeMembers} title="Members">
+          <MenuOptionGroup
+            type="checkbox"
+            value={filteredMembers}
+            onChange={(value) => handleFilterChange(value, 'members')}
+            title="Members"
+          >
             {members.map((entity) => (
               <MenuItemOption key={entity.id} value={entity.id}>
                 {entity.name}
