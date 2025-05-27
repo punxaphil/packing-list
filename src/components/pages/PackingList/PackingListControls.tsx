@@ -1,4 +1,4 @@
-import { Box, Button, Flex, useBreakpointValue, useDisclosure } from '@chakra-ui/react';
+import { Box, Button, Flex, Tooltip, useBreakpointValue, useDisclosure } from '@chakra-ui/react';
 import {
   AiOutlineArrowDown,
   AiOutlineArrowUp,
@@ -9,7 +9,7 @@ import {
   AiOutlineTags,
 } from 'react-icons/ai';
 import { IoMdRadioButtonOn } from 'react-icons/io';
-import { MdOutlineRemoveDone } from 'react-icons/md';
+import { MdOutlineRemoveDone, MdUndo } from 'react-icons/md';
 import { CategoryModal } from '~/components/pages/PackingList/CategoryModal.tsx';
 import { DeleteItemsModal } from '~/components/pages/PackingList/DeleteItemsModal.tsx';
 import { DeleteSelectedItemsModal } from '~/components/pages/PackingList/DeleteSelectedItemsModal.tsx';
@@ -18,6 +18,7 @@ import { PLIconButton } from '~/components/shared/PLIconButton.tsx';
 import { useDatabase } from '~/providers/DatabaseContext.ts';
 import { useFullscreenMode } from '~/providers/FullscreenModeContext.ts';
 import { useSelectMode } from '~/providers/SelectModeContext.ts';
+import { useUndo } from '~/providers/UndoContext.ts';
 
 export function PackingListControls({
   onTextMode,
@@ -36,6 +37,7 @@ export function PackingListControls({
     moveSelectedItemsToBottom,
     clearSelection,
   } = useSelectMode();
+  const { canUndo, performUndo, getUndoDescription, undoHistory } = useUndo();
   const moveToCategoryDisclosure = useDisclosure();
   const deleteItemsDisclosure = useDisclosure();
   const deleteCheckedItemsDisclosure = useDisclosure();
@@ -68,6 +70,10 @@ export function PackingListControls({
 
   function onFullscreen() {
     setFullscreenMode(!fullscreenMode);
+  }
+
+  async function handleUndo() {
+    await performUndo();
   }
 
   return (
@@ -137,6 +143,24 @@ export function PackingListControls({
           <Flex justifyContent="space-between" width="100%">
             <Filter onFilter={onFilter} />
             <Flex>
+              <Tooltip
+                label={
+                  canUndo
+                    ? `Undo: ${getUndoDescription()} (${undoHistory.length} action${undoHistory.length === 1 ? '' : 's'} available)`
+                    : 'No actions to undo'
+                }
+                placement="bottom"
+              >
+                <Box>
+                  <PLIconButton
+                    aria-label="Undo last action"
+                    icon={<MdUndo />}
+                    onClick={handleUndo}
+                    mr={2}
+                    isDisabled={!canUndo}
+                  />
+                </Box>
+              </Tooltip>
               <PLIconButton aria-label="Select mode" icon={<IoMdRadioButtonOn />} onClick={toggleSelectMode} mr={2} />
               <PLIconButton aria-label="Edit" icon={<AiOutlineEdit />} onClick={onEditClick} mr={2} />
               <PLIconButton

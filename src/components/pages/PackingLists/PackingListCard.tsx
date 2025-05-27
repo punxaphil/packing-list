@@ -7,6 +7,7 @@ import { DragHandle } from '~/components/shared/DragHandle.tsx';
 import { PLIconButton } from '~/components/shared/PLIconButton.tsx';
 import { useDatabase } from '~/providers/DatabaseContext.ts';
 import { usePackingList } from '~/providers/PackingListContext.ts';
+import { useUndo } from '~/providers/UndoContext.ts';
 import { writeDb } from '~/services/database.ts';
 import { findUniqueName, rankOnTop } from '~/services/utils.ts';
 import { NamedEntity } from '~/types/NamedEntity.ts';
@@ -29,6 +30,7 @@ export function PackingListCard({
   const navigate = useNavigate();
   const { packingLists, groupedPackItems } = useDatabase();
   const { setPackingListId } = usePackingList();
+  const { addUndoAction } = useUndo();
   const toast = useToast();
 
   function onListClick() {
@@ -44,19 +46,39 @@ export function PackingListCard({
     }
   }
 
-  async function confirmDelete() {
+  async function deletePackingListAndItems() {
     const batch = writeDb.initBatch();
     for (const packItem of packItems) {
       writeDb.deletePackItemBatch(packItem.id, batch);
     }
     writeDb.deletePackingListBatch(packingList.id, batch);
     await batch.commit();
+  }
+
+  function switchToNextPackingList() {
     const filtered = packingLists.filter((l) => l.id !== packingList.id);
     const selectedPackingList = filtered[0];
     setPackingListId(selectedPackingList.id);
+  }
+
+  async function confirmDelete() {
+    const deletedPackingList = { ...packingList };
+    const deletedPackItems = [...packItems];
+
+    await deletePackingListAndItems();
+    switchToNextPackingList();
+
+    addUndoAction({
+      type: 'delete-packing-list',
+      description: `Deleted packing list "${packingList.name}"`,
+      data: { packingList: deletedPackingList, items: deletedPackItems },
+    });
+
     toast({
-      title: `Packing list "${packingList.name}" deleted`,
+      title: `Deleted packing list "${packingList.name}"`,
       status: 'success',
+      duration: 3000,
+      isClosable: true,
     });
   }
 

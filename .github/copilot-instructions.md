@@ -1,5 +1,9 @@
+# GitHub Copilot Instructions
+
+## Project Context
 This is a React project using TypeScript, Chakra UI, Firebase, and Biome for linting and formatting.
 
+## Coding Guidelines
 - Always use TypeScript.
 - Make sure to fix any TypeScript errors or warnings.
 - Follow Chakra UI best practices for UI components.
@@ -10,15 +14,19 @@ This is a React project using TypeScript, Chakra UI, Firebase, and Biome for lin
 - Use the provided providers for state management where applicable (e.g., DatabaseProvider, ErrorProvider).
 - When adding new dependencies, use `npm install`.
 - For any new UI components, ensure they are responsive and accessible.
-- Don't comment or JSDoc code, instead break out to well named functions
-- Don't duplicate code unless it's 3 lines or less, instead break out into common function
-- Don't use npx if the dependency is already installed
 - There should be no commented out code
 - try to avoid functions longer than 20 lines, if it is longer break it out into smaller functions
-- don't cd into root directory, you are already there
 - keep all helper inside the main component function
 - order in main component function:
   - state and other consts
   - effects
   - helper functions
   - render
+
+## Do not
+- Don't comment or JSDoc code, instead break out to well named functions
+- Don't duplicate code unless it's 3 lines or less, instead break out into common function
+- Don't use npx if the dependency is already installed
+- Don't cd into root directory, you are already there
+- Don't run the application, just write the code
+- Don't ignore promises, always await them

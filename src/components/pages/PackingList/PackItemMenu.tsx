@@ -1,9 +1,10 @@
 import { MenuItem } from '@chakra-ui/icons';
-import { useDisclosure } from '@chakra-ui/react';
+import { useDisclosure, useToast } from '@chakra-ui/react';
 import { AiOutlineCopy, AiOutlineDelete, AiOutlineUsergroupAdd } from 'react-icons/ai';
 import { TbStatusChange } from 'react-icons/tb';
 import { DeleteDialog } from '~/components/shared/DeleteDialog.tsx';
 import { useDatabase } from '~/providers/DatabaseContext.ts';
+import { useUndo } from '~/providers/UndoContext.ts';
 import { writeDb } from '~/services/database.ts';
 import { PackItem } from '~/types/PackItem.ts';
 import { CategoryModal } from './CategoryModal.tsx';
@@ -17,13 +18,29 @@ export function PackItemMenu({
   packItem: PackItem;
 }) {
   const { packingLists } = useDatabase();
+  const { addUndoAction } = useUndo();
   const copyDisclosure = useDisclosure();
   const deleteDisclosure = useDisclosure();
   const moveDisclosure = useDisclosure();
   const membersDisclosure = useDisclosure();
+  const toast = useToast();
 
   async function onConfirmDelete() {
+    const deletedItem = { ...packItem };
     await writeDb.deletePackItem(packItem.id);
+
+    addUndoAction({
+      type: 'delete-pack-item',
+      description: `Deleted item ${packItem.name}`,
+      data: { items: [deletedItem] },
+    });
+
+    toast({
+      title: `Deleted item ${packItem.name}`,
+      status: 'success',
+      duration: 3000,
+      isClosable: true,
+    });
   }
 
   return (

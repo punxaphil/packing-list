@@ -1,11 +1,12 @@
 import { MenuItem } from '@chakra-ui/icons';
-import { useDisclosure } from '@chakra-ui/react';
+import { useDisclosure, useToast } from '@chakra-ui/react';
 import { AiOutlineCopy, AiOutlineDelete } from 'react-icons/ai';
 import { IoColorPaletteOutline } from 'react-icons/io5';
 import { TbCategoryPlus } from 'react-icons/tb';
 import { DeleteDialog } from '~/components/shared/DeleteDialog.tsx';
 import { useDatabase } from '~/providers/DatabaseContext.ts';
 import { useNewPackItemRowId } from '~/providers/NewPackItemRowIdContext.ts';
+import { useUndo } from '~/providers/UndoContext.ts';
 import { writeDb } from '~/services/database.ts';
 import { NamedEntity } from '~/types/NamedEntity.ts';
 import { PackItem } from '~/types/PackItem.ts';
@@ -22,15 +23,20 @@ export function CategoryMenu({
 }) {
   const { setNewPackItemRowId } = useNewPackItemRowId();
   const { packingLists } = useDatabase();
+  const { addUndoAction } = useUndo();
   const copyDisclosure = useDisclosure();
   const deleteDisclosure = useDisclosure();
   const colorDisclosure = useDisclosure();
+  const toast = useToast();
 
   function copyToOtherList() {
     copyDisclosure.onOpen();
   }
 
   async function onConfirmDelete() {
+    const itemsToDelete = packItemsInCat.filter((packItem) => packItem.category === category.id);
+    const deletedItems = [...itemsToDelete];
+
     const batch = writeDb.initBatch();
     for (const packItem of packItemsInCat) {
       if (packItem.category === category.id) {
@@ -38,6 +44,19 @@ export function CategoryMenu({
       }
     }
     await batch.commit();
+
+    addUndoAction({
+      type: 'delete-category-items',
+      description: `Deleted ${deletedItems.length} items in category ${category.name}`,
+      data: { items: deletedItems },
+    });
+
+    toast({
+      title: `Deleted ${deletedItems.length} items in category ${category.name}`,
+      status: 'success',
+      duration: 3000,
+      isClosable: true,
+    });
   }
 
   return (

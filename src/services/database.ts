@@ -163,12 +163,13 @@ export const writeDb = {
     members: MemberPackItem[],
     category: string,
     rank: number,
-    packingList: string
+    packingList: string,
+    checked = false
   ) {
     return addBatch(PACK_ITEMS_KEY, writeBatch, {
       name,
       members,
-      checked: false,
+      checked,
       category,
       packingList,
       rank,
