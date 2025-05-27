@@ -9,7 +9,9 @@ import {
   AiOutlineTags,
 } from 'react-icons/ai';
 import { IoMdRadioButtonOn } from 'react-icons/io';
+import { MdOutlineRemoveDone } from 'react-icons/md';
 import { CategoryModal } from '~/components/pages/PackingList/CategoryModal.tsx';
+import { DeleteItemsModal } from '~/components/pages/PackingList/DeleteItemsModal.tsx';
 import { DeleteSelectedItemsModal } from '~/components/pages/PackingList/DeleteSelectedItemsModal.tsx';
 import { Filter } from '~/components/pages/PackingList/Filter.tsx';
 import { PLIconButton } from '~/components/shared/PLIconButton.tsx';
@@ -24,33 +26,48 @@ export function PackingListControls({
   onTextMode: () => void;
   onMemberFilter: (memberIds: string[]) => void;
 }) {
-  const setFilter = useDatabase().setFilter;
+  const { packItems, setFilter } = useDatabase();
   const { fullscreenMode, setFullscreenMode } = useFullscreenMode();
-  const { isSelectMode, setSelectMode, selectedItems, moveSelectedItemsToTop, moveSelectedItemsToBottom } =
-    useSelectMode();
+  const {
+    isSelectMode,
+    setSelectMode,
+    selectedItems,
+    moveSelectedItemsToTop,
+    moveSelectedItemsToBottom,
+    clearSelection,
+  } = useSelectMode();
   const moveToCategoryDisclosure = useDisclosure();
   const deleteItemsDisclosure = useDisclosure();
-  // Determine button size based on screen size
-  const buttonSize = useBreakpointValue({ base: 'xs', md: 'sm' });
-  // Use icons only on very small screens
-  const showButtonText = useBreakpointValue({ base: false, sm: true });
+  const deleteCheckedItemsDisclosure = useDisclosure();
 
-  function onFilter(showTheseCategories: string[], showTheseMembers: string[], showTheseStates: string[]) {
-    setFilter({ showTheseCategories, showTheseMembers, showTheseStates });
-    onMemberFilter(showTheseMembers);
+  const checkedItems = packItems.filter((item) => item.checked);
+  const checkedItemsCount = checkedItems.length;
+
+  const buttonSize = useBreakpointValue({ base: 'sm', md: 'md' });
+  const showButtonText = useBreakpointValue({ base: false, md: true });
+
+  function toggleSelectMode() {
+    setSelectMode(!isSelectMode);
+    if (isSelectMode) {
+      clearSelection();
+    }
+  }
+
+  function onFilter(filterCategories: string[], filterMembers: string[], filterPackItemState: string[]) {
+    setFilter({
+      showTheseCategories: filterCategories,
+      showTheseMembers: filterMembers,
+      showTheseStates: filterPackItemState,
+    });
+    onMemberFilter(filterMembers);
+  }
+
+  function onEditClick() {
+    onTextMode();
   }
 
   function onFullscreen() {
     setFullscreenMode(!fullscreenMode);
-  }
-
-  function onEditClick() {
-    setFilter({ showTheseCategories: [], showTheseMembers: [], showTheseStates: [] });
-    onTextMode();
-  }
-
-  function toggleSelectMode() {
-    setSelectMode(!isSelectMode);
   }
 
   return (
@@ -123,6 +140,13 @@ export function PackingListControls({
               <PLIconButton aria-label="Select mode" icon={<IoMdRadioButtonOn />} onClick={toggleSelectMode} mr={2} />
               <PLIconButton aria-label="Edit" icon={<AiOutlineEdit />} onClick={onEditClick} mr={2} />
               <PLIconButton
+                aria-label="Remove checked items"
+                icon={<MdOutlineRemoveDone />}
+                onClick={deleteCheckedItemsDisclosure.onOpen}
+                mr={2}
+                isDisabled={checkedItemsCount === 0}
+              />
+              <PLIconButton
                 aria-label="Full screen"
                 icon={fullscreenMode ? <AiOutlineFullscreenExit /> : <AiOutlineFullscreen />}
                 onClick={onFullscreen}
@@ -135,6 +159,13 @@ export function PackingListControls({
       <CategoryModal isOpen={moveToCategoryDisclosure.isOpen} onClose={moveToCategoryDisclosure.onClose} />
 
       <DeleteSelectedItemsModal isOpen={deleteItemsDisclosure.isOpen} onClose={deleteItemsDisclosure.onClose} />
+
+      <DeleteItemsModal
+        isOpen={deleteCheckedItemsDisclosure.isOpen}
+        onClose={deleteCheckedItemsDisclosure.onClose}
+        items={checkedItems}
+        itemType="checked"
+      />
     </Box>
   );
 }
