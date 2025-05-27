@@ -14,6 +14,12 @@ import { PackItem } from '~/types/PackItem.ts';
 import { DatabaseContext } from './DatabaseContext.ts';
 import { usePackingList } from './PackingListContext.ts';
 
+type FilterState = {
+  showTheseCategories: string[];
+  showTheseMembers: string[];
+  showTheseStates: string[];
+};
+
 export function DatabaseProvider({ children }: { children: ReactNode }) {
   const [members, setMembers] = useState<NamedEntity[]>();
   const [categories, setCategories] = useState<NamedEntity[]>();
@@ -21,12 +27,88 @@ export function DatabaseProvider({ children }: { children: ReactNode }) {
   const [images, setImages] = useState<Image[]>();
   const [packingLists, setPackingLists] = useState<NamedEntity[]>();
   const { packingList } = usePackingList();
-  const [filter, setFilter] = useState<{
-    showTheseCategories: string[];
-    showTheseMembers: string[];
-    showTheseStates: string[];
-  } | null>(null);
+
+  const [currentFilterState, setCurrentFilterState] = useState<FilterState | null>(getInitialFilterState);
+
   const nbrOfColumns: 1 | 2 | 3 = useBreakpointValue({ base: 1, sm: 1, md: 2, lg: 3 }) ?? 3;
+
+  function getInitialFilterState(): FilterState | null {
+    const savedCategories = localStorage.getItem('filteredCategories');
+    const savedMembers = localStorage.getItem('filteredMembers');
+    const savedStates = localStorage.getItem('filteredPackItemState');
+
+    if (savedCategories || savedMembers || savedStates) {
+      return {
+        showTheseCategories: savedCategories ? JSON.parse(savedCategories) : [],
+        showTheseMembers: savedMembers ? JSON.parse(savedMembers) : [],
+        showTheseStates: savedStates ? JSON.parse(savedStates) : [],
+      };
+    }
+    return null;
+  }
+
+  function persistFiltersToLocalStorage(filters: FilterState) {
+    localStorage.setItem('filteredCategories', JSON.stringify(filters.showTheseCategories));
+    localStorage.setItem('filteredMembers', JSON.stringify(filters.showTheseMembers));
+    localStorage.setItem('filteredPackItemState', JSON.stringify(filters.showTheseStates));
+  }
+
+  function filterByCategories(packItems: PackItem[], categoryIds: string[]): PackItem[] {
+    if (!categoryIds.length) {
+      return packItems;
+    }
+    return packItems.filter((item) => categoryIds.includes(item.category));
+  }
+
+  function filterByMembers(packItems: PackItem[], memberIds: string[]): PackItem[] {
+    if (!memberIds.length) {
+      return packItems;
+    }
+    return packItems.filter((item) => {
+      if (memberIds.includes('') && item.members.length === 0) {
+        return true;
+      }
+      if (item.members.length) {
+        return item.members.some((m) => memberIds.includes(m.id));
+      }
+      return false;
+    });
+  }
+
+  function filterByStates(packItems: PackItem[], states: string[]): PackItem[] {
+    if (!states.length) {
+      return packItems;
+    }
+    return packItems.filter(
+      (item) =>
+        (states.includes(CHECKED_FILTER_STATE) && item.checked) ||
+        (states.includes(UNCHECKED_FILTER_STATE) && !item.checked)
+    );
+  }
+
+  function applyAllFilters(packItems: PackItem[], filterState: FilterState | null): PackItem[] {
+    if (!filterState || !packItems) {
+      return packItems;
+    }
+
+    const { showTheseCategories, showTheseMembers, showTheseStates } = filterState;
+    let filtered = filterByCategories(packItems, showTheseCategories);
+    filtered = filterByMembers(filtered, showTheseMembers);
+    return filterByStates(filtered, showTheseStates);
+  }
+
+  function getCategoriesInPackingList(categories: NamedEntity[], packItems: PackItem[]): NamedEntity[] {
+    return categories.filter((c) => packItems.some((p) => p.category === c.id));
+  }
+
+  function getMembersInPackingList(members: NamedEntity[], packItems: PackItem[]): NamedEntity[] {
+    return members.filter((m) => packItems.some((p) => p.members.some((t) => t.id === m.id)));
+  }
+
+  function updateAndPersistFilters(newFilters: FilterState) {
+    setCurrentFilterState(newFilters);
+    persistFiltersToLocalStorage(newFilters);
+  }
 
   useEffect(() => {
     (async () => {
@@ -54,42 +136,14 @@ export function DatabaseProvider({ children }: { children: ReactNode }) {
   const isInitialized = members && categories && packItems && images && packingLists && packingList;
   if (isInitialized) {
     sortAll(members, categories, packItems, packingLists);
-    const filtered = filterPackItems(packItems);
+    const filtered = applyAllFilters(packItems, currentFilterState);
     groupedPackItems = groupByCategories(filtered, categories);
     const flattened = flattenGroupedPackItems(groupedPackItems);
     columns = createColumns(flattened, nbrOfColumns);
-    categoriesInPackingList = categories.filter((c) => {
-      return packItems.some((p) => p.category === c.id);
-    });
-    membersInPackingList = members.filter((m) => packItems.some((p) => p.members.some((t) => t.id === m.id)));
+    categoriesInPackingList = getCategoriesInPackingList(categories, packItems);
+    membersInPackingList = getMembersInPackingList(members, packItems);
   }
 
-  function filterPackItems(packItems: PackItem[]) {
-    if (!filter || !packItems) {
-      return packItems;
-    }
-    const { showTheseCategories, showTheseMembers, showTheseStates } = filter;
-    let filtered = !showTheseCategories.length
-      ? packItems
-      : packItems.filter((item) => showTheseCategories.includes(item.category));
-    filtered = !showTheseMembers.length
-      ? filtered
-      : filtered.filter((item) => {
-          if (showTheseMembers.includes('') && item.members.length === 0) {
-            return true;
-          }
-          if (item.members.length) {
-            return item.members.some((m) => showTheseMembers.includes(m.id));
-          }
-        });
-    return !showTheseStates.length
-      ? filtered
-      : filtered.filter(
-          (item) =>
-            (showTheseStates.includes(CHECKED_FILTER_STATE) && item.checked) ||
-            (showTheseStates.includes(UNCHECKED_FILTER_STATE) && !item.checked)
-        );
-  }
   return (
     <>
       {isInitialized ? (
@@ -105,7 +159,8 @@ export function DatabaseProvider({ children }: { children: ReactNode }) {
             nbrOfColumns,
             categoriesInPackingList,
             membersInPackingList,
-            setFilter,
+            filter: currentFilterState,
+            setFilter: updateAndPersistFilters,
           }}
         >
           {children}

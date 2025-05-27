@@ -14,3 +14,11 @@ This is a React project using TypeScript, Chakra UI, Firebase, and Biome for lin
 - Don't duplicate code unless it's 3 lines or less, instead break out into common function
 - Don't use npx if the dependency is already installed
 - There should be no commented out code
+- try to avoid functions longer than 20 lines, if it is longer break it out into smaller functions
+- don't cd into root directory, you are already there
+- keep all helper inside the main component function
+- order in main component function:
+  - state and other consts
+  - effects
+  - helper functions
+  - render

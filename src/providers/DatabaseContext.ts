@@ -16,6 +16,11 @@ interface ContextType {
   nbrOfColumns: 1 | 2 | 3;
   categoriesInPackingList: NamedEntity[];
   membersInPackingList: NamedEntity[];
+  filter: {
+    showTheseCategories: string[];
+    showTheseMembers: string[];
+    showTheseStates: string[];
+  } | null;
   setFilter: ({
     showTheseCategories,
     showTheseMembers,
