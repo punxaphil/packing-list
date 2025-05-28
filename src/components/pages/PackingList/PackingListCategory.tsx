@@ -70,7 +70,6 @@ export function PackingListCategory({
   return (
     <>
       <Flex gap="1" alignItems="center" borderTopRadius="2xl" pt="1" sx={sx} px="2" h="32px">
-        {/* Always show drag handle when category has ID, but visually disable it in select mode */}
         {category.id && <DragHandle dragHandleProps={dragHandleProps} disabled={isSelectMode} />}
         {!isSelectMode && <Checkbox isChecked={checked} isIndeterminate={isIndeterminate} onChange={toggleItem} />}
         {categoryImage && <Image borderRadius="full" boxSize="30px" src={categoryImage} mr="2" />}

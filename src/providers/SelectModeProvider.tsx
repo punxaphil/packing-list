@@ -4,11 +4,13 @@ import { writeDb } from '~/services/database.ts';
 import { PackItem } from '~/types/PackItem.ts';
 import { useDatabase } from './DatabaseContext.ts';
 import { SelectModeContext } from './SelectModeContext.ts';
+import { useUndo } from './UndoContext.ts';
 
 export function SelectModeProvider({ children }: { children: ReactNode }) {
   const [isSelectMode, setSelectMode] = useState(false);
   const [selectedItems, setSelectedItems] = useState<PackItem[]>([]);
   const { packItems } = useDatabase();
+  const { addUndoAction } = useUndo();
   const toast = useToast();
 
   const toggleItemSelection = useCallback((packItem: PackItem) => {
@@ -32,7 +34,6 @@ export function SelectModeProvider({ children }: { children: ReactNode }) {
     [selectedItems]
   );
 
-  // When turning off select mode, clear all selections
   const handleSetSelectMode = (value: boolean) => {
     setSelectMode(value);
     if (!value) {
@@ -40,111 +41,171 @@ export function SelectModeProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  // Move selected items to top of their respective categories
   const moveSelectedItemsToTop = useCallback(async () => {
     if (selectedItems.length === 0) {
       return;
     }
 
-    // Group items by their category
-    const itemsByCategory: Record<string, PackItem[]> = {};
-    for (const item of selectedItems) {
-      const categoryId = item.category || '';
-      if (!itemsByCategory[categoryId]) {
-        itemsByCategory[categoryId] = [];
+    const captureOriginalOrder = () =>
+      selectedItems.map((item) => ({
+        id: item.id,
+        rank: item.rank,
+        category: item.category,
+      }));
+
+    const groupItemsByCategory = () => {
+      const itemsByCategory: Record<string, PackItem[]> = {};
+      for (const item of selectedItems) {
+        const categoryId = item.category || '';
+        if (!itemsByCategory[categoryId]) {
+          itemsByCategory[categoryId] = [];
+        }
+        itemsByCategory[categoryId].push(item);
       }
-      itemsByCategory[categoryId].push(item);
-    }
+      return itemsByCategory;
+    };
 
-    // Find max rank for each category to place items at the top
-    const categoryMaxRanks: Record<string, number> = {};
-    for (const item of packItems) {
-      const categoryId = item.category || '';
-      if (!categoryMaxRanks[categoryId] || item.rank > categoryMaxRanks[categoryId]) {
-        categoryMaxRanks[categoryId] = item.rank;
+    const findCategoryMaxRanks = () => {
+      const categoryMaxRanks: Record<string, number> = {};
+      for (const item of packItems) {
+        const categoryId = item.category || '';
+        if (!categoryMaxRanks[categoryId] || item.rank > categoryMaxRanks[categoryId]) {
+          categoryMaxRanks[categoryId] = item.rank;
+        }
       }
-    }
+      return categoryMaxRanks;
+    };
 
-    // Update items with new ranks
-    const batch = writeDb.initBatch();
-    let updatedCount = 0;
+    const updateItemRanksToTop = (
+      itemsByCategory: Record<string, PackItem[]>,
+      categoryMaxRanks: Record<string, number>
+    ) => {
+      const batch = writeDb.initBatch();
+      let updatedCount = 0;
 
-    for (const categoryId in itemsByCategory) {
-      const items = itemsByCategory[categoryId];
-      const baseRank = categoryMaxRanks[categoryId] || 0;
+      for (const categoryId in itemsByCategory) {
+        const items = itemsByCategory[categoryId];
+        const baseRank = categoryMaxRanks[categoryId] || 0;
 
-      items.forEach((item, index) => {
-        const updatedItem = {
-          ...item,
-          rank: baseRank + index + 1,
-        };
-        writeDb.updatePackItemBatch(updatedItem, batch);
-        updatedCount++;
-      });
-    }
+        items.forEach((item, index) => {
+          const updatedItem = {
+            ...item,
+            rank: baseRank + index + 1,
+          };
+          writeDb.updatePackItemBatch(updatedItem, batch);
+          updatedCount++;
+        });
+      }
+
+      return { batch, updatedCount };
+    };
+
+    const originalOrder = captureOriginalOrder();
+    const itemsByCategory = groupItemsByCategory();
+    const categoryMaxRanks = findCategoryMaxRanks();
+    const { batch, updatedCount } = updateItemRanksToTop(itemsByCategory, categoryMaxRanks);
 
     await batch.commit();
+
+    addUndoAction({
+      type: 'move-items',
+      description: `Moved ${updatedCount} items to top`,
+      data: {
+        items: selectedItems,
+        originalOrder,
+      },
+    });
+
     toast({
       title: `Moved ${updatedCount} items to top`,
       status: 'success',
     });
 
-    // Clear selections but stay in select mode
     clearSelection();
-  }, [selectedItems, packItems, toast, clearSelection]);
+  }, [selectedItems, packItems, addUndoAction, toast, clearSelection]);
 
-  // Move selected items to bottom of their respective categories
   const moveSelectedItemsToBottom = useCallback(async () => {
     if (selectedItems.length === 0) {
       return;
     }
 
-    // Group items by their category
-    const itemsByCategory: Record<string, PackItem[]> = {};
-    for (const item of selectedItems) {
-      const categoryId = item.category || '';
-      if (!itemsByCategory[categoryId]) {
-        itemsByCategory[categoryId] = [];
+    const captureOriginalOrder = () =>
+      selectedItems.map((item) => ({
+        id: item.id,
+        rank: item.rank,
+        category: item.category,
+      }));
+
+    const groupItemsByCategory = () => {
+      const itemsByCategory: Record<string, PackItem[]> = {};
+      for (const item of selectedItems) {
+        const categoryId = item.category || '';
+        if (!itemsByCategory[categoryId]) {
+          itemsByCategory[categoryId] = [];
+        }
+        itemsByCategory[categoryId].push(item);
       }
-      itemsByCategory[categoryId].push(item);
-    }
+      return itemsByCategory;
+    };
 
-    // Find min rank for each category to place items at the bottom
-    const categoryMinRanks: Record<string, number> = {};
-    for (const item of packItems) {
-      const categoryId = item.category || '';
-      if (!categoryMinRanks[categoryId] || item.rank < categoryMinRanks[categoryId]) {
-        categoryMinRanks[categoryId] = item.rank;
+    const findCategoryMinRanks = () => {
+      const categoryMinRanks: Record<string, number> = {};
+      for (const item of packItems) {
+        const categoryId = item.category || '';
+        if (!categoryMinRanks[categoryId] || item.rank < categoryMinRanks[categoryId]) {
+          categoryMinRanks[categoryId] = item.rank;
+        }
       }
-    }
+      return categoryMinRanks;
+    };
 
-    // Update items with new ranks
-    const batch = writeDb.initBatch();
-    let updatedCount = 0;
+    const updateItemRanksToBottom = (
+      itemsByCategory: Record<string, PackItem[]>,
+      categoryMinRanks: Record<string, number>
+    ) => {
+      const batch = writeDb.initBatch();
+      let updatedCount = 0;
 
-    for (const categoryId in itemsByCategory) {
-      const items = itemsByCategory[categoryId];
-      const baseRank = categoryMinRanks[categoryId] || 0;
+      for (const categoryId in itemsByCategory) {
+        const items = itemsByCategory[categoryId];
+        const baseRank = categoryMinRanks[categoryId] || 0;
 
-      items.forEach((item, index) => {
-        const updatedItem = {
-          ...item,
-          rank: baseRank - index - 1,
-        };
-        writeDb.updatePackItemBatch(updatedItem, batch);
-        updatedCount++;
-      });
-    }
+        items.forEach((item, index) => {
+          const updatedItem = {
+            ...item,
+            rank: baseRank - index - 1,
+          };
+          writeDb.updatePackItemBatch(updatedItem, batch);
+          updatedCount++;
+        });
+      }
+
+      return { batch, updatedCount };
+    };
+
+    const originalOrder = captureOriginalOrder();
+    const itemsByCategory = groupItemsByCategory();
+    const categoryMinRanks = findCategoryMinRanks();
+    const { batch, updatedCount } = updateItemRanksToBottom(itemsByCategory, categoryMinRanks);
 
     await batch.commit();
+
+    addUndoAction({
+      type: 'move-items',
+      description: `Moved ${updatedCount} items to bottom`,
+      data: {
+        items: selectedItems,
+        originalOrder,
+      },
+    });
+
     toast({
       title: `Moved ${updatedCount} items to bottom`,
       status: 'success',
     });
 
-    // Clear selections but stay in select mode
     clearSelection();
-  }, [selectedItems, packItems, toast, clearSelection]);
+  }, [selectedItems, packItems, addUndoAction, toast, clearSelection]);
 
   return (
     <SelectModeContext.Provider

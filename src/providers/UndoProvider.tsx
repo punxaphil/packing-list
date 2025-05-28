@@ -58,6 +58,12 @@ export function UndoProvider({ children }: UndoProviderProps) {
             await restorePackingList(actionToUndo.data.packingList, actionToUndo.data.items);
           }
           break;
+        case 'reorder-items':
+        case 'move-items':
+          if (actionToUndo.data.originalOrder) {
+            await restoreItemOrder(actionToUndo.data.originalOrder);
+          }
+          break;
       }
 
       toast({
@@ -99,6 +105,15 @@ export function UndoProvider({ children }: UndoProviderProps) {
     for (const item of items) {
       writeDb.addPackItemBatch(batch, item.name, item.members, item.category, item.rank, packingListId, item.checked);
     }
+  }
+
+  async function restoreItemOrder(originalOrder: Array<{ id: string; rank: number; category: string }>) {
+    const batch = writeDb.initBatch();
+    for (const orderInfo of originalOrder) {
+      const packItem = { id: orderInfo.id, rank: orderInfo.rank, category: orderInfo.category };
+      writeDb.updatePackItemBatch(packItem, batch);
+    }
+    await batch.commit();
   }
 
   function getUndoDescription() {

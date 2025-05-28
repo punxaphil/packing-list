@@ -4,11 +4,19 @@ import type { PackItem } from '~/types/PackItem.ts';
 
 export interface UndoAction {
   id: string;
-  type: 'delete-items' | 'delete-checked-items' | 'delete-category-items' | 'delete-pack-item' | 'delete-packing-list';
+  type:
+    | 'delete-items'
+    | 'delete-checked-items'
+    | 'delete-category-items'
+    | 'delete-pack-item'
+    | 'delete-packing-list'
+    | 'reorder-items'
+    | 'move-items';
   description: string;
   data: {
     items?: PackItem[];
     packingList?: NamedEntity;
+    originalOrder?: Array<{ id: string; rank: number; category: string }>;
   };
   timestamp: number;
 }

@@ -67,7 +67,6 @@ export function PackItemRow({
     >
       <PackItemRowWrapper>
         <Flex gap="3" align="center">
-          {/* Always pass dragHandleProps but visually disable it in select mode */}
           <DragHandle dragHandleProps={dragHandleProps} disabled={isSelectMode} />
 
           {isSelectMode ? (

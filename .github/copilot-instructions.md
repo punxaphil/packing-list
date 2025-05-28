@@ -24,7 +24,9 @@ This is a React project using TypeScript, Chakra UI, Firebase, and Biome for lin
   - render
 
 ## Do not
-- Don't comment or JSDoc code, instead break out to well named functions
+- Don't comment or JSDoc code
+    - In most cases code should be self-explanatory
+    - In cases where explanation is needed, try to break out to well named function
 - Don't duplicate code unless it's 3 lines or less, instead break out into common function
 - Don't use npx if the dependency is already installed
 - Don't cd into root directory, you are already there
