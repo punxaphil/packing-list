@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { useSelectMode } from '~/providers/SelectModeContext.ts';
 import { DeleteItemsModal } from './DeleteItemsModal.tsx';
 
@@ -10,6 +11,10 @@ export function DeleteSelectedItemsModal({
 }) {
   const { selectedItems, clearSelection } = useSelectMode();
 
+  const itemsToDelete = useMemo(() => {
+    return isOpen ? [...selectedItems] : [];
+  }, [isOpen, selectedItems]);
+
   function handleAfterDelete() {
     clearSelection();
   }
@@ -18,7 +23,7 @@ export function DeleteSelectedItemsModal({
     <DeleteItemsModal
       isOpen={isOpen}
       onClose={onClose}
-      items={selectedItems}
+      items={itemsToDelete}
       itemType="selected"
       onAfterDelete={handleAfterDelete}
     />
