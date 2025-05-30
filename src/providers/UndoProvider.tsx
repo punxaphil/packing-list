@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { writeDb } from '~/services/database.ts';
 import type { NamedEntity } from '~/types/NamedEntity.ts';
 import type { PackItem } from '~/types/PackItem.ts';
+import { useDatabase } from './DatabaseContext.ts';
 import { usePackingList } from './PackingListContext.ts';
 import { type UndoAction, UndoContext } from './UndoContext.ts';
 
@@ -18,6 +19,7 @@ const MAX_UNDO_HISTORY = 20;
 export function UndoProvider({ children }: UndoProviderProps) {
   const [undoHistory, setUndoHistory] = useState<UndoAction[]>([]);
   const { setPackingListId } = usePackingList();
+  const { packItems } = useDatabase();
   const toast = useToast();
 
   const canUndo = undoHistory.length > 0;
@@ -110,8 +112,15 @@ export function UndoProvider({ children }: UndoProviderProps) {
   async function restoreItemOrder(originalOrder: Array<{ id: string; rank: number; category: string }>) {
     const batch = writeDb.initBatch();
     for (const orderInfo of originalOrder) {
-      const packItem = { id: orderInfo.id, rank: orderInfo.rank, category: orderInfo.category };
-      writeDb.updatePackItemBatch(packItem, batch);
+      const currentPackItem = packItems.find(item => item.id === orderInfo.id);
+      if (currentPackItem) {
+        const updatedPackItem = { 
+          ...currentPackItem, 
+          rank: orderInfo.rank, 
+          category: orderInfo.category 
+        };
+        writeDb.updatePackItemBatch(updatedPackItem, batch);
+      }
     }
     await batch.commit();
   }
