@@ -112,12 +112,12 @@ export function UndoProvider({ children }: UndoProviderProps) {
   async function restoreItemOrder(originalOrder: Array<{ id: string; rank: number; category: string }>) {
     const batch = writeDb.initBatch();
     for (const orderInfo of originalOrder) {
-      const currentPackItem = packItems.find(item => item.id === orderInfo.id);
+      const currentPackItem = packItems.find((item) => item.id === orderInfo.id);
       if (currentPackItem) {
-        const updatedPackItem = { 
-          ...currentPackItem, 
-          rank: orderInfo.rank, 
-          category: orderInfo.category 
+        const updatedPackItem = {
+          ...currentPackItem,
+          rank: orderInfo.rank,
+          category: orderInfo.category,
         };
         writeDb.updatePackItemBatch(updatedPackItem, batch);
       }
