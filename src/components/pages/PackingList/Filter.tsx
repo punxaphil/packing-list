@@ -1,6 +1,24 @@
-import { Menu, MenuButton, MenuDivider, MenuList, SmallCloseIcon, Text } from '@chakra-ui/icons';
-import { Button, HStack, MenuItemOption, MenuOptionGroup, useBreakpointValue } from '@chakra-ui/react';
-import { useEffect, useRef, useState } from 'react'; // Added useRef
+import { SmallCloseIcon } from '@chakra-ui/icons';
+import {
+  Button,
+  HStack,
+  Text,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  ModalCloseButton,
+  useDisclosure,
+  useBreakpointValue,
+  Checkbox,
+  CheckboxGroup,
+  Stack,
+  Divider,
+  VStack
+} from '@chakra-ui/react';
+import { useEffect, useRef, useState } from 'react';
 import { AiOutlineFilter } from 'react-icons/ai';
 import { useDatabase } from '~/providers/DatabaseContext.ts';
 import { UNCATEGORIZED } from '~/services/utils.ts';
@@ -28,6 +46,7 @@ export function Filter({
 }: {
   onFilter: (filterCategories: string[], filterMembers: string[], filterPackItemState: string[]) => void;
 }) {
+  const { isOpen, onOpen, onClose } = useDisclosure();
   const { categoriesInPackingList, membersInPackingList } = useDatabase();
   const categories = [UNCATEGORIZED, ...categoriesInPackingList];
   const members = [{ id: '', name: 'Without members', rank: 0 }, ...membersInPackingList];
@@ -40,6 +59,10 @@ export function Filter({
     getInitialState('filteredPackItemState', [])
   );
 
+  const [tempFilteredCategories, setTempFilteredCategories] = useState<string[]>([]);
+  const [tempFilteredMembers, setTempFilteredMembers] = useState<string[]>([]);
+  const [tempFilteredPackItemState, setTempFilteredPackItemState] = useState<string[]>([]);
+
   const initialFilterCallDoneRef = useRef(false);
 
   useEffect(() => {
@@ -49,32 +72,34 @@ export function Filter({
   }, [filteredCategories, filteredMembers, filteredPackItemState]);
 
   useEffect(() => {
-    // This effect ensures onFilter is called with initial values from localStorage
-    // while adhering to exhaustive-deps by including all dependencies.
-    // The ref guard ensures the onFilter logic here only executes once.
     if (!initialFilterCallDoneRef.current) {
       onFilter(filteredCategories, filteredMembers, filteredPackItemState);
       initialFilterCallDoneRef.current = true;
     }
   }, [onFilter, filteredCategories, filteredMembers, filteredPackItemState]);
 
-  const handleFilterChange = (value: string | string[], type: 'categories' | 'members' | 'packItemState') => {
-    const newValues = Array.isArray(value) ? value : [value];
-    let updatedCategories = filteredCategories;
-    let updatedMembers = filteredMembers;
-    let updatedPackItemState = filteredPackItemState;
+  useEffect(() => {
+    setTempFilteredCategories(filteredCategories);
+    setTempFilteredMembers(filteredMembers);
+    setTempFilteredPackItemState(filteredPackItemState);
+  }, [isOpen, filteredCategories, filteredMembers, filteredPackItemState]);
 
+  const handleTempFilterChange = (value: string[], type: 'categories' | 'members' | 'packItemState') => {
     if (type === 'categories') {
-      setFilteredCategories(newValues);
-      updatedCategories = newValues;
+      setTempFilteredCategories(value);
     } else if (type === 'members') {
-      setFilteredMembers(newValues);
-      updatedMembers = newValues;
+      setTempFilteredMembers(value);
     } else if (type === 'packItemState') {
-      setFilteredPackItemState(newValues);
-      updatedPackItemState = newValues;
+      setTempFilteredPackItemState(value);
     }
-    onFilter(updatedCategories, updatedMembers, updatedPackItemState);
+  };
+
+  const applyFilters = () => {
+    setFilteredCategories(tempFilteredCategories);
+    setFilteredMembers(tempFilteredMembers);
+    setFilteredPackItemState(tempFilteredPackItemState);
+    onFilter(tempFilteredCategories, tempFilteredMembers, tempFilteredPackItemState);
+    onClose();
   };
 
   function removeNamedEntityFilter(id: string) {
@@ -87,12 +112,12 @@ export function Filter({
       onFilter(filteredCategories, arr, filteredPackItemState);
       setFilteredMembers(arr);
     } else if (filteredPackItemState.includes(id)) {
-      // Explicitly check packItemState
       const arr = filteredPackItemState.filter((f) => f !== id);
       onFilter(filteredCategories, filteredMembers, arr);
       setFilteredPackItemState(arr);
     }
   }
+
   const showFilterButtons = useBreakpointValue({ base: false, lg: true });
   const filterButtonsData = [
     ...filteredCategories.map((c) => categories.find((e) => e.id === c)),
@@ -102,55 +127,80 @@ export function Filter({
 
   return (
     <HStack ml="3" spacing={0} alignItems="center">
-      <Menu>
-        <MenuButton>
-          <HStack gap={0}>
-            <AiOutlineFilter />
-            <Text fontSize="2xs">
-              {!showFilterButtons && filterButtonsData.length > 0 && `${filterButtonsData.length}*`}
-            </Text>
-          </HStack>
-        </MenuButton>
-        <MenuList>
-          <MenuOptionGroup
-            type="checkbox"
-            value={filteredPackItemState}
-            onChange={(value) => handleFilterChange(value, 'packItemState')}
-            title="Pack Item state"
-          >
-            {[CHECKED_FILTER_STATE, UNCHECKED_FILTER_STATE].map((entity) => (
-              <MenuItemOption key={entity} value={entity}>
-                {entity}
-              </MenuItemOption>
-            ))}
-          </MenuOptionGroup>
-          <MenuOptionGroup
-            type="checkbox"
-            value={filteredCategories}
-            onChange={(value) => handleFilterChange(value, 'categories')}
-            title="Categories"
-          >
-            {categories.map((entity) => (
-              <MenuItemOption key={entity.id} value={entity.id}>
-                {entity.name}
-              </MenuItemOption>
-            ))}
-          </MenuOptionGroup>
-          <MenuDivider />
-          <MenuOptionGroup
-            type="checkbox"
-            value={filteredMembers}
-            onChange={(value) => handleFilterChange(value, 'members')}
-            title="Members"
-          >
-            {members.map((entity) => (
-              <MenuItemOption key={entity.id} value={entity.id}>
-                {entity.name}
-              </MenuItemOption>
-            ))}
-          </MenuOptionGroup>
-        </MenuList>
-      </Menu>
+      <Button onClick={onOpen} size="sm" variant="ghost">
+        <HStack gap={0}>
+          <AiOutlineFilter />
+          <Text fontSize="2xs">
+            {!showFilterButtons && filterButtonsData.length > 0 && `${filterButtonsData.length}*`}
+          </Text>
+        </HStack>
+      </Button>
+
+      <Modal isOpen={isOpen} onClose={onClose} size="lg">
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Filter Items</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <VStack spacing={6} align="stretch">
+              <VStack align="stretch" spacing={3}>
+                <Text fontWeight="bold">Pack Item State</Text>
+                <CheckboxGroup
+                  value={tempFilteredPackItemState}
+                  onChange={(value) => handleTempFilterChange(value as string[], 'packItemState')}
+                >
+                  <Stack direction="column">
+                    <Checkbox value={CHECKED_FILTER_STATE}>{CHECKED_FILTER_STATE}</Checkbox>
+                    <Checkbox value={UNCHECKED_FILTER_STATE}>{UNCHECKED_FILTER_STATE}</Checkbox>
+                  </Stack>
+                </CheckboxGroup>
+              </VStack>
+
+              <Divider />
+
+              <VStack align="stretch" spacing={3}>
+                <Text fontWeight="bold">Categories</Text>
+                <CheckboxGroup
+                  value={tempFilteredCategories}
+                  onChange={(value) => handleTempFilterChange(value as string[], 'categories')}
+                >
+                  <Stack direction="column">
+                    {categories.map((entity) => (
+                      <Checkbox key={entity.id} value={entity.id}>
+                        {entity.name}
+                      </Checkbox>
+                    ))}
+                  </Stack>
+                </CheckboxGroup>
+              </VStack>
+
+              <Divider />
+
+              <VStack align="stretch" spacing={3}>
+                <Text fontWeight="bold">Members</Text>
+                <CheckboxGroup
+                  value={tempFilteredMembers}
+                  onChange={(value) => handleTempFilterChange(value as string[], 'members')}
+                >
+                  <Stack direction="column">
+                    {members.map((entity) => (
+                      <Checkbox key={entity.id} value={entity.id}>
+                        {entity.name}
+                      </Checkbox>
+                    ))}
+                  </Stack>
+                </CheckboxGroup>
+              </VStack>
+            </VStack>
+          </ModalBody>
+          <ModalFooter>
+            <Button colorScheme="blue" onClick={applyFilters}>
+              Done
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+
       {showFilterButtons &&
         filterButtonsData.map((c, index) => (
           <Button
