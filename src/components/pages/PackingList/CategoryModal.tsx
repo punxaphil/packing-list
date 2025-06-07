@@ -1,4 +1,5 @@
-import { Button, Divider, Flex, Text, VStack, useToast } from '@chakra-ui/react';
+import { Button, Divider, Flex, Input, Text, VStack, useToast } from '@chakra-ui/react';
+import { useState } from 'react';
 import { BaseModal } from '~/components/shared/BaseModal.tsx';
 import { CategoryButton } from '~/components/shared/CategoryButton.tsx';
 import { useDatabase } from '~/providers/DatabaseContext.ts';
@@ -19,6 +20,7 @@ export function CategoryModal({ isOpen, onClose, packItem }: CategoryModalProps)
   const { selectedItems, clearSelection } = useSelectMode();
   const { addUndoAction } = useUndo();
   const toast = useToast();
+  const [newCategoryName, setNewCategoryName] = useState('');
 
   const isSingleItemMode = !!packItem;
   const itemsToMove = isSingleItemMode && packItem ? [packItem] : selectedItems;
@@ -31,6 +33,27 @@ export function CategoryModal({ isOpen, onClose, packItem }: CategoryModalProps)
   function getBottomRank(categoryId: string): number {
     const itemsInCategory = packItems.filter((item) => item.category === categoryId);
     return itemsInCategory.length === 0 ? 0 : Math.min(...itemsInCategory.map((item) => item.rank)) - 1;
+  }
+
+  async function createNewCategory() {
+    if (!newCategoryName.trim()) {
+      return;
+    }
+
+    const newCategoryId = await writeDb.addCategory(newCategoryName.trim());
+    const newCategory: NamedEntity = {
+      id: newCategoryId,
+      name: newCategoryName.trim(),
+      rank: 0,
+    };
+    setNewCategoryName('');
+    await handleCategoryChange(newCategory);
+  }
+
+  function handleKeyPress(event: React.KeyboardEvent) {
+    if (event.key === 'Enter') {
+      createNewCategory();
+    }
   }
 
   async function handleCategoryChange(category: NamedEntity | null) {
@@ -150,6 +173,24 @@ export function CategoryModal({ isOpen, onClose, packItem }: CategoryModalProps)
             />
           ))}
         </Flex>
+
+        <Divider my={2} />
+
+        <Text fontSize="sm" fontWeight="medium">
+          Create New Category:
+        </Text>
+
+        <VStack spacing={3}>
+          <Input
+            placeholder="Enter category name"
+            value={newCategoryName}
+            onChange={(e) => setNewCategoryName(e.target.value)}
+            onKeyPress={handleKeyPress}
+          />
+          <Button onClick={createNewCategory} colorScheme="green" width="100%" isDisabled={!newCategoryName.trim()}>
+            Create Category
+          </Button>
+        </VStack>
       </VStack>
     </BaseModal>
   );

@@ -162,18 +162,8 @@ export function PackingListControls({
                   />
                 </Box>
               </Tooltip>
-              <PLIconButton
-                aria-label="Select mode"
-                icon={<IoMdRadioButtonOn />}
-                onClick={toggleSelectMode}
-                mr={2}
-              />
-              <PLIconButton
-                aria-label="Edit"
-                icon={<AiOutlineEdit />}
-                onClick={onEditClick}
-                mr={2}
-              />
+              <PLIconButton aria-label="Select mode" icon={<IoMdRadioButtonOn />} onClick={toggleSelectMode} mr={2} />
+              <PLIconButton aria-label="Edit" icon={<AiOutlineEdit />} onClick={onEditClick} mr={2} />
               <PLIconButton
                 aria-label="Remove checked items"
                 icon={<MdOutlineRemoveDone />}

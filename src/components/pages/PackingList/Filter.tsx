@@ -1,22 +1,22 @@
 import { SmallCloseIcon } from '@chakra-ui/icons';
 import {
   Button,
-  HStack,
-  Text,
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-  ModalCloseButton,
-  useDisclosure,
-  useBreakpointValue,
   Checkbox,
   CheckboxGroup,
-  Stack,
   Divider,
-  VStack
+  HStack,
+  Modal,
+  ModalBody,
+  ModalCloseButton,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalOverlay,
+  Stack,
+  Text,
+  VStack,
+  useBreakpointValue,
+  useDisclosure,
 } from '@chakra-ui/react';
 import { useEffect, useRef, useState } from 'react';
 import { AiOutlineFilter } from 'react-icons/ai';
@@ -82,7 +82,7 @@ export function Filter({
     setTempFilteredCategories(filteredCategories);
     setTempFilteredMembers(filteredMembers);
     setTempFilteredPackItemState(filteredPackItemState);
-  }, [isOpen, filteredCategories, filteredMembers, filteredPackItemState]);
+  }, [filteredCategories, filteredMembers, filteredPackItemState]);
 
   const handleTempFilterChange = (value: string[], type: 'categories' | 'members' | 'packItemState') => {
     if (type === 'categories') {
