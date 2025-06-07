@@ -1,4 +1,4 @@
-import { Box, Button, Flex, Tooltip, useBreakpointValue, useDisclosure } from '@chakra-ui/react';
+import { Box, Button, Flex, Tooltip, useBreakpointValue, useColorModeValue, useDisclosure } from '@chakra-ui/react';
 import {
   AiOutlineArrowDown,
   AiOutlineArrowUp,
@@ -47,6 +47,7 @@ export function PackingListControls({
 
   const buttonSize = useBreakpointValue({ base: 'sm', md: 'md' });
   const showButtonText = useBreakpointValue({ base: false, md: true });
+  const stickyBg = useColorModeValue('white', 'gray.800');
 
   function toggleSelectMode() {
     setSelectMode(!isSelectMode);
@@ -77,7 +78,7 @@ export function PackingListControls({
   }
 
   return (
-    <Box mb={2}>
+    <Box mb={2} position="sticky" top={0} zIndex={10} bg={stickyBg} boxShadow="sm" py={2}>
       {isSelectMode ? (
         <Flex
           direction={{ base: 'column', md: 'row' }}
@@ -161,8 +162,18 @@ export function PackingListControls({
                   />
                 </Box>
               </Tooltip>
-              <PLIconButton aria-label="Select mode" icon={<IoMdRadioButtonOn />} onClick={toggleSelectMode} mr={2} />
-              <PLIconButton aria-label="Edit" icon={<AiOutlineEdit />} onClick={onEditClick} mr={2} />
+              <PLIconButton
+                aria-label="Select mode"
+                icon={<IoMdRadioButtonOn />}
+                onClick={toggleSelectMode}
+                mr={2}
+              />
+              <PLIconButton
+                aria-label="Edit"
+                icon={<AiOutlineEdit />}
+                onClick={onEditClick}
+                mr={2}
+              />
               <PLIconButton
                 aria-label="Remove checked items"
                 icon={<MdOutlineRemoveDone />}
