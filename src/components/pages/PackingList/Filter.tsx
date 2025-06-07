@@ -26,6 +26,7 @@ import { COLUMN_COLORS } from '~/types/Column.ts';
 
 export const CHECKED_FILTER_STATE = '☑ Checked';
 export const UNCHECKED_FILTER_STATE = '☐ Unchecked';
+export const WITHOUT_MEMBERS_ID = '__WITHOUT_MEMBERS__';
 
 // Helper function moved outside the component to avoid TSX parsing ambiguity with generics
 function getInitialState<T>(key: string, defaultValue: T): T {
@@ -49,7 +50,7 @@ export function Filter({
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { categoriesInPackingList, membersInPackingList } = useDatabase();
   const categories = [UNCATEGORIZED, ...categoriesInPackingList];
-  const members = [{ id: '', name: 'Without members', rank: 0 }, ...membersInPackingList];
+  const members = [{ id: WITHOUT_MEMBERS_ID, name: 'Without members', rank: 0 }, ...membersInPackingList];
 
   const [filteredCategories, setFilteredCategories] = useState<string[]>(() =>
     getInitialState('filteredCategories', [])
@@ -138,10 +139,10 @@ export function Filter({
 
       <Modal isOpen={isOpen} onClose={onClose} size="lg">
         <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>Filter Items</ModalHeader>
+        <ModalContent maxH="90vh" display="flex" flexDirection="column">
+          <ModalHeader flexShrink={0}>Filter Items</ModalHeader>
           <ModalCloseButton />
-          <ModalBody>
+          <ModalBody overflowY="auto" flex={1}>
             <VStack spacing={6} align="stretch">
               <VStack align="stretch" spacing={3}>
                 <Text fontWeight="bold">Pack Item State</Text>
@@ -193,7 +194,7 @@ export function Filter({
               </VStack>
             </VStack>
           </ModalBody>
-          <ModalFooter>
+          <ModalFooter flexShrink={0}>
             <Button colorScheme="blue" onClick={applyFilters}>
               Done
             </Button>

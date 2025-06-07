@@ -1,7 +1,11 @@
 import { useBreakpointValue } from '@chakra-ui/react';
 import { getAuth } from 'firebase/auth';
 import { ReactNode, useEffect, useState } from 'react';
-import { CHECKED_FILTER_STATE, UNCHECKED_FILTER_STATE } from '~/components/pages/PackingList/Filter.tsx';
+import {
+  CHECKED_FILTER_STATE,
+  UNCHECKED_FILTER_STATE,
+  WITHOUT_MEMBERS_ID,
+} from '~/components/pages/PackingList/Filter.tsx';
 import { createColumns, flattenGroupedPackItems } from '~/components/pages/PackingList/packingListUtils.ts';
 import { TextProgress } from '~/components/shared/TextProgress.tsx';
 import { readDb } from '~/services/database.ts';
@@ -64,13 +68,28 @@ export function DatabaseProvider({ children }: { children: ReactNode }) {
     if (!memberIds.length) {
       return packItems;
     }
+
     return packItems.filter((item) => {
-      if (memberIds.includes('') && item.members.length === 0) {
+      const hasNoMembers = item.members.length === 0;
+      const withoutMembersSelected = memberIds.includes(WITHOUT_MEMBERS_ID);
+
+      // If "Without members" is selected and item has no members, include it
+      if (withoutMembersSelected && hasNoMembers) {
         return true;
       }
-      if (item.members.length) {
-        return item.members.some((m) => memberIds.includes(m.id));
+
+      // If item has members, check if any member matches the selected filters
+      // But exclude "Without members" from this check
+      if (item.members.length > 0) {
+        const nonEmptyMemberIds = memberIds.filter((id) => id !== WITHOUT_MEMBERS_ID);
+        if (nonEmptyMemberIds.length === 0) {
+          // Only "Without members" is selected, so exclude items with members
+          return false;
+        }
+        const hasMatchingMember = item.members.some((m) => nonEmptyMemberIds.includes(m.id));
+        return hasMatchingMember;
       }
+
       return false;
     });
   }
@@ -92,9 +111,12 @@ export function DatabaseProvider({ children }: { children: ReactNode }) {
     }
 
     const { showTheseCategories, showTheseMembers, showTheseStates } = filterState;
+
     let filtered = filterByCategories(packItems, showTheseCategories);
     filtered = filterByMembers(filtered, showTheseMembers);
-    return filterByStates(filtered, showTheseStates);
+    filtered = filterByStates(filtered, showTheseStates);
+
+    return filtered;
   }
 
   function getCategoriesInPackingList(categories: NamedEntity[], packItems: PackItem[]): NamedEntity[] {
