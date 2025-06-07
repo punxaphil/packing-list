@@ -137,9 +137,16 @@ export function Filter({
         </HStack>
       </Button>
 
-      <Modal isOpen={isOpen} onClose={onClose} size="lg">
+      <Modal
+        isOpen={isOpen}
+        onClose={onClose}
+        size="lg"
+        scrollBehavior="inside"
+        blockScrollOnMount={true}
+        closeOnOverlayClick={false}
+      >
         <ModalOverlay />
-        <ModalContent maxH="90vh" display="flex" flexDirection="column">
+        <ModalContent maxH="90vh" display="flex" flexDirection="column" mx={4} my="auto">
           <ModalHeader flexShrink={0}>Filter Items</ModalHeader>
           <ModalCloseButton />
           <ModalBody overflowY="auto" flex={1}>
