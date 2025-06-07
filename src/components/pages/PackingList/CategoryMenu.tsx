@@ -1,8 +1,9 @@
 import { MenuItem } from '@chakra-ui/icons';
 import { useDisclosure, useToast } from '@chakra-ui/react';
+import type { WriteBatch } from 'firebase/firestore';
 import { AiOutlineCopy, AiOutlineDelete } from 'react-icons/ai';
 import { IoColorPaletteOutline } from 'react-icons/io5';
-import { TbCategoryPlus } from 'react-icons/tb';
+import { TbCategoryPlus, TbSortAscending } from 'react-icons/tb';
 import { DeleteDialog } from '~/components/shared/DeleteDialog.tsx';
 import { useDatabase } from '~/providers/DatabaseContext.ts';
 import { useNewPackItemRowId } from '~/providers/NewPackItemRowIdContext.ts';
@@ -59,6 +60,40 @@ export function CategoryMenu({
     });
   }
 
+  function getSortedItems(items: PackItem[]) {
+    return [...items].sort((a, b) => a.name.localeCompare(b.name, 'sv-SE', { numeric: true, caseFirst: 'lower' }));
+  }
+
+  function updateItemsWithRanks(sortedItems: PackItem[], batch: WriteBatch) {
+    let rank = sortedItems.length;
+    for (const item of sortedItems) {
+      const updatedItem = { ...item, rank };
+      writeDb.updatePackItemBatch(updatedItem, batch);
+      rank--;
+    }
+  }
+
+  async function sortAlphabetically() {
+    const itemsToSort = packItemsInCat.filter((packItem) => packItem.category === category.id);
+
+    if (itemsToSort.length <= 1) {
+      return;
+    }
+
+    const sortedItems = getSortedItems(itemsToSort);
+    const batch = writeDb.initBatch();
+
+    updateItemsWithRanks(sortedItems, batch);
+    await batch.commit();
+
+    toast({
+      title: `Sorted ${sortedItems.length} items alphabetically in ${category.name}`,
+      status: 'success',
+      duration: 3000,
+      isClosable: true,
+    });
+  }
+
   return (
     <ContextMenu title="Category actions">
       <MenuItem key="add" onClick={() => setNewPackItemRowId(category.id)} icon={<TbCategoryPlus />}>
@@ -74,6 +109,9 @@ export function CategoryMenu({
       </MenuItem>
       <MenuItem key="color" icon={<IoColorPaletteOutline />} onClick={colorDisclosure.onOpen}>
         Set color
+      </MenuItem>
+      <MenuItem key="sort" icon={<TbSortAscending />} onClick={sortAlphabetically}>
+        Sort alphabetically
       </MenuItem>
 
       <CopyToOtherListModal
