@@ -80,11 +80,23 @@ export function CategoryMenu({
       return;
     }
 
+    const originalOrder = itemsToSort.map((item) => ({
+      id: item.id,
+      rank: item.rank,
+      category: item.category,
+    }));
+
     const sortedItems = getSortedItems(itemsToSort);
     const batch = writeDb.initBatch();
 
     updateItemsWithRanks(sortedItems, batch);
     await batch.commit();
+
+    addUndoAction({
+      type: 'reorder-items',
+      description: `Sort alphabetically in ${category.name}`,
+      data: { originalOrder },
+    });
 
     toast({
       title: `Sorted ${sortedItems.length} items alphabetically in ${category.name}`,
