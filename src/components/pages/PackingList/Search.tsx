@@ -4,71 +4,71 @@ import { AiOutlineSearch } from 'react-icons/ai';
 import { PLIconButton } from '~/components/shared/PLIconButton.tsx';
 
 export function Search({
-    onToggle,
-    isOpen,
+  onToggle,
+  isOpen,
 }: {
-    onToggle: () => void;
-    isOpen: boolean;
+  onToggle: () => void;
+  isOpen: boolean;
 }) {
-    return (
-        <PLIconButton
-            aria-label="Search items"
-            icon={<AiOutlineSearch />}
-            onClick={onToggle}
-            mr={2}
-            colorScheme={isOpen ? 'blue' : undefined}
-        />
-    );
+  return (
+    <PLIconButton
+      aria-label="Search items"
+      icon={<AiOutlineSearch />}
+      onClick={onToggle}
+      mr={2}
+      colorScheme={isOpen ? 'blue' : undefined}
+    />
+  );
 }
 
 export function SearchInput({
-    onSearch,
-    onClose,
+  onSearch,
+  onClose,
 }: {
-    onSearch: (searchText: string) => void;
-    onClose?: () => void;
+  onSearch: (searchText: string) => void;
+  onClose?: () => void;
 }) {
-    const [searchText, setSearchText] = useState('');
-    const onSearchRef = useRef(onSearch);
+  const [searchText, setSearchText] = useState('');
+  const onSearchRef = useRef(onSearch);
 
-    useEffect(() => {
-        onSearchRef.current = onSearch;
-    }, [onSearch]);
+  useEffect(() => {
+    onSearchRef.current = onSearch;
+  }, [onSearch]);
 
-    function handleSearch(value: string) {
-        setSearchText(value);
+  function handleSearch(value: string) {
+    setSearchText(value);
+  }
+
+  function handleKeyDown(event: React.KeyboardEvent) {
+    if (event.key === 'Escape' && onClose) {
+      onClose();
     }
+  }
 
-    function handleKeyDown(event: React.KeyboardEvent) {
-        if (event.key === 'Escape' && onClose) {
-            onClose();
-        }
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      onSearchRef.current(searchText);
+    }, 300);
+
+    return () => clearTimeout(timeoutId);
+  }, [searchText]);
+
+  useEffect(() => {
+    const input = document.getElementById('search-input');
+    if (input) {
+      input.focus();
     }
+  }, []);
 
-    useEffect(() => {
-        const timeoutId = setTimeout(() => {
-            onSearchRef.current(searchText);
-        }, 300);
-
-        return () => clearTimeout(timeoutId);
-    }, [searchText]);
-
-    useEffect(() => {
-        const input = document.getElementById('search-input');
-        if (input) {
-            input.focus();
-        }
-    }, []);
-
-    return (
-        <Input
-            id="search-input"
-            placeholder="Search items by name..."
-            value={searchText}
-            onChange={(e) => handleSearch(e.target.value)}
-            onKeyDown={handleKeyDown}
-            size="md"
-            autoComplete="off"
-        />
-    );
+  return (
+    <Input
+      id="search-input"
+      placeholder="Search items by name..."
+      value={searchText}
+      onChange={(e) => handleSearch(e.target.value)}
+      onKeyDown={handleKeyDown}
+      size="md"
+      autoComplete="off"
+    />
+  );
 }
