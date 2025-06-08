@@ -22,6 +22,7 @@ type FilterState = {
   showTheseCategories: string[];
   showTheseMembers: string[];
   showTheseStates: string[];
+  searchText?: string;
 };
 
 export function DatabaseProvider({ children }: { children: ReactNode }) {
@@ -46,6 +47,7 @@ export function DatabaseProvider({ children }: { children: ReactNode }) {
         showTheseCategories: savedCategories ? JSON.parse(savedCategories) : [],
         showTheseMembers: savedMembers ? JSON.parse(savedMembers) : [],
         showTheseStates: savedStates ? JSON.parse(savedStates) : [],
+        searchText: '',
       };
     }
     return null;
@@ -105,16 +107,25 @@ export function DatabaseProvider({ children }: { children: ReactNode }) {
     );
   }
 
+  function filterBySearchText(packItems: PackItem[], searchText: string): PackItem[] {
+    if (!searchText || !searchText.trim()) {
+      return packItems;
+    }
+    const lowerSearchText = searchText.toLowerCase().trim();
+    return packItems.filter((item) => item.name.toLowerCase().includes(lowerSearchText));
+  }
+
   function applyAllFilters(packItems: PackItem[], filterState: FilterState | null): PackItem[] {
     if (!filterState || !packItems) {
       return packItems;
     }
 
-    const { showTheseCategories, showTheseMembers, showTheseStates } = filterState;
+    const { showTheseCategories, showTheseMembers, showTheseStates, searchText } = filterState;
 
     let filtered = filterByCategories(packItems, showTheseCategories);
     filtered = filterByMembers(filtered, showTheseMembers);
     filtered = filterByStates(filtered, showTheseStates);
+    filtered = filterBySearchText(filtered, searchText || '');
 
     return filtered;
   }
@@ -157,13 +168,19 @@ export function DatabaseProvider({ children }: { children: ReactNode }) {
   let membersInPackingList: NamedEntity[] = [];
   const isInitialized = members && categories && packItems && images && packingLists && packingList;
   if (isInitialized) {
-    sortAll(members, categories, packItems, packingLists);
-    const filtered = applyAllFilters(packItems, currentFilterState);
-    groupedPackItems = groupByCategories(filtered, categories);
+    // Create copies to avoid mutating the original arrays on every render
+    const membersCopy = [...members];
+    const categoriesCopy = [...categories];
+    const packItemsCopy = [...packItems];
+    const packingListsCopy = [...packingLists];
+
+    sortAll(membersCopy, categoriesCopy, packItemsCopy, packingListsCopy);
+    const filtered = applyAllFilters(packItemsCopy, currentFilterState);
+    groupedPackItems = groupByCategories(filtered, categoriesCopy);
     const flattened = flattenGroupedPackItems(groupedPackItems);
     columns = createColumns(flattened, nbrOfColumns);
-    categoriesInPackingList = getCategoriesInPackingList(categories, packItems);
-    membersInPackingList = getMembersInPackingList(members, packItems);
+    categoriesInPackingList = getCategoriesInPackingList(categoriesCopy, packItemsCopy);
+    membersInPackingList = getMembersInPackingList(membersCopy, packItemsCopy);
   }
 
   return (

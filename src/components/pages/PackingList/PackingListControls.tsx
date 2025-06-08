@@ -1,4 +1,5 @@
 import { Box, Button, Flex, Tooltip, useBreakpointValue, useColorModeValue, useDisclosure } from '@chakra-ui/react';
+import { useState } from 'react';
 import {
   AiOutlineArrowDown,
   AiOutlineArrowUp,
@@ -14,6 +15,7 @@ import { CategoryModal } from '~/components/pages/PackingList/CategoryModal.tsx'
 import { DeleteItemsModal } from '~/components/pages/PackingList/DeleteItemsModal.tsx';
 import { DeleteSelectedItemsModal } from '~/components/pages/PackingList/DeleteSelectedItemsModal.tsx';
 import { Filter } from '~/components/pages/PackingList/Filter.tsx';
+import { Search, SearchInput } from '~/components/pages/PackingList/Search.tsx';
 import { PLIconButton } from '~/components/shared/PLIconButton.tsx';
 import { useDatabase } from '~/providers/DatabaseContext.ts';
 import { useFullscreenMode } from '~/providers/FullscreenModeContext.ts';
@@ -27,7 +29,7 @@ export function PackingListControls({
   onTextMode: () => void;
   onMemberFilter: (memberIds: string[]) => void;
 }) {
-  const { packItems, setFilter } = useDatabase();
+  const { packItems, setFilter, filter } = useDatabase();
   const { fullscreenMode, setFullscreenMode } = useFullscreenMode();
   const {
     isSelectMode,
@@ -41,6 +43,7 @@ export function PackingListControls({
   const moveToCategoryDisclosure = useDisclosure();
   const deleteItemsDisclosure = useDisclosure();
   const deleteCheckedItemsDisclosure = useDisclosure();
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   const checkedItems = packItems.filter((item) => item.checked);
   const checkedItemsCount = checkedItems.length;
@@ -61,8 +64,34 @@ export function PackingListControls({
       showTheseCategories: filterCategories,
       showTheseMembers: filterMembers,
       showTheseStates: filterPackItemState,
+      searchText: filter?.searchText || '',
     });
     onMemberFilter(filterMembers);
+  }
+
+  function onSearch(searchText: string) {
+    // Only update if search text actually changed
+    if (filter?.searchText !== searchText) {
+      setFilter({
+        showTheseCategories: filter?.showTheseCategories || [],
+        showTheseMembers: filter?.showTheseMembers || [],
+        showTheseStates: filter?.showTheseStates || [],
+        searchText,
+      });
+    }
+  }
+
+  function toggleSearch() {
+    setIsSearchOpen(!isSearchOpen);
+    if (isSearchOpen) {
+      // Clear search when closing
+      setFilter({
+        showTheseCategories: filter?.showTheseCategories || [],
+        showTheseMembers: filter?.showTheseMembers || [],
+        showTheseStates: filter?.showTheseStates || [],
+        searchText: '',
+      });
+    }
   }
 
   function onEditClick() {
@@ -140,45 +169,53 @@ export function PackingListControls({
           </Flex>
         </Flex>
       ) : (
-        <Flex direction="row" justifyContent="space-between" alignItems="center" mb={1} wrap="wrap" gap={2}>
-          <Flex justifyContent="space-between" width="100%">
-            <Filter onFilter={onFilter} />
-            <Flex>
-              <Tooltip
-                label={
-                  canUndo
-                    ? `Undo: ${getUndoDescription()} (${undoHistory.length} action${undoHistory.length === 1 ? '' : 's'} available)`
-                    : 'No actions to undo'
-                }
-                placement="bottom"
-              >
-                <Box>
-                  <PLIconButton
-                    aria-label="Undo last action"
-                    icon={<MdUndo />}
-                    onClick={handleUndo}
-                    mr={2}
-                    isDisabled={!canUndo}
-                  />
-                </Box>
-              </Tooltip>
-              <PLIconButton aria-label="Select mode" icon={<IoMdRadioButtonOn />} onClick={toggleSelectMode} mr={2} />
-              <PLIconButton aria-label="Edit" icon={<AiOutlineEdit />} onClick={onEditClick} mr={2} />
-              <PLIconButton
-                aria-label="Remove checked items"
-                icon={<MdOutlineRemoveDone />}
-                onClick={deleteCheckedItemsDisclosure.onOpen}
-                mr={2}
-                isDisabled={checkedItemsCount === 0}
-              />
-              <PLIconButton
-                aria-label="Full screen"
-                icon={fullscreenMode ? <AiOutlineFullscreenExit /> : <AiOutlineFullscreen />}
-                onClick={onFullscreen}
-              />
+        <>
+          <Flex direction="row" justifyContent="space-between" alignItems="center" mb={1} wrap="wrap" gap={2}>
+            <Flex justifyContent="space-between" width="100%">
+              <Filter onFilter={onFilter} />
+              <Flex>
+                <Tooltip
+                  label={
+                    canUndo
+                      ? `Undo: ${getUndoDescription()} (${undoHistory.length} action${undoHistory.length === 1 ? '' : 's'} available)`
+                      : 'No actions to undo'
+                  }
+                  placement="bottom"
+                >
+                  <Box>
+                    <PLIconButton
+                      aria-label="Undo last action"
+                      icon={<MdUndo />}
+                      onClick={handleUndo}
+                      mr={2}
+                      isDisabled={!canUndo}
+                    />{' '}
+                  </Box>
+                </Tooltip>
+                <Search onToggle={toggleSearch} isOpen={isSearchOpen} />
+                <PLIconButton aria-label="Select mode" icon={<IoMdRadioButtonOn />} onClick={toggleSelectMode} mr={2} />
+                <PLIconButton aria-label="Edit" icon={<AiOutlineEdit />} onClick={onEditClick} mr={2} />
+                <PLIconButton
+                  aria-label="Remove checked items"
+                  icon={<MdOutlineRemoveDone />}
+                  onClick={deleteCheckedItemsDisclosure.onOpen}
+                  mr={2}
+                  isDisabled={checkedItemsCount === 0}
+                />
+                <PLIconButton
+                  aria-label="Full screen"
+                  icon={fullscreenMode ? <AiOutlineFullscreenExit /> : <AiOutlineFullscreen />}
+                  onClick={onFullscreen}
+                />
+              </Flex>
             </Flex>
           </Flex>
-        </Flex>
+          {isSearchOpen && (
+            <Box mt={2}>
+              <SearchInput onSearch={onSearch} onClose={toggleSearch} />
+            </Box>
+          )}
+        </>
       )}
 
       <CategoryModal isOpen={moveToCategoryDisclosure.isOpen} onClose={moveToCategoryDisclosure.onClose} />

@@ -20,12 +20,19 @@ interface ContextType {
     showTheseCategories: string[];
     showTheseMembers: string[];
     showTheseStates: string[];
+    searchText?: string;
   } | null;
   setFilter: ({
     showTheseCategories,
     showTheseMembers,
     showTheseStates,
-  }: { showTheseCategories: string[]; showTheseMembers: string[]; showTheseStates: string[] }) => void;
+    searchText,
+  }: {
+    showTheseCategories: string[];
+    showTheseMembers: string[];
+    showTheseStates: string[];
+    searchText?: string;
+  }) => void;
 }
 
 export const DatabaseContext = createContext<ContextType | undefined>(undefined);
