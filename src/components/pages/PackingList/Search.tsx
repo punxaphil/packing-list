@@ -1,4 +1,5 @@
-import { Input } from '@chakra-ui/react';
+import { CloseIcon } from '@chakra-ui/icons';
+import { IconButton, Input, InputGroup, InputRightElement } from '@chakra-ui/react';
 import { useEffect, useRef, useState } from 'react';
 import { AiOutlineSearch } from 'react-icons/ai';
 import { PLIconButton } from '~/components/shared/PLIconButton.tsx';
@@ -39,6 +40,10 @@ export function SearchInput({
     setSearchText(value);
   }
 
+  function handleClearSearch() {
+    setSearchText('');
+  }
+
   function handleKeyDown(event: React.KeyboardEvent) {
     if (event.key === 'Escape' && onClose) {
       onClose();
@@ -61,14 +66,27 @@ export function SearchInput({
   }, []);
 
   return (
-    <Input
-      id="search-input"
-      placeholder="Search items by name..."
-      value={searchText}
-      onChange={(e) => handleSearch(e.target.value)}
-      onKeyDown={handleKeyDown}
-      size="md"
-      autoComplete="off"
-    />
+    <InputGroup>
+      <Input
+        id="search-input"
+        placeholder="Search items by name..."
+        value={searchText}
+        onChange={(e) => handleSearch(e.target.value)}
+        onKeyDown={handleKeyDown}
+        size="md"
+        autoComplete="off"
+      />
+      {searchText && (
+        <InputRightElement>
+          <IconButton
+            aria-label="Clear search"
+            icon={<CloseIcon />}
+            size="xs"
+            variant="ghost"
+            onClick={handleClearSearch}
+          />
+        </InputRightElement>
+      )}
+    </InputGroup>
   );
 }
