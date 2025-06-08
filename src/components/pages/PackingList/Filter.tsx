@@ -1,8 +1,6 @@
 import { SmallCloseIcon } from '@chakra-ui/icons';
 import {
   Button,
-  Checkbox,
-  CheckboxGroup,
   Divider,
   HStack,
   Modal,
@@ -85,13 +83,22 @@ export function Filter({
     setTempFilteredPackItemState(filteredPackItemState);
   }, [filteredCategories, filteredMembers, filteredPackItemState]);
 
-  const handleTempFilterChange = (value: string[], type: 'categories' | 'members' | 'packItemState') => {
+  const handleTempFilterChange = (value: string, type: 'categories' | 'members' | 'packItemState') => {
     if (type === 'categories') {
-      setTempFilteredCategories(value);
+      const newCategories = tempFilteredCategories.includes(value)
+        ? tempFilteredCategories.filter((id) => id !== value)
+        : [...tempFilteredCategories, value];
+      setTempFilteredCategories(newCategories);
     } else if (type === 'members') {
-      setTempFilteredMembers(value);
+      const newMembers = tempFilteredMembers.includes(value)
+        ? tempFilteredMembers.filter((id) => id !== value)
+        : [...tempFilteredMembers, value];
+      setTempFilteredMembers(newMembers);
     } else if (type === 'packItemState') {
-      setTempFilteredPackItemState(value);
+      const newStates = tempFilteredPackItemState.includes(value)
+        ? tempFilteredPackItemState.filter((id) => id !== value)
+        : [...tempFilteredPackItemState, value];
+      setTempFilteredPackItemState(newStates);
     }
   };
 
@@ -100,6 +107,14 @@ export function Filter({
     setFilteredMembers(tempFilteredMembers);
     setFilteredPackItemState(tempFilteredPackItemState);
     onFilter(tempFilteredCategories, tempFilteredMembers, tempFilteredPackItemState);
+    onClose();
+  };
+
+  const clearAllFilters = () => {
+    setFilteredCategories([]);
+    setFilteredMembers([]);
+    setFilteredPackItemState([]);
+    onFilter([], [], []);
     onClose();
   };
 
@@ -153,58 +168,90 @@ export function Filter({
             <VStack spacing={6} align="stretch">
               <VStack align="stretch" spacing={3}>
                 <Text fontWeight="bold">Pack Item State</Text>
-                <CheckboxGroup
-                  value={tempFilteredPackItemState}
-                  onChange={(value) => handleTempFilterChange(value as string[], 'packItemState')}
-                >
-                  <Stack direction="column">
-                    <Checkbox value={CHECKED_FILTER_STATE}>{CHECKED_FILTER_STATE}</Checkbox>
-                    <Checkbox value={UNCHECKED_FILTER_STATE}>{UNCHECKED_FILTER_STATE}</Checkbox>
-                  </Stack>
-                </CheckboxGroup>
+                <Stack direction="row" flexWrap="wrap" justifyContent="flex-start">
+                  <Button
+                    onClick={() => handleTempFilterChange(CHECKED_FILTER_STATE, 'packItemState')}
+                    m={1}
+                    bg={tempFilteredPackItemState.includes(CHECKED_FILTER_STATE) ? COLUMN_COLORS[0] : ''}
+                    borderColor={tempFilteredPackItemState.includes(CHECKED_FILTER_STATE) ? 'black' : COLUMN_COLORS[0]}
+                    borderWidth={tempFilteredPackItemState.includes(CHECKED_FILTER_STATE) ? 2 : 4}
+                    size="sm"
+                  >
+                    {CHECKED_FILTER_STATE}
+                  </Button>
+                  <Button
+                    onClick={() => handleTempFilterChange(UNCHECKED_FILTER_STATE, 'packItemState')}
+                    m={1}
+                    bg={tempFilteredPackItemState.includes(UNCHECKED_FILTER_STATE) ? COLUMN_COLORS[1] : ''}
+                    borderColor={
+                      tempFilteredPackItemState.includes(UNCHECKED_FILTER_STATE) ? 'black' : COLUMN_COLORS[1]
+                    }
+                    borderWidth={tempFilteredPackItemState.includes(UNCHECKED_FILTER_STATE) ? 2 : 4}
+                    size="sm"
+                  >
+                    {UNCHECKED_FILTER_STATE}
+                  </Button>
+                </Stack>
               </VStack>
 
               <Divider />
 
               <VStack align="stretch" spacing={3}>
                 <Text fontWeight="bold">Categories</Text>
-                <CheckboxGroup
-                  value={tempFilteredCategories}
-                  onChange={(value) => handleTempFilterChange(value as string[], 'categories')}
-                >
-                  <Stack direction="column">
-                    {categories.map((entity) => (
-                      <Checkbox key={entity.id} value={entity.id}>
-                        {entity.name}
-                      </Checkbox>
-                    ))}
-                  </Stack>
-                </CheckboxGroup>
+                <Stack direction="row" flexWrap="wrap" justifyContent="flex-start">
+                  {categories.map((entity, index) => (
+                    <Button
+                      key={entity.id}
+                      onClick={() => handleTempFilterChange(entity.id, 'categories')}
+                      m={1}
+                      bg={tempFilteredCategories.includes(entity.id) ? COLUMN_COLORS[index % COLUMN_COLORS.length] : ''}
+                      borderColor={
+                        tempFilteredCategories.includes(entity.id)
+                          ? 'black'
+                          : COLUMN_COLORS[index % COLUMN_COLORS.length]
+                      }
+                      borderWidth={tempFilteredCategories.includes(entity.id) ? 2 : 4}
+                      size="sm"
+                    >
+                      {entity.name}
+                    </Button>
+                  ))}
+                </Stack>
               </VStack>
 
               <Divider />
 
               <VStack align="stretch" spacing={3}>
                 <Text fontWeight="bold">Members</Text>
-                <CheckboxGroup
-                  value={tempFilteredMembers}
-                  onChange={(value) => handleTempFilterChange(value as string[], 'members')}
-                >
-                  <Stack direction="column">
-                    {members.map((entity) => (
-                      <Checkbox key={entity.id} value={entity.id}>
-                        {entity.name}
-                      </Checkbox>
-                    ))}
-                  </Stack>
-                </CheckboxGroup>
+                <Stack direction="row" flexWrap="wrap" justifyContent="flex-start">
+                  {members.map((entity, index) => (
+                    <Button
+                      key={entity.id}
+                      onClick={() => handleTempFilterChange(entity.id, 'members')}
+                      m={1}
+                      bg={tempFilteredMembers.includes(entity.id) ? COLUMN_COLORS[index % COLUMN_COLORS.length] : ''}
+                      borderColor={
+                        tempFilteredMembers.includes(entity.id) ? 'black' : COLUMN_COLORS[index % COLUMN_COLORS.length]
+                      }
+                      borderWidth={tempFilteredMembers.includes(entity.id) ? 2 : 4}
+                      size="sm"
+                    >
+                      {entity.name}
+                    </Button>
+                  ))}
+                </Stack>
               </VStack>
             </VStack>
           </ModalBody>
           <ModalFooter flexShrink={0}>
-            <Button colorScheme="blue" onClick={applyFilters}>
-              Done
-            </Button>
+            <Stack direction="row" spacing={3}>
+              <Button variant="outline" onClick={clearAllFilters}>
+                Clear All
+              </Button>
+              <Button colorScheme="blue" onClick={applyFilters}>
+                Done
+              </Button>
+            </Stack>
           </ModalFooter>
         </ModalContent>
       </Modal>
