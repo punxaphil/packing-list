@@ -33,12 +33,13 @@ export function PackItemRow({
   isFirstItemInCategory?: boolean;
 }) {
   const members = useDatabase().members;
+  const { filter } = useDatabase();
   const { newPackItemRowId, setNewPackItemRowId } = useNewPackItemRowId();
   const { isSelectMode, toggleItemSelection, isItemSelected } = useSelectMode();
 
   const memberRows = useMemo(() => {
-    return getMemberRows(packItem.members, filteredMembers, members);
-  }, [packItem.members, filteredMembers, members, packItem]);
+    return getMemberRows(packItem.members, filteredMembers, members, filter?.showTheseStates || []);
+  }, [packItem.members, filteredMembers, members, filter?.showTheseStates, packItem]);
 
   async function toggleItem() {
     packItem.checked = !packItem.checked;

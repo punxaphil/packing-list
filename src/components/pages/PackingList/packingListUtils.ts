@@ -1,4 +1,5 @@
 import { DragUpdate } from '@hello-pangea/dnd';
+import { CHECKED_FILTER_STATE, UNCHECKED_FILTER_STATE } from '~/components/pages/PackingList/Filter.tsx';
 import { ColumnList, PackingListRow } from '~/types/Column.ts';
 import { GroupedPackItem } from '~/types/GroupedPackItem.ts';
 import { MemberPackItem } from '~/types/MemberPackItem.ts';
@@ -73,13 +74,29 @@ function moveLastCategoryToNextColumn(columns: PackingListRow[][]) {
   }
 }
 
-export function getMemberRows(memberPackItems: MemberPackItem[], filteredMembers: string[], members: NamedEntity[]) {
+export function getMemberRows(
+  memberPackItems: MemberPackItem[],
+  filteredMembers: string[],
+  members: NamedEntity[],
+  filteredPackItemStates: string[] = []
+) {
   let filtered: MemberPackItem[];
   if (!filteredMembers.length) {
     filtered = memberPackItems;
   } else {
     filtered = memberPackItems.filter(({ id }) => filteredMembers.includes(id));
   }
+
+  // Apply pack item state filtering to individual members
+  if (filteredPackItemStates.length > 0) {
+    filtered = filtered.filter((memberItem) => {
+      return (
+        (filteredPackItemStates.includes(CHECKED_FILTER_STATE) && memberItem.checked) ||
+        (filteredPackItemStates.includes(UNCHECKED_FILTER_STATE) && !memberItem.checked)
+      );
+    });
+  }
+
   return (
     filtered.map((m) => {
       const member = members.find((t) => t.id === m.id);
