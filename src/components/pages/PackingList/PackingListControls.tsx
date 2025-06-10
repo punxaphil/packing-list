@@ -212,7 +212,7 @@ export function PackingListControls({
           </Flex>
           {isSearchOpen && (
             <Box mt={2}>
-              <SearchInput onSearch={onSearch} onClose={toggleSearch} />
+              <SearchInput onSearch={onSearch} onClose={toggleSearch} initialValue={filter?.searchText || ''} />
             </Box>
           )}
         </>

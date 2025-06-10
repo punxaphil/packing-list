@@ -1,6 +1,6 @@
 import { useBreakpointValue } from '@chakra-ui/react';
 import { getAuth } from 'firebase/auth';
-import { ReactNode, useEffect, useState } from 'react';
+import { ReactNode, useCallback, useEffect, useRef, useState } from 'react';
 import {
   CHECKED_FILTER_STATE,
   UNCHECKED_FILTER_STATE,
@@ -34,6 +34,12 @@ export function DatabaseProvider({ children }: { children: ReactNode }) {
   const { packingList } = usePackingList();
 
   const [currentFilterState, setCurrentFilterState] = useState<FilterState | null>(getInitialFilterState);
+  const currentFilterStateRef = useRef(currentFilterState);
+
+  // Keep ref in sync with state
+  useEffect(() => {
+    currentFilterStateRef.current = currentFilterState;
+  }, [currentFilterState]);
 
   const nbrOfColumns: 1 | 2 | 3 = useBreakpointValue({ base: 1, sm: 1, md: 2, lg: 3 }) ?? 3;
 
@@ -58,6 +64,8 @@ export function DatabaseProvider({ children }: { children: ReactNode }) {
     localStorage.setItem('filteredMembers', JSON.stringify(filters.showTheseMembers));
     localStorage.setItem('filteredPackItemState', JSON.stringify(filters.showTheseStates));
   }
+
+  const persistFiltersCallback = useCallback(persistFiltersToLocalStorage, []);
 
   function filterByCategories(packItems: PackItem[], categoryIds: string[]): PackItem[] {
     if (!categoryIds.length) {
@@ -161,6 +169,25 @@ export function DatabaseProvider({ children }: { children: ReactNode }) {
       }
     })().catch(console.error);
   }, [packingList]);
+
+  const resetSearchTextIfNeeded = useCallback(() => {
+    const filterState = currentFilterStateRef.current;
+    if (filterState?.searchText) {
+      const newFilters = {
+        ...filterState,
+        searchText: '',
+      };
+      setCurrentFilterState(newFilters);
+      persistFiltersCallback(newFilters);
+    }
+  }, [persistFiltersCallback]);
+
+  // Reset search text when switching between packing lists
+  useEffect(() => {
+    if (packingList) {
+      resetSearchTextIfNeeded();
+    }
+  }, [packingList, resetSearchTextIfNeeded]);
 
   let groupedPackItems: GroupedPackItem[] = [];
   let columns: ColumnList[] = [];

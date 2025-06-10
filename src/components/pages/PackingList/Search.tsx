@@ -25,16 +25,23 @@ export function Search({
 export function SearchInput({
   onSearch,
   onClose,
+  initialValue = '',
 }: {
   onSearch: (searchText: string) => void;
   onClose?: () => void;
+  initialValue?: string;
 }) {
-  const [searchText, setSearchText] = useState('');
+  const [searchText, setSearchText] = useState(initialValue);
   const onSearchRef = useRef(onSearch);
 
   useEffect(() => {
     onSearchRef.current = onSearch;
   }, [onSearch]);
+
+  // Sync local state with external value changes
+  useEffect(() => {
+    setSearchText(initialValue);
+  }, [initialValue]);
 
   function handleSearch(value: string) {
     setSearchText(value);
