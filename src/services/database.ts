@@ -14,6 +14,7 @@ import {
   getDocs,
   initializeFirestore,
   onSnapshot,
+  orderBy,
   persistentLocalCache,
   persistentMultipleTabManager,
   query,
@@ -76,7 +77,10 @@ export const readDb = {
     );
     const categoriesQuery = collection(firestore, USERS_KEY, userId, CATEGORIES_KEY);
     const imagesQuery = collection(firestore, USERS_KEY, userId, IMAGES_KEY);
-    const packingListsQuery = collection(firestore, USERS_KEY, userId, PACKING_LISTS_KEY);
+    const packingListsQuery = query(
+      collection(firestore, USERS_KEY, userId, PACKING_LISTS_KEY),
+      orderBy('rank', 'desc')
+    );
 
     await getInitialData();
     createSubscriptions();

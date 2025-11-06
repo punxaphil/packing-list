@@ -1,6 +1,6 @@
 import { Button, Card, CardBody, Flex, Spacer, useToast } from '@chakra-ui/react';
 import { DragDropContext, Draggable, DropResult, Droppable } from '@hello-pangea/dnd';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { PackingListCard } from '~/components/pages/PackingLists/PackingListCard.tsx';
 import { useDatabase } from '~/providers/DatabaseContext.ts';
 import { useError } from '~/providers/ErrorContext.ts';
@@ -13,14 +13,15 @@ import { PackItem } from '~/types/PackItem.ts';
 import { PackingListWithItems } from '~/types/PackingListsWithItems.ts';
 
 export function PackingLists() {
-  const [reordered, setReordered] = useState<NamedEntity[]>([]);
-  const initialPackingLists = useDatabase().packingLists;
+  const initialPackingListsFromDb = useDatabase().packingLists;
+  const [displayPackingLists, setDisplayPackingLists] = useState<NamedEntity[]>(() => initialPackingListsFromDb ?? []);
   const [packingListsWithItems, setPackingListsWithItems] = useState<PackingListWithItems[]>([]);
   const [allPackItems, setAllPackItems] = useState<PackItem[]>([]);
   const currentList = usePackingList().packingList;
   const { setError } = useError();
   const toast = useToast();
   const [initialized, setInitialized] = useState(false);
+  const [isDraggingOrSaving, setIsDraggingOrSaving] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -29,13 +30,15 @@ export function PackingLists() {
     })().catch(setError);
   }, [setError]);
 
-  useMemo(() => {
-    setReordered(initialPackingLists);
-  }, [initialPackingLists]);
+  useEffect(() => {
+    if (!isDraggingOrSaving && initialPackingListsFromDb) {
+      setDisplayPackingLists(initialPackingListsFromDb);
+    }
+  }, [initialPackingListsFromDb, isDraggingOrSaving]);
 
-  useMemo(() => {
+  useEffect(() => {
     const groups: PackingListWithItems[] = [];
-    for (const packingList of reordered) {
+    for (const packingList of displayPackingLists) {
       const group: PackingListWithItems = { packingList, packItems: [] };
       for (const packItem of allPackItems) {
         if (packItem.packingList === packingList.id) {
@@ -45,11 +48,11 @@ export function PackingLists() {
       groups.push(group);
     }
     setPackingListsWithItems(groups);
-  }, [reordered, allPackItems]);
+  }, [displayPackingLists, allPackItems]);
 
-  async function OnNewList() {
-    const name = findUniqueName('My packing list', reordered);
-    const rank = rankOnTop(reordered);
+  async function handleNewList() {
+    const name = findUniqueName('My packing list', displayPackingLists);
+    const rank = rankOnTop(displayPackingLists);
     await writeDb.addPackingList(name, rank);
     toast({
       title: `Packing list "${name}" created`,
@@ -57,8 +60,20 @@ export function PackingLists() {
     });
   }
 
-  function dragEnd(result: DropResult) {
-    return reorderAndSave(result, writeDb.updatePackingLists, reordered, setReordered);
+  async function handleDragEnd(result: DropResult) {
+    if (!result.destination) {
+      return;
+    }
+
+    setIsDraggingOrSaving(true);
+
+    try {
+      await reorderAndSave(result, writeDb.updatePackingLists, displayPackingLists, setDisplayPackingLists);
+    } catch (error) {
+      setError(error as Error);
+    } finally {
+      setIsDraggingOrSaving(false);
+    }
   }
 
   return (
@@ -67,7 +82,7 @@ export function PackingLists() {
         <Spacer />
         <Card>
           <CardBody>
-            <DragDropContext onDragEnd={dragEnd}>
+            <DragDropContext onDragEnd={handleDragEnd}>
               <Droppable droppableId="droppable">
                 {(provided) => (
                   <Flex
@@ -79,18 +94,18 @@ export function PackingLists() {
                     m={2}
                     maxWidth={800}
                   >
-                    <Button onClick={OnNewList} my={2}>
+                    <Button onClick={handleNewList} my={2}>
                       Create new Packing List
                     </Button>
                     {packingListsWithItems.map(({ packingList, packItems }, index) => (
                       <Draggable key={packingList.id} draggableId={packingList.id} index={index}>
-                        {(provided, snapshot) => (
+                        {(draggableProvided, snapshot) => (
                           <PackingListCard
                             key={packingList.id}
                             packingList={packingList}
                             isCurrentList={packingList.id === currentList.id}
                             packItems={packItems}
-                            draggableProvided={provided}
+                            draggableProvided={draggableProvided}
                             draggableSnapshot={snapshot}
                           />
                         )}

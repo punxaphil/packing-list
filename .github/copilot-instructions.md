@@ -22,6 +22,7 @@ This is a React project using TypeScript, Chakra UI, Firebase, and Biome for lin
   - effects
   - helper functions
   - render
+- after making changes,run build and fix errors
 
 ## Do not
 - Don't comment or JSDoc code
