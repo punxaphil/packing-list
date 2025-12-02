@@ -1,6 +1,6 @@
 import { Box, BoxProps, usePrefersReducedMotion } from '@chakra-ui/react';
 import { Draggable, Droppable } from '@hello-pangea/dnd';
-import { type Transition, motion } from 'framer-motion';
+import { motion, type Transition } from 'framer-motion';
 import { useDatabase } from '~/providers/DatabaseContext.ts';
 import { UNCATEGORIZED } from '~/services/utils.ts';
 import { PackingListRow } from '~/types/Column.ts';

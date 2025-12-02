@@ -15,13 +15,7 @@ import { ColorPicker } from './ColorPicker.tsx';
 import { ContextMenu } from './ContextMenu.tsx';
 import { CopyToOtherListModal } from './CopyToOtherListModal.tsx';
 
-export function CategoryMenu({
-  packItemsInCat,
-  category,
-}: {
-  packItemsInCat: PackItem[];
-  category: NamedEntity;
-}) {
+export function CategoryMenu({ packItemsInCat, category }: { packItemsInCat: PackItem[]; category: NamedEntity }) {
   const { setNewPackItemRowId } = useNewPackItemRowId();
   const { packingLists } = useDatabase();
   const { addUndoAction } = useUndo();

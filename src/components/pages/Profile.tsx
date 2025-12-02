@@ -37,12 +37,10 @@ export function Profile() {
           <Flex gap="3" direction="column" alignItems="center">
             {currentUser.email}
             <Flex alignItems="end">
-              <>
-                <ProfileAvatar shouldNavigate={false} size={profileImage ? 'full' : '2xl'} />
-                {profileImage && (
-                  <IconButton size="xs" icon={<DeleteIcon />} aria-label="Delete profile picture" onClick={onDelete} />
-                )}
-              </>
+              <ProfileAvatar shouldNavigate={false} size={profileImage ? 'full' : '2xl'} />
+              {profileImage && (
+                <IconButton size="xs" icon={<DeleteIcon />} aria-label="Delete profile picture" onClick={onDelete} />
+              )}
             </Flex>
             <Spacer />
             <Stack gap="2">

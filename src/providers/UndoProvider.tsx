@@ -78,7 +78,7 @@ export function UndoProvider({ children }: UndoProviderProps) {
 
       // Remove the action from history
       setUndoHistory((prev) => prev.slice(0, -1));
-    } catch (error) {
+    } catch (_error) {
       toast({
         title: 'Undo failed',
         description: 'Unable to undo the last action',

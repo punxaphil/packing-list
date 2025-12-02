@@ -12,9 +12,9 @@ import {
   ModalOverlay,
   Stack,
   Text,
-  VStack,
   useBreakpointValue,
   useDisclosure,
+  VStack,
 } from '@chakra-ui/react';
 import { useEffect, useRef, useState } from 'react';
 import { AiOutlineFilter } from 'react-icons/ai';

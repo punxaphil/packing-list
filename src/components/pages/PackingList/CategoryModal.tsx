@@ -1,4 +1,4 @@
-import { Button, Divider, Flex, Input, Text, VStack, useToast } from '@chakra-ui/react';
+import { Button, Divider, Flex, Input, Text, useToast, VStack } from '@chakra-ui/react';
 import { useState } from 'react';
 import { BaseModal } from '~/components/shared/BaseModal.tsx';
 import { CategoryButton } from '~/components/shared/CategoryButton.tsx';

@@ -12,11 +12,7 @@ import { ConnectMembersToPackItemModal } from './ConnectMembersToPackItemModal.t
 import { ContextMenu } from './ContextMenu.tsx';
 import { CopyToOtherListModal } from './CopyToOtherListModal.tsx';
 
-export function PackItemMenu({
-  packItem,
-}: {
-  packItem: PackItem;
-}) {
+export function PackItemMenu({ packItem }: { packItem: PackItem }) {
   const { packingLists } = useDatabase();
   const { addUndoAction } = useUndo();
   const copyDisclosure = useDisclosure();
