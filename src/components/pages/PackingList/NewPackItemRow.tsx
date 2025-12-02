@@ -1,6 +1,5 @@
 import { Input } from '@chakra-ui/react';
-import { ChangeEvent, useState } from 'react';
-import { KeyboardEvent } from 'react';
+import { ChangeEvent, KeyboardEvent, useState } from 'react';
 import { useDatabase } from '~/providers/DatabaseContext.ts';
 import { useNewPackItemRowId } from '~/providers/NewPackItemRowIdContext.ts';
 import { usePackingList } from '~/providers/PackingListContext.ts';

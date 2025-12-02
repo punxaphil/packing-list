@@ -5,7 +5,7 @@ import { NamedEntity } from '~/types/NamedEntity.ts';
 import { PackItem, TextPackItem } from '~/types/PackItem.ts';
 
 import { writeDb } from './database.ts';
-import { UNCATEGORIZED, getMemberName, rankOnTop } from './utils.ts';
+import { getMemberName, rankOnTop, UNCATEGORIZED } from './utils.ts';
 
 export function getGroupedAsText(grouped: GroupedPackItem[], members: NamedEntity[]) {
   let result = '';
@@ -26,7 +26,7 @@ export function getGroupedAsText(grouped: GroupedPackItem[], members: NamedEntit
 
 export function createTextPackItemsFromText(groupedAsText: string): TextPackItem[] {
   const items: TextPackItem[] = [];
-  let currentItem: TextPackItem | undefined = undefined;
+  let currentItem: TextPackItem | undefined;
   let currentCategory = '';
   for (const line of groupedAsText.split('\n')) {
     if (/^ *--.*/.test(line)) {

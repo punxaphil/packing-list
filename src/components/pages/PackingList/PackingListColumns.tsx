@@ -10,11 +10,7 @@ import { PackingListRow } from '~/types/Column.ts';
 import { PackingListColumn } from './PackingListColumn.tsx';
 import { reorder } from './packingListUtils.ts';
 
-export function PackingListColumns({
-  filteredMembers,
-}: {
-  filteredMembers: string[];
-}) {
+export function PackingListColumns({ filteredMembers }: { filteredMembers: string[] }) {
   const { columns: initialColumns, nbrOfColumns } = useDatabase();
   const { addUndoAction } = useUndo();
   const columns = useMemo(() => initialColumns, [initialColumns]);

@@ -21,11 +21,7 @@ import {
   updateDatabaseFromTextPackItems,
 } from '~/services/textModeUtils.ts';
 
-export function PackItemsTextMode({
-  onDone,
-}: {
-  onDone: () => void;
-}) {
+export function PackItemsTextMode({ onDone }: { onDone: () => void }) {
   const { categories, members, packItems, groupedPackItems } = useDatabase();
   const [groupedAsText, setGroupedAsText] = useState('');
   const [saving, setSaving] = useState(false);

@@ -27,29 +27,27 @@ export function ErrorProvider({ children }: { children: ReactNode }) {
         setError: setErrorInternal,
       }}
     >
-      <>
-        {children}
-        <Modal isOpen={isOpen} onClose={onClose}>
-          <ModalOverlay />
-          <ModalContent>
-            <ModalHeader>Error</ModalHeader>
-            <ModalCloseButton />
-            <ModalBody>
-              {Array.isArray(error) ? (
-                error.map((e) => <Box key={e}>{e}</Box>)
-              ) : typeof error === 'string' ? (
-                <Box>{error}</Box>
-              ) : (
-                <Box>{error.message ?? JSON.stringify(error)}</Box>
-              )}
-            </ModalBody>
+      {children}
+      <Modal isOpen={isOpen} onClose={onClose}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Error</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            {Array.isArray(error) ? (
+              error.map((e) => <Box key={e}>{e}</Box>)
+            ) : typeof error === 'string' ? (
+              <Box>{error}</Box>
+            ) : (
+              <Box>{error.message ?? JSON.stringify(error)}</Box>
+            )}
+          </ModalBody>
 
-            <ModalFooter>
-              <Button onClick={onClose}>Close</Button>
-            </ModalFooter>
-          </ModalContent>
-        </Modal>
-      </>
+          <ModalFooter>
+            <Button onClick={onClose}>Close</Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </ErrorContext>
   );
 }

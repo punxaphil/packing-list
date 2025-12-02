@@ -4,13 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { AiOutlineSearch } from 'react-icons/ai';
 import { PLIconButton } from '~/components/shared/PLIconButton.tsx';
 
-export function Search({
-  onToggle,
-  isOpen,
-}: {
-  onToggle: () => void;
-  isOpen: boolean;
-}) {
+export function Search({ onToggle, isOpen }: { onToggle: () => void; isOpen: boolean }) {
   return (
     <PLIconButton
       aria-label="Search items"

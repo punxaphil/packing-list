@@ -14,7 +14,12 @@ export function DeleteDialog({
   onConfirm,
   onClose,
   isOpen,
-}: { text: string; onConfirm: () => void; onClose: () => void; isOpen: boolean }) {
+}: {
+  text: string;
+  onConfirm: () => void;
+  onClose: () => void;
+  isOpen: boolean;
+}) {
   const cancelRef = useRef<HTMLButtonElement>(null) as RefObject<HTMLButtonElement>;
 
   function onDelete() {
@@ -23,29 +28,25 @@ export function DeleteDialog({
   }
 
   return (
-    <>
-      <AlertDialog isOpen={isOpen} leastDestructiveRef={cancelRef} onClose={onClose}>
-        <AlertDialogOverlay>
-          <AlertDialogContent>
-            <AlertDialogHeader fontSize="lg" fontWeight="bold">
-              Delete {text}
-            </AlertDialogHeader>
+    <AlertDialog isOpen={isOpen} leastDestructiveRef={cancelRef} onClose={onClose}>
+      <AlertDialogOverlay>
+        <AlertDialogContent>
+          <AlertDialogHeader fontSize="lg" fontWeight="bold">
+            Delete {text}
+          </AlertDialogHeader>
 
-            <AlertDialogBody>
-              Are you sure? You can use the undo button to reverse this action if needed.
-            </AlertDialogBody>
+          <AlertDialogBody>Are you sure? You can use the undo button to reverse this action if needed.</AlertDialogBody>
 
-            <AlertDialogFooter>
-              <Button ref={cancelRef} onClick={onClose}>
-                Cancel
-              </Button>
-              <Button colorScheme="red" onClick={onDelete} ml={3}>
-                Delete
-              </Button>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialogOverlay>
-      </AlertDialog>
-    </>
+          <AlertDialogFooter>
+            <Button ref={cancelRef} onClick={onClose}>
+              Cancel
+            </Button>
+            <Button colorScheme="red" onClick={onDelete} ml={3}>
+              Delete
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialogOverlay>
+    </AlertDialog>
   );
 }

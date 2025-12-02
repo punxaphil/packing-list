@@ -99,54 +99,52 @@ export function UploadModal({
   }
 
   return (
-    <>
-      <Modal closeOnOverlayClick={false} isOpen={isOpen} onClose={onClose}>
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>Set image - {name}</ModalHeader>
-          <ModalCloseButton />
-          <ModalBody pb={6}>
-            <Stack m="5" spacing={4} align="center">
-              {fileUrl === undefined && (
-                <Switch onChange={onSwitch} isChecked={pasteImage}>
-                  Paste image?
-                </Switch>
-              )}
-              {pasteImage ? (
-                <HStack>
-                  {fileUrl === undefined && (
-                    <Input
-                      placeholder="Paste image here"
-                      onPaste={onPaste}
-                      autoFocus
-                      readOnly
-                      width="200px"
-                      height="200px"
-                    />
-                  )}
-                </HStack>
-              ) : (
-                fileUrl === undefined && <Input type="file" onChange={onFileSelected} accept="/image/*" p="1" />
-              )}
-              {fileUrl && <img src={fileUrl} alt="uploaded" />}
-            </Stack>
-          </ModalBody>
+    <Modal closeOnOverlayClick={false} isOpen={isOpen} onClose={onClose}>
+      <ModalOverlay />
+      <ModalContent>
+        <ModalHeader>Set image - {name}</ModalHeader>
+        <ModalCloseButton />
+        <ModalBody pb={6}>
+          <Stack m="5" spacing={4} align="center">
+            {fileUrl === undefined && (
+              <Switch onChange={onSwitch} isChecked={pasteImage}>
+                Paste image?
+              </Switch>
+            )}
+            {pasteImage ? (
+              <HStack>
+                {fileUrl === undefined && (
+                  <Input
+                    placeholder="Paste image here"
+                    onPaste={onPaste}
+                    autoFocus
+                    readOnly
+                    width="200px"
+                    height="200px"
+                  />
+                )}
+              </HStack>
+            ) : (
+              fileUrl === undefined && <Input type="file" onChange={onFileSelected} accept="/image/*" p="1" />
+            )}
+            {fileUrl && <img src={fileUrl} alt="uploaded" />}
+          </Stack>
+        </ModalBody>
 
-          <ModalFooter>
-            <ButtonGroup>
-              <Button onClick={handleUpload} colorScheme="blue" leftIcon={<AttachmentIcon />} isDisabled={!fileUrl}>
-                Save
-              </Button>
-              <Button onClick={handleDelete} colorScheme="orange" leftIcon={<DeleteIcon />} isDisabled={!entityImage}>
-                Remove
-              </Button>
-              <Button onClick={resetAndClose} colorScheme="gray" leftIcon={<CloseIcon />}>
-                Cancel
-              </Button>
-            </ButtonGroup>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
-    </>
+        <ModalFooter>
+          <ButtonGroup>
+            <Button onClick={handleUpload} colorScheme="blue" leftIcon={<AttachmentIcon />} isDisabled={!fileUrl}>
+              Save
+            </Button>
+            <Button onClick={handleDelete} colorScheme="orange" leftIcon={<DeleteIcon />} isDisabled={!entityImage}>
+              Remove
+            </Button>
+            <Button onClick={resetAndClose} colorScheme="gray" leftIcon={<CloseIcon />}>
+              Cancel
+            </Button>
+          </ButtonGroup>
+        </ModalFooter>
+      </ModalContent>
+    </Modal>
   );
 }

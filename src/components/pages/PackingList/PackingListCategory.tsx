@@ -9,7 +9,7 @@ import { useDatabase } from '~/providers/DatabaseContext.ts';
 import { useNewPackItemRowId } from '~/providers/NewPackItemRowIdContext.ts';
 import { useSelectMode } from '~/providers/SelectModeContext.ts';
 import { writeDb } from '~/services/database.ts';
-import { UNCATEGORIZED, getPackItemGroup } from '~/services/utils.ts';
+import { getPackItemGroup, UNCATEGORIZED } from '~/services/utils.ts';
 import { NamedEntity } from '~/types/NamedEntity.ts';
 import { PackItem } from '~/types/PackItem.ts';
 import { NewPackItemRow } from './NewPackItemRow.tsx';
