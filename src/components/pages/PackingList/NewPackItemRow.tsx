@@ -33,12 +33,12 @@ export function NewPackItemRow({
       if (packItemToPlaceNewItemAfter) {
         rank = packItemToPlaceNewItemAfter.rank;
         for (const packItem of packItems) {
-          packItem.rank = packItem.rank + 1;
-          writeDb.updatePackItemBatch(packItem, batch);
-          if (packItem.id === packItemToPlaceNewItemAfter.id) {
-            break;
+          if (packItem.rank < rank) {
+            packItem.rank = packItem.rank - 1;
+            writeDb.updatePackItemBatch(packItem, batch);
           }
         }
+        rank = rank - 1;
       } else {
         rank = rankOnTop(packItems);
       }
