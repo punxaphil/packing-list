@@ -39,12 +39,13 @@ export function PackingListControls({
     moveSelectedItemsToBottom,
     clearSelection,
   } = useSelectMode();
-  const { canUndo, performUndo, getUndoDescription, undoHistory } = useUndo();
+  const { canUndo, performUndo, getUndoDescription, getFilteredHistory } = useUndo();
   const moveToCategoryDisclosure = useDisclosure();
   const deleteItemsDisclosure = useDisclosure();
   const deleteCheckedItemsDisclosure = useDisclosure();
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 
+  const undoHistory = getFilteredHistory('packing-list');
   const checkedItems = packItems.filter((item) => item.checked);
   const checkedItemsCount = checkedItems.length;
 
@@ -103,7 +104,7 @@ export function PackingListControls({
   }
 
   async function handleUndo() {
-    await performUndo();
+    await performUndo('packing-list');
   }
 
   return (
@@ -176,8 +177,8 @@ export function PackingListControls({
               <Flex>
                 <Tooltip
                   label={
-                    canUndo
-                      ? `Undo: ${getUndoDescription()} (${undoHistory.length} action${undoHistory.length === 1 ? '' : 's'} available)`
+                    canUndo('packing-list')
+                      ? `Undo: ${getUndoDescription('packing-list')} (${undoHistory.length} action${undoHistory.length === 1 ? '' : 's'} available)`
                       : 'No actions to undo'
                   }
                   placement="bottom"
@@ -188,7 +189,7 @@ export function PackingListControls({
                       icon={<MdUndo />}
                       onClick={handleUndo}
                       mr={2}
-                      isDisabled={!canUndo}
+                      isDisabled={!canUndo('packing-list')}
                     />{' '}
                   </Box>
                 </Tooltip>

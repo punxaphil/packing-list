@@ -68,9 +68,9 @@ function TestComponent() {
 
   return (
     <div>
-      <div data-testid="can-undo">{canUndo.toString()}</div>
+      <div data-testid="can-undo">{canUndo().toString()}</div>
       <div data-testid="history-length">{undoHistory.length}</div>
-      <div data-testid="next-action">{nextAction ? nextAction.description : 'none'}</div>
+      <div data-testid="next-action">{nextAction() ? nextAction()?.description : 'none'}</div>
       <div data-testid="undo-description">{getUndoDescription() || 'none'}</div>
       <button
         type="button"
@@ -129,7 +129,7 @@ function TestComponent() {
       >
         Add Reorder Items Action
       </button>
-      <button type="button" data-testid="perform-undo" onClick={performUndo}>
+      <button type="button" data-testid="perform-undo" onClick={() => performUndo()}>
         Perform Undo
       </button>
     </div>

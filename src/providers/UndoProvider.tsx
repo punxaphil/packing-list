@@ -7,7 +7,7 @@ import type { NamedEntity } from '~/types/NamedEntity.ts';
 import type { PackItem } from '~/types/PackItem.ts';
 import { useDatabase } from './DatabaseContext.ts';
 import { usePackingList } from './PackingListContext.ts';
-import { type UndoAction, UndoContext } from './UndoContext.ts';
+import { getActionsForScope, type UndoAction, UndoContext, type UndoScope } from './UndoContext.ts';
 
 interface UndoProviderProps {
   children: ReactNode;
@@ -22,8 +22,25 @@ export function UndoProvider({ children }: UndoProviderProps) {
   const { packItems } = useDatabase();
   const toast = useToast();
 
-  const canUndo = undoHistory.length > 0;
-  const nextAction = undoHistory.length > 0 ? undoHistory[undoHistory.length - 1] : null;
+  function getFilteredHistory(scope: UndoScope) {
+    const allowedTypes = getActionsForScope(scope);
+    return undoHistory.filter((action) => allowedTypes.includes(action.type));
+  }
+
+  function canUndo(scope?: UndoScope) {
+    if (!scope) {
+      return undoHistory.length > 0;
+    }
+    return getFilteredHistory(scope).length > 0;
+  }
+
+  function nextAction(scope?: UndoScope) {
+    if (!scope) {
+      return undoHistory.length > 0 ? undoHistory[undoHistory.length - 1] : null;
+    }
+    const filtered = getFilteredHistory(scope);
+    return filtered.length > 0 ? filtered[filtered.length - 1] : null;
+  }
 
   function addUndoAction(action: Omit<UndoAction, 'id' | 'timestamp'>) {
     const undoAction: UndoAction = {
@@ -38,12 +55,11 @@ export function UndoProvider({ children }: UndoProviderProps) {
     });
   }
 
-  async function performUndo() {
-    if (undoHistory.length === 0) {
+  async function performUndo(scope?: UndoScope) {
+    const actionToUndo = nextAction(scope);
+    if (!actionToUndo) {
       return;
     }
-
-    const actionToUndo = undoHistory[undoHistory.length - 1];
 
     try {
       switch (actionToUndo.type) {
@@ -77,7 +93,7 @@ export function UndoProvider({ children }: UndoProviderProps) {
       });
 
       // Remove the action from history
-      setUndoHistory((prev) => prev.slice(0, -1));
+      setUndoHistory((prev) => prev.filter((a) => a.id !== actionToUndo.id));
     } catch (_error) {
       toast({
         title: 'Undo failed',
@@ -125,13 +141,15 @@ export function UndoProvider({ children }: UndoProviderProps) {
     await batch.commit();
   }
 
-  function getUndoDescription() {
-    return nextAction ? nextAction.description : null;
+  function getUndoDescription(scope?: UndoScope) {
+    const action = nextAction(scope);
+    return action ? action.description : null;
   }
 
   const value = {
     canUndo,
     undoHistory,
+    getFilteredHistory,
     nextAction,
     addUndoAction,
     performUndo,
