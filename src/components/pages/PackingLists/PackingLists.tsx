@@ -1,4 +1,4 @@
-import { Box, Button, Card, CardBody, Flex, Spacer, Tooltip, useToast } from '@chakra-ui/react';
+import { Box, Button, Card, CardBody, Flex, SimpleGrid, Tooltip, useToast } from '@chakra-ui/react';
 import { DragDropContext, Draggable, Droppable, DropResult } from '@hello-pangea/dnd';
 import { useEffect, useState } from 'react';
 import { MdUndo } from 'react-icons/md';
@@ -83,42 +83,38 @@ export function PackingLists() {
 
   return (
     initialized && (
-      <Flex m="5" minWidth={300}>
-        <Spacer />
-        <Card>
+      <Flex m="5" minWidth={300} justifyContent="center">
+        <Card maxWidth={1200} width="100%">
           <CardBody>
+            <Flex gap={2} my={2} alignItems="center" justifyContent="center">
+              <Button onClick={handleNewList}>Create new Packing List</Button>
+              <Tooltip
+                label={
+                  canUndo('packing-lists')
+                    ? `Undo: ${getUndoDescription('packing-lists')} (${undoHistory.length} action${undoHistory.length === 1 ? '' : 's'} available)`
+                    : 'No actions to undo'
+                }
+                placement="bottom"
+              >
+                <Box>
+                  <PLIconButton
+                    aria-label="Undo last action"
+                    icon={<MdUndo />}
+                    onClick={() => performUndo('packing-lists')}
+                    isDisabled={!canUndo('packing-lists')}
+                  />
+                </Box>
+              </Tooltip>
+            </Flex>
             <DragDropContext onDragEnd={handleDragEnd}>
               <Droppable droppableId="droppable">
                 {(provided) => (
-                  <Flex
-                    wrap="wrap"
-                    direction="column"
-                    alignItems="center"
+                  <SimpleGrid
+                    columns={{ base: 1, md: 2, lg: 3 }}
+                    spacing={4}
                     {...provided.droppableProps}
                     ref={provided.innerRef}
-                    m={2}
-                    maxWidth={800}
                   >
-                    <Flex gap={2} my={2} alignItems="center">
-                      <Button onClick={handleNewList}>Create new Packing List</Button>
-                      <Tooltip
-                        label={
-                          canUndo('packing-lists')
-                            ? `Undo: ${getUndoDescription('packing-lists')} (${undoHistory.length} action${undoHistory.length === 1 ? '' : 's'} available)`
-                            : 'No actions to undo'
-                        }
-                        placement="bottom"
-                      >
-                        <Box>
-                          <PLIconButton
-                            aria-label="Undo last action"
-                            icon={<MdUndo />}
-                            onClick={() => performUndo('packing-lists')}
-                            isDisabled={!canUndo('packing-lists')}
-                          />
-                        </Box>
-                      </Tooltip>
-                    </Flex>
                     {packingListsWithItems.map(({ packingList, packItems }, index) => (
                       <Draggable key={packingList.id} draggableId={packingList.id} index={index}>
                         {(draggableProvided, snapshot) => (
@@ -134,13 +130,12 @@ export function PackingLists() {
                       </Draggable>
                     ))}
                     {provided.placeholder}
-                  </Flex>
+                  </SimpleGrid>
                 )}
               </Droppable>
             </DragDropContext>
           </CardBody>
         </Card>
-        <Spacer />
       </Flex>
     )
   );
