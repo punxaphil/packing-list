@@ -33,30 +33,31 @@ export function DeleteItemsModal({ isOpen, onClose, items, itemType, onAfterDele
     }
 
     const deletedItems = [...items];
+    const itemCount = items.length;
     const batch = writeDb.initBatch();
 
     for (const item of items) {
       writeDb.deletePackItemBatch(item.id, batch);
     }
 
+    onClose();
     await batch.commit();
 
     const actionType = itemType === 'checked' ? 'delete-checked-items' : 'delete-items';
     addUndoAction({
       type: actionType,
-      description: `Deleted ${items.length} ${itemType} items`,
+      description: `Deleted ${itemCount} ${itemType} items`,
       data: { items: deletedItems },
     });
 
     toast({
-      title: `Deleted ${items.length} ${itemType} items`,
+      title: `Deleted ${itemCount} ${itemType} items`,
       status: 'success',
       duration: 3000,
       isClosable: true,
     });
 
     onAfterDelete?.();
-    onClose();
   }
 
   return (
