@@ -16,6 +16,7 @@ interface ContextType {
   nbrOfColumns: 1 | 2 | 3;
   categoriesInPackingList: NamedEntity[];
   membersInPackingList: NamedEntity[];
+  isLoadingPackItems: boolean;
   filter: {
     showTheseCategories: string[];
     showTheseMembers: string[];

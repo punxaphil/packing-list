@@ -29,6 +29,7 @@ export function DatabaseProvider({ children }: { children: ReactNode }) {
   const [members, setMembers] = useState<NamedEntity[]>();
   const [categories, setCategories] = useState<NamedEntity[]>();
   const [packItems, setPackItems] = useState<PackItem[]>();
+  const [packItemsListId, setPackItemsListId] = useState<string>();
   const [images, setImages] = useState<Image[]>();
   const [packingLists, setPackingLists] = useState<NamedEntity[]>();
   const { packingList } = usePackingList();
@@ -152,16 +153,22 @@ export function DatabaseProvider({ children }: { children: ReactNode }) {
   }
 
   useEffect(() => {
+    setPackItems(undefined);
+    setPackItemsListId(undefined);
     (async () => {
       const userId = getAuth().currentUser?.uid;
       if (!userId) {
         throw new Error('No user logged in');
       }
       if (packingList) {
+        const currentListId = packingList.id;
         await readDb.getUserCollectionsAndSubscribe(
           setMembers,
           setCategories,
-          setPackItems,
+          (items) => {
+            setPackItems(items);
+            setPackItemsListId(currentListId);
+          },
           setImages,
           setPackingLists,
           packingList.id
@@ -193,9 +200,12 @@ export function DatabaseProvider({ children }: { children: ReactNode }) {
   let columns: ColumnList[] = [];
   let categoriesInPackingList: NamedEntity[] = [];
   let membersInPackingList: NamedEntity[] = [];
-  const isInitialized = members && categories && packItems && images && packingLists && packingList;
-  if (isInitialized) {
-    // Create copies to avoid mutating the original arrays on every render
+  const packItemsMatchCurrentList = packItemsListId === packingList?.id;
+  const isFullyInitialized =
+    members && categories && packItems && images && packingLists && packingList && packItemsMatchCurrentList;
+  const isLoadingPackItems = !packItemsMatchCurrentList;
+
+  if (isFullyInitialized) {
     const membersCopy = [...members];
     const categoriesCopy = [...categories];
     const packItemsCopy = [...packItems];
@@ -210,30 +220,31 @@ export function DatabaseProvider({ children }: { children: ReactNode }) {
     membersInPackingList = getMembersInPackingList(membersCopy, packItemsCopy);
   }
 
+  const baseDataLoaded = members && categories && images && packingLists && packingList;
+
+  if (!baseDataLoaded) {
+    return <TextProgress text="Loading your packing lists" />;
+  }
+
   return (
-    <>
-      {isInitialized ? (
-        <DatabaseContext.Provider
-          value={{
-            members,
-            categories,
-            packItems,
-            images,
-            packingLists,
-            groupedPackItems,
-            columns,
-            nbrOfColumns,
-            categoriesInPackingList,
-            membersInPackingList,
-            filter: currentFilterState,
-            setFilter: updateAndPersistFilters,
-          }}
-        >
-          {children}
-        </DatabaseContext.Provider>
-      ) : (
-        <TextProgress text="Loading your packing lists" />
-      )}
-    </>
+    <DatabaseContext.Provider
+      value={{
+        members,
+        categories,
+        packItems: packItems ?? [],
+        images,
+        packingLists,
+        groupedPackItems,
+        columns,
+        nbrOfColumns,
+        categoriesInPackingList,
+        membersInPackingList,
+        isLoadingPackItems,
+        filter: currentFilterState,
+        setFilter: updateAndPersistFilters,
+      }}
+    >
+      {children}
+    </DatabaseContext.Provider>
   );
 }

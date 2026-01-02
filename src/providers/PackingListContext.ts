@@ -3,7 +3,7 @@ import { NamedEntity } from '~/types/NamedEntity.ts';
 
 interface PackingListIdType {
   packingList: NamedEntity;
-  setPackingListId: (packingListId: string) => void;
+  setPackingListId: (packingListId: string) => Promise<void>;
 }
 
 export const PackingListContext = createContext<PackingListIdType | undefined>(undefined);

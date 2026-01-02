@@ -54,6 +54,7 @@ const mockDatabaseContext = {
   nbrOfColumns: 1 as const,
   categoriesInPackingList: [],
   membersInPackingList: [],
+  isLoadingPackItems: false,
   filter: null,
   setFilter: vi.fn(),
 };
