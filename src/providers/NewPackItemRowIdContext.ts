@@ -1,8 +1,9 @@
-import { createContext, useContext } from 'react';
+import { createContext, type RefObject, useContext } from 'react';
 
 interface ContextType {
   newPackItemRowId?: string;
   setNewPackItemRowId: (id?: string) => void;
+  inputRef: RefObject<HTMLInputElement | null>;
 }
 
 export const NewPackItemRowIdContext = createContext<ContextType | undefined>(undefined);

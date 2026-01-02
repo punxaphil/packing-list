@@ -1,5 +1,5 @@
 import { Input, Tooltip } from '@chakra-ui/react';
-import { ChangeEvent, KeyboardEvent, useCallback, useEffect, useRef, useState } from 'react';
+import { type ChangeEvent, type KeyboardEvent, type RefObject, useCallback, useEffect, useRef, useState } from 'react';
 import { handleEnter } from '~/services/utils.ts';
 
 export function PLInput({
@@ -9,6 +9,7 @@ export function PLInput({
   bold,
   onEnter,
   disabled,
+  focusOnEnterRef,
 }: {
   value: string;
   onUpdate: (value: string) => void;
@@ -16,6 +17,7 @@ export function PLInput({
   bold?: boolean;
   onEnter?: () => void;
   disabled?: boolean;
+  focusOnEnterRef?: RefObject<HTMLInputElement | null>;
 }) {
   const [text, setText] = useState(value);
   const [overflowActive, setOverflowActive] = useState(false);
@@ -28,6 +30,9 @@ export function PLInput({
   function onKeyDown(e: KeyboardEvent<HTMLInputElement>) {
     handleEnter(e, () => {
       onUpdate(text);
+      if (focusOnEnterRef?.current) {
+        focusOnEnterRef.current.focus();
+      }
       onEnter?.();
     });
   }
