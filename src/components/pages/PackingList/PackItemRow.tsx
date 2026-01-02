@@ -13,6 +13,7 @@ import { useNewPackItemRowId } from '~/providers/NewPackItemRowIdContext.ts';
 import { usePackingList } from '~/providers/PackingListContext.ts';
 import { useSelectMode } from '~/providers/SelectModeContext.ts';
 import { useTemplate } from '~/providers/TemplateContext.ts';
+import { useVersion } from '~/providers/VersionContext.ts';
 import { writeDb } from '~/services/database.ts';
 import { PackItem } from '~/types/PackItem.ts';
 import { MemberPackItemRow } from './MemberPackItemRow.tsx';
@@ -41,6 +42,7 @@ export function PackItemRow({
   const { getSyncDecision, getMatchingItemsForSync, isTemplateList, refreshTemplateItems, templateList } =
     useTemplate();
   const { packingList } = usePackingList();
+  const { scheduleVersionSave } = useVersion();
   const syncDialog = useDisclosure();
   const [pendingRename, setPendingRename] = useState<{
     oldName: string;
@@ -78,6 +80,7 @@ export function PackItemRow({
   async function toggleItem() {
     packItem.checked = !packItem.checked;
     await onUpdate(packItem);
+    scheduleVersionSave('Before checking/unchecking item');
   }
 
   async function onUpdate(packItem: PackItem) {
@@ -89,6 +92,7 @@ export function PackItemRow({
     if (oldName === newName) {
       return;
     }
+    scheduleVersionSave('Before renaming item');
 
     const decision = getSyncDecision('rename');
     if (decision !== null) {

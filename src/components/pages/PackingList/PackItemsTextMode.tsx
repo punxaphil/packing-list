@@ -15,6 +15,7 @@ import {
 import { ChangeEvent, useEffect, useState } from 'react';
 import { useDatabase } from '~/providers/DatabaseContext.ts';
 import { usePackingList } from '~/providers/PackingListContext.ts';
+import { writeDb } from '~/services/database.ts';
 import {
   createTextPackItemsFromText,
   getGroupedAsText,
@@ -38,6 +39,7 @@ export function PackItemsTextMode({ onDone }: { onDone: () => void }) {
 
   async function save() {
     setSaving(true);
+    await writeDb.saveVersion(packingList.id, packItems, 'Before text mode changes');
     const textPackItems = createTextPackItemsFromText(groupedAsText);
     await updateDatabaseFromTextPackItems(packItems, textPackItems, members, categories, packingList.id);
     setSaving(false);

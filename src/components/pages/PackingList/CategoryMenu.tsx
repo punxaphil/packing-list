@@ -7,6 +7,7 @@ import { TbCategoryPlus, TbSortAscending } from 'react-icons/tb';
 import { DeleteDialog } from '~/components/shared/DeleteDialog.tsx';
 import { useDatabase } from '~/providers/DatabaseContext.ts';
 import { useNewPackItemRowId } from '~/providers/NewPackItemRowIdContext.ts';
+import { usePackingList } from '~/providers/PackingListContext.ts';
 import { useUndo } from '~/providers/UndoContext.ts';
 import { writeDb } from '~/services/database.ts';
 import { NamedEntity } from '~/types/NamedEntity.ts';
@@ -17,7 +18,8 @@ import { CopyToOtherListModal } from './CopyToOtherListModal.tsx';
 
 export function CategoryMenu({ packItemsInCat, category }: { packItemsInCat: PackItem[]; category: NamedEntity }) {
   const { setNewPackItemRowId } = useNewPackItemRowId();
-  const { packingLists } = useDatabase();
+  const { packingLists, packItems } = useDatabase();
+  const { packingList } = usePackingList();
   const { addUndoAction } = useUndo();
   const copyDisclosure = useDisclosure();
   const deleteDisclosure = useDisclosure();
@@ -31,6 +33,12 @@ export function CategoryMenu({ packItemsInCat, category }: { packItemsInCat: Pac
   async function onConfirmDelete(_shouldSync: boolean) {
     const itemsToDelete = packItemsInCat.filter((packItem) => packItem.category === category.id);
     const deletedItems = [...itemsToDelete];
+
+    await writeDb.saveVersion(
+      packingList.id,
+      packItems,
+      `Before deleting ${deletedItems.length} items in ${category.name}`
+    );
 
     const batch = writeDb.initBatch();
     for (const packItem of packItemsInCat) {

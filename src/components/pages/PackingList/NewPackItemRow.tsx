@@ -2,6 +2,7 @@ import { Input } from '@chakra-ui/react';
 import { ChangeEvent, KeyboardEvent, useEffect, useRef, useState } from 'react';
 import { useDatabase } from '~/providers/DatabaseContext.ts';
 import { useNewPackItemRowId } from '~/providers/NewPackItemRowIdContext.ts';
+import { useVersion } from '~/providers/VersionContext.ts';
 import { handleEnter } from '~/services/utils.ts';
 import { PackItem } from '~/types/PackItem.ts';
 import { PackItemRowWrapper } from './PackItemRowWrapper.tsx';
@@ -20,6 +21,7 @@ export function NewPackItemRow({
   const [newRowText, setNewRowText] = useState('');
   const { setNewPackItemRowId } = useNewPackItemRowId();
   const { addLocalPackItem, savePendingItems } = useDatabase();
+  const { scheduleVersionSave } = useVersion();
   const inputRef = useRef<HTMLInputElement>(null);
   const isReadyForBlur = useRef(false);
 
@@ -72,6 +74,7 @@ export function NewPackItemRow({
       }
     }
     savePendingItems();
+    scheduleVersionSave('Before adding items');
     onHide();
   }
 

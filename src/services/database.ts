@@ -27,6 +27,7 @@ import { Image } from '~/types/Image.ts';
 import { MemberPackItem } from '~/types/MemberPackItem.ts';
 import { NamedEntity } from '~/types/NamedEntity.ts';
 import { PackItem } from '~/types/PackItem.ts';
+import { PackingListVersion } from '~/types/PackingListVersion.ts';
 import { sortEntities } from './utils.ts';
 
 const firebaseConfig = {
@@ -52,6 +53,7 @@ const PACK_ITEMS_KEY = 'packItems';
 const USERS_KEY = 'users';
 const IMAGES_KEY = 'images';
 const PACKING_LISTS_KEY = 'packingLists';
+const VERSIONS_KEY = 'versions';
 
 const subs: (() => void)[] = [];
 
@@ -281,6 +283,45 @@ export const writeDb = {
     const packItems = fromQueryResult<PackItem>(await getDocs(q));
     sortEntities(packItems);
     return packItems;
+  },
+  saveVersion: async (packingListId: string, items: PackItem[], name?: string) => {
+    const userId = getUserId();
+    const checkedCount = items.filter((item) => item.checked).length;
+    const version: Omit<PackingListVersion, 'id'> = {
+      packingListId,
+      timestamp: Date.now(),
+      name,
+      items: items.map((item) => ({ ...item })),
+      itemCount: items.length,
+      checkedCount,
+    };
+    await addDoc(collection(firestore, USERS_KEY, userId, VERSIONS_KEY), version);
+  },
+  getVersions: async (packingListId: string): Promise<PackingListVersion[]> => {
+    const userId = getUserId();
+    const snapshot = await getDocs(collection(firestore, USERS_KEY, userId, VERSIONS_KEY));
+    const allVersions = fromQueryResult<PackingListVersion>(snapshot);
+    return allVersions.filter((v) => v.packingListId === packingListId).sort((a, b) => b.timestamp - a.timestamp);
+  },
+  deleteVersion: async (versionId: string) => {
+    await del(VERSIONS_KEY, versionId);
+  },
+  restoreVersion: async (version: PackingListVersion) => {
+    const userId = getUserId();
+    const currentItems = await writeDb.getPackItemsForPackingList(version.packingListId);
+    const batch = writeBatch(firestore);
+
+    for (const item of currentItems) {
+      batch.delete(doc(firestore, USERS_KEY, userId, PACK_ITEMS_KEY, item.id));
+    }
+
+    for (const item of version.items) {
+      const { id, ...itemData } = item;
+      const docRef = doc(collection(firestore, USERS_KEY, userId, PACK_ITEMS_KEY));
+      batch.set(docRef, itemData);
+    }
+
+    await batch.commit();
   },
 };
 

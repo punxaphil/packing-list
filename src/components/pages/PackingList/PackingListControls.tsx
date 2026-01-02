@@ -7,6 +7,7 @@ import {
   AiOutlineEdit,
   AiOutlineFullscreen,
   AiOutlineFullscreenExit,
+  AiOutlineHistory,
   AiOutlineTags,
 } from 'react-icons/ai';
 import { IoMdRadioButtonOn } from 'react-icons/io';
@@ -16,6 +17,7 @@ import { DeleteItemsModal } from '~/components/pages/PackingList/DeleteItemsModa
 import { DeleteSelectedItemsModal } from '~/components/pages/PackingList/DeleteSelectedItemsModal.tsx';
 import { Filter } from '~/components/pages/PackingList/Filter.tsx';
 import { Search, SearchInput } from '~/components/pages/PackingList/Search.tsx';
+import { VersionHistoryModal } from '~/components/pages/PackingList/VersionHistoryModal.tsx';
 import { PLIconButton } from '~/components/shared/PLIconButton.tsx';
 import { useDatabase } from '~/providers/DatabaseContext.ts';
 import { useFullscreenMode } from '~/providers/FullscreenModeContext.ts';
@@ -43,6 +45,7 @@ export function PackingListControls({
   const moveToCategoryDisclosure = useDisclosure();
   const deleteItemsDisclosure = useDisclosure();
   const deleteCheckedItemsDisclosure = useDisclosure();
+  const versionHistoryDisclosure = useDisclosure();
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   const undoHistory = getFilteredHistory('packing-list');
@@ -222,6 +225,12 @@ export function PackingListControls({
                   isDisabled={checkedItemsCount === 0}
                 />
                 <PLIconButton
+                  aria-label="Version history"
+                  icon={<AiOutlineHistory />}
+                  onClick={versionHistoryDisclosure.onOpen}
+                  mr={2}
+                />
+                <PLIconButton
                   aria-label="Full screen"
                   icon={fullscreenMode ? <AiOutlineFullscreenExit /> : <AiOutlineFullscreen />}
                   onClick={onFullscreen}
@@ -247,6 +256,8 @@ export function PackingListControls({
         items={checkedItems}
         itemType="checked"
       />
+
+      <VersionHistoryModal isOpen={versionHistoryDisclosure.isOpen} onClose={versionHistoryDisclosure.onClose} />
     </Box>
   );
 }

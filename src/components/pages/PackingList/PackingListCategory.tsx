@@ -10,6 +10,7 @@ import { useNewPackItemRowId } from '~/providers/NewPackItemRowIdContext.ts';
 import { usePackingList } from '~/providers/PackingListContext.ts';
 import { useSelectMode } from '~/providers/SelectModeContext.ts';
 import { useTemplate } from '~/providers/TemplateContext.ts';
+import { useVersion } from '~/providers/VersionContext.ts';
 import { writeDb } from '~/services/database.ts';
 import { getPackItemGroup, UNCATEGORIZED } from '~/services/utils.ts';
 import { NamedEntity } from '~/types/NamedEntity.ts';
@@ -30,6 +31,7 @@ export function PackingListCategory({
   const { isSelectMode } = useSelectMode();
   const { packingList } = usePackingList();
   const { isTemplateList } = useTemplate();
+  const { scheduleVersionSave } = useVersion();
   const [checked, setChecked] = useState(false);
   const [isIndeterminate, setIsIndeterminate] = useState(false);
   const [packItemsInCat, setPackItemsInCat] = useState<PackItem[]>([]);
@@ -58,6 +60,7 @@ export function PackingListCategory({
   }
 
   async function toggleItem() {
+    scheduleVersionSave('Before checking/unchecking category');
     const newState = !checked;
     const batch = writeDb.initBatch();
     for (const t of packItemsInCat) {

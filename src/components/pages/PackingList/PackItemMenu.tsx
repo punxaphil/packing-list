@@ -5,6 +5,7 @@ import { AiOutlineCopy, AiOutlineDelete, AiOutlineUsergroupAdd } from 'react-ico
 import { TbStatusChange } from 'react-icons/tb';
 import { DeleteDialog } from '~/components/shared/DeleteDialog.tsx';
 import { useDatabase } from '~/providers/DatabaseContext.ts';
+import { usePackingList } from '~/providers/PackingListContext.ts';
 import { useTemplate } from '~/providers/TemplateContext.ts';
 import { useUndo } from '~/providers/UndoContext.ts';
 import { writeDb } from '~/services/database.ts';
@@ -15,7 +16,8 @@ import { ContextMenu } from './ContextMenu.tsx';
 import { CopyToOtherListModal } from './CopyToOtherListModal.tsx';
 
 export function PackItemMenu({ packItem }: { packItem: PackItem }) {
-  const { packingLists } = useDatabase();
+  const { packingLists, packItems } = useDatabase();
+  const { packingList } = usePackingList();
   const { addUndoAction } = useUndo();
   const { getSyncDecision, setSyncDecision, getMatchingItemsForSync, isTemplateList, refreshTemplateItems } =
     useTemplate();
@@ -53,6 +55,8 @@ export function PackItemMenu({ packItem }: { packItem: PackItem }) {
   }
 
   async function onConfirmDelete(shouldSync: boolean) {
+    await writeDb.saveVersion(packingList.id, packItems, `Before deleting ${packItem.name}`);
+
     const deletedItem = { ...packItem };
     await writeDb.deletePackItem(packItem.id);
 

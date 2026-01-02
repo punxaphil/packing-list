@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { BaseModal } from '~/components/shared/BaseModal.tsx';
 import { useDatabase } from '~/providers/DatabaseContext.ts';
 import { useTemplate } from '~/providers/TemplateContext.ts';
+import { useVersion } from '~/providers/VersionContext.ts';
 import { writeDb } from '~/services/database.ts';
 import { COLUMN_COLORS } from '~/types/Column.ts';
 import { MemberPackItem } from '~/types/MemberPackItem.ts';
@@ -27,6 +28,7 @@ export function ConnectMembersToPackItemModal({
     refreshTemplateItems,
     templateList,
   } = useTemplate();
+  const { scheduleVersionSave } = useVersion();
   const toast = useToast();
   const [localMembers, setLocalMembers] = useState<MemberPackItem[]>([]);
   const [matchingItems, setMatchingItems] = useState<PackItem[]>([]);
@@ -172,6 +174,7 @@ export function ConnectMembersToPackItemModal({
       return;
     }
 
+    scheduleVersionSave('Before changing members');
     packItem.members = [...localMembers];
     await writeDb.updatePackItem(packItem);
     showSuccessToast();
@@ -180,7 +183,6 @@ export function ConnectMembersToPackItemModal({
       originalMembersOfThisPackItem,
       localMembers
     );
-
     if (membersDisconnectedFromThisSpecificItem.length > 0) {
       updateFiltersForDisconnectedMembers(membersDisconnectedFromThisSpecificItem);
     }

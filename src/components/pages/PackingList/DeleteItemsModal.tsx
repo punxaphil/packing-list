@@ -9,6 +9,8 @@ import {
   useToast,
 } from '@chakra-ui/react';
 import { useRef } from 'react';
+import { useDatabase } from '~/providers/DatabaseContext.ts';
+import { usePackingList } from '~/providers/PackingListContext.ts';
 import { useUndo } from '~/providers/UndoContext.ts';
 import { writeDb } from '~/services/database.ts';
 import type { PackItem } from '~/types/PackItem.ts';
@@ -24,6 +26,8 @@ interface DeleteItemsModalProps {
 export function DeleteItemsModal({ isOpen, onClose, items, itemType, onAfterDelete }: DeleteItemsModalProps) {
   const cancelRef = useRef<HTMLButtonElement>(null);
   const { addUndoAction } = useUndo();
+  const { packItems } = useDatabase();
+  const { packingList } = usePackingList();
   const toast = useToast();
 
   async function onConfirmDelete() {
@@ -31,6 +35,8 @@ export function DeleteItemsModal({ isOpen, onClose, items, itemType, onAfterDele
       onClose();
       return;
     }
+
+    await writeDb.saveVersion(packingList.id, packItems, `Before deleting ${items.length} ${itemType} items`);
 
     const deletedItems = [...items];
     const itemCount = items.length;
