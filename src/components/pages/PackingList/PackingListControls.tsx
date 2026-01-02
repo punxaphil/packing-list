@@ -49,6 +49,12 @@ export function PackingListControls({
   const checkedItems = packItems.filter((item) => item.checked);
   const checkedItemsCount = checkedItems.length;
 
+  const hasActiveFilters =
+    (filter?.showTheseCategories?.length ?? 0) > 0 ||
+    (filter?.showTheseMembers?.length ?? 0) > 0 ||
+    (filter?.showTheseStates?.length ?? 0) > 0 ||
+    (filter?.searchText?.length ?? 0) > 0;
+
   const buttonSize = useBreakpointValue({ base: 'sm', md: 'md' });
   const showButtonText = useBreakpointValue({ base: false, md: true });
   const stickyBg = useColorModeValue('white', 'gray.800');
@@ -178,7 +184,9 @@ export function PackingListControls({
                 <Tooltip
                   label={
                     canUndo('packing-list')
-                      ? `Undo: ${getUndoDescription('packing-list')} (${undoHistory.length} action${undoHistory.length === 1 ? '' : 's'} available)`
+                      ? `Undo: ${getUndoDescription('packing-list')} (${undoHistory.length} action${
+                          undoHistory.length === 1 ? '' : 's'
+                        } available)`
                       : 'No actions to undo'
                   }
                   placement="bottom"
@@ -195,7 +203,17 @@ export function PackingListControls({
                 </Tooltip>
                 <Search onToggle={toggleSearch} isOpen={isSearchOpen} />
                 <PLIconButton aria-label="Select mode" icon={<IoMdRadioButtonOn />} onClick={toggleSelectMode} mr={2} />
-                <PLIconButton aria-label="Edit" icon={<AiOutlineEdit />} onClick={onEditClick} mr={2} />
+                <Tooltip label={hasActiveFilters ? 'Disable filters to use text mode' : ''} placement="bottom">
+                  <Box>
+                    <PLIconButton
+                      aria-label="Edit"
+                      icon={<AiOutlineEdit />}
+                      onClick={onEditClick}
+                      mr={2}
+                      isDisabled={hasActiveFilters}
+                    />
+                  </Box>
+                </Tooltip>
                 <PLIconButton
                   aria-label="Remove checked items"
                   icon={<MdOutlineRemoveDone />}
