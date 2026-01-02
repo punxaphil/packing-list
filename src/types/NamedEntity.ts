@@ -4,4 +4,5 @@ export interface NamedEntity {
   image?: string;
   rank: number;
   color?: string;
+  isTemplate?: boolean;
 }

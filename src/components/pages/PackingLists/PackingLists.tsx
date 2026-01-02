@@ -1,12 +1,14 @@
-import { Box, Button, Card, CardBody, Flex, SimpleGrid, Tooltip, useToast } from '@chakra-ui/react';
+import { Box, Button, Card, CardBody, Flex, SimpleGrid, Tooltip, useDisclosure, useToast } from '@chakra-ui/react';
 import { DragDropContext, Draggable, Droppable, DropResult } from '@hello-pangea/dnd';
 import { useEffect, useState } from 'react';
 import { MdUndo } from 'react-icons/md';
+import { CreateFromTemplateDialog } from '~/components/pages/PackingLists/CreateFromTemplateDialog.tsx';
 import { PackingListCard } from '~/components/pages/PackingLists/PackingListCard.tsx';
 import { PLIconButton } from '~/components/shared/PLIconButton.tsx';
 import { useDatabase } from '~/providers/DatabaseContext.ts';
 import { useError } from '~/providers/ErrorContext.ts';
 import { usePackingList } from '~/providers/PackingListContext.ts';
+import { useTemplate } from '~/providers/TemplateContext.ts';
 import { useUndo } from '~/providers/UndoContext.ts';
 import { writeDb } from '~/services/database.ts';
 import { reorderAndSave } from '~/services/reorderUtils.ts';
@@ -24,7 +26,9 @@ export function PackingLists() {
   const { setError } = useError();
   const toast = useToast();
   const { canUndo, performUndo, getUndoDescription, getFilteredHistory } = useUndo();
+  const { templateList, templateItems } = useTemplate();
   const undoHistory = getFilteredHistory('packing-lists');
+  const createFromTemplateDialog = useDisclosure();
   const [initialized, setInitialized] = useState(false);
   const [isDraggingOrSaving, setIsDraggingOrSaving] = useState(false);
 
@@ -56,6 +60,14 @@ export function PackingLists() {
   }, [displayPackingLists, allPackItems]);
 
   async function handleNewList() {
+    if (templateList) {
+      createFromTemplateDialog.onOpen();
+    } else {
+      await createEmptyList();
+    }
+  }
+
+  async function createEmptyList() {
     const name = findUniqueName('My packing list', displayPackingLists);
     const rank = rankOnTop(displayPackingLists);
     await writeDb.addPackingList(name, rank);
@@ -63,6 +75,29 @@ export function PackingLists() {
       title: `Packing list "${name}" created`,
       status: 'success',
     });
+  }
+
+  async function createListFromTemplate(useTemplate: boolean) {
+    const name = findUniqueName('My packing list', displayPackingLists);
+    const rank = rankOnTop(displayPackingLists);
+    if (useTemplate) {
+      const batch = writeDb.initBatch();
+      const packingListId = writeDb.addPackingListBatch(name, batch, rank);
+      for (const item of templateItems) {
+        writeDb.addPackItemBatch(batch, item.name, item.members, item.category, item.rank, packingListId, false);
+      }
+      await batch.commit();
+      toast({
+        title: `Packing list "${name}" created from template`,
+        status: 'success',
+      });
+    } else {
+      await writeDb.addPackingList(name, rank);
+      toast({
+        title: `Packing list "${name}" created`,
+        status: 'success',
+      });
+    }
   }
 
   async function handleDragEnd(result: DropResult) {
@@ -91,7 +126,9 @@ export function PackingLists() {
               <Tooltip
                 label={
                   canUndo('packing-lists')
-                    ? `Undo: ${getUndoDescription('packing-lists')} (${undoHistory.length} action${undoHistory.length === 1 ? '' : 's'} available)`
+                    ? `Undo: ${getUndoDescription('packing-lists')} (${
+                        undoHistory.length
+                      } action${undoHistory.length === 1 ? '' : 's'} available)`
                     : 'No actions to undo'
                 }
                 placement="bottom"
@@ -136,6 +173,11 @@ export function PackingLists() {
             </DragDropContext>
           </CardBody>
         </Card>
+        <CreateFromTemplateDialog
+          isOpen={createFromTemplateDialog.isOpen}
+          onClose={createFromTemplateDialog.onClose}
+          onConfirm={createListFromTemplate}
+        />
       </Flex>
     )
   );

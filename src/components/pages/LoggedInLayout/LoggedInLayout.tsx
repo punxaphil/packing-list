@@ -3,6 +3,7 @@ import { Header } from '~/components/pages/LoggedInLayout/Header.tsx';
 import { DatabaseProvider } from '~/providers/DatabaseProvider.tsx';
 import { useFullscreenMode } from '~/providers/FullscreenModeContext.ts';
 import { PackingListProvider } from '~/providers/PackingListProvider.tsx';
+import { TemplateProvider } from '~/providers/TemplateProvider.tsx';
 import { UndoProvider } from '~/providers/UndoProvider.tsx';
 
 export function LoggedInLayout() {
@@ -10,10 +11,12 @@ export function LoggedInLayout() {
   return (
     <PackingListProvider>
       <DatabaseProvider>
-        <UndoProvider>
-          {!fullscreenMode && <Header />}
-          <Outlet />
-        </UndoProvider>
+        <TemplateProvider>
+          <UndoProvider>
+            {!fullscreenMode && <Header />}
+            <Outlet />
+          </UndoProvider>
+        </TemplateProvider>
       </DatabaseProvider>
     </PackingListProvider>
   );

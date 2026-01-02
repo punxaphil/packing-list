@@ -1,16 +1,19 @@
-import { Flex, HStack, IconButton, Input, Spacer, Stack } from '@chakra-ui/react';
+import { Badge, Flex, HStack, IconButton, Input, Spacer, Stack } from '@chakra-ui/react';
 import { useMemo, useState } from 'react';
 import { GoArrowSwitch } from 'react-icons/go';
 import { useNavigate } from 'react-router';
 import { ProfileAvatar } from '~/components/auth/ProfileAvatar.tsx';
 import { usePackingList } from '~/providers/PackingListContext.ts';
+import { useTemplate } from '~/providers/TemplateContext.ts';
 import { writeDb } from '~/services/database.ts';
 import { NavButton } from './NavButton.tsx';
 
 export function Header() {
   const { packingList } = usePackingList();
+  const { isTemplateList } = useTemplate();
   const [packingListName, setPackingListName] = useState('');
   const navigate = useNavigate();
+  const isCurrentListTemplate = isTemplateList(packingList.id);
 
   useMemo(() => {
     setPackingListName(packingList.name);
@@ -27,19 +30,26 @@ export function Header() {
       <Flex align="center" justifyContent="space-between" m="3" key={packingList.id}>
         <img src="/squirrel_icon.png" alt="squirrel icon" />
         <Spacer />
-        <Input
-          key={packingList.id}
-          value={packingListName}
-          onChange={(e) => savePackingListName(e.target.value)}
-          w="max-content"
-          textAlign="center"
-          fontSize={['xl', '4xl']}
-          p={0}
-          variant="unstyled"
-          overflow="hidden"
-          textOverflow="ellipsis"
-          whiteSpace="nowrap"
-        />
+        <HStack spacing={2}>
+          <Input
+            key={packingList.id}
+            value={packingListName}
+            onChange={(e) => savePackingListName(e.target.value)}
+            w="max-content"
+            textAlign="center"
+            fontSize={['xl', '4xl']}
+            p={0}
+            variant="unstyled"
+            overflow="hidden"
+            textOverflow="ellipsis"
+            whiteSpace="nowrap"
+          />
+          {isCurrentListTemplate && (
+            <Badge colorScheme="purple" fontSize="sm">
+              Template
+            </Badge>
+          )}
+        </HStack>
         <IconButton
           aria-label="Go to lists"
           icon={<GoArrowSwitch />}

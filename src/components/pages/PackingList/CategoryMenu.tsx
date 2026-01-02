@@ -28,7 +28,7 @@ export function CategoryMenu({ packItemsInCat, category }: { packItemsInCat: Pac
     copyDisclosure.onOpen();
   }
 
-  async function onConfirmDelete() {
+  async function onConfirmDelete(_shouldSync: boolean) {
     const itemsToDelete = packItemsInCat.filter((packItem) => packItem.category === category.id);
     const deletedItems = [...itemsToDelete];
 
@@ -55,7 +55,12 @@ export function CategoryMenu({ packItemsInCat, category }: { packItemsInCat: Pac
   }
 
   function getSortedItems(items: PackItem[]) {
-    return [...items].sort((a, b) => a.name.localeCompare(b.name, 'sv-SE', { numeric: true, caseFirst: 'lower' }));
+    return [...items].sort((a, b) =>
+      a.name.localeCompare(b.name, 'sv-SE', {
+        numeric: true,
+        caseFirst: 'lower',
+      })
+    );
   }
 
   function updateItemsWithRanks(sortedItems: PackItem[], batch: WriteBatch) {

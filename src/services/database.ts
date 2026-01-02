@@ -41,7 +41,9 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const firestore = initializeFirestore(app, {
-  localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() }),
+  localCache: persistentLocalCache({
+    tabManager: persistentMultipleTabManager(),
+  }),
 });
 
 const CATEGORIES_KEY = 'categories';
@@ -111,8 +113,23 @@ export const writeDb = {
     packingList: string,
     rank: number
   ): Promise<PackItem> => {
-    const docRef = await add(PACK_ITEMS_KEY, { name, members, checked: false, category, packingList, rank });
-    return { id: docRef.id, checked: false, members, name, category, packingList, rank };
+    const docRef = await add(PACK_ITEMS_KEY, {
+      name,
+      members,
+      checked: false,
+      category,
+      packingList,
+      rank,
+    });
+    return {
+      id: docRef.id,
+      checked: false,
+      members,
+      name,
+      category,
+      packingList,
+      rank,
+    };
   },
   updatePackItem: async (packItem: PackItem) => {
     await update(PACK_ITEMS_KEY, packItem.id, packItem);
@@ -255,6 +272,16 @@ export const writeDb = {
     sortEntities(allPackItems);
     return allPackItems;
   },
+  getPackItemsForPackingList: async (packingListId: string) => {
+    const userId = getUserId();
+    const q = query(
+      collection(firestore, USERS_KEY, userId, PACK_ITEMS_KEY),
+      where('packingList', '==', packingListId)
+    );
+    const packItems = fromQueryResult<PackItem>(await getDocs(q));
+    sortEntities(packItems);
+    return packItems;
+  },
 };
 
 function getUserId() {
@@ -275,7 +302,10 @@ async function updateNamedEntities(collectionKey: string, entities: NamedEntity[
 }
 
 function fromQueryResult<K>(res: QuerySnapshot) {
-  return res.docs.map((doc: QueryDocumentSnapshot) => ({ id: doc.id, ...doc.data() })) as K[];
+  return res.docs.map((doc: QueryDocumentSnapshot) => ({
+    id: doc.id,
+    ...doc.data(),
+  })) as K[];
 }
 
 async function add<K extends DocumentData>(userColl: string, data: WithFieldValue<K>) {

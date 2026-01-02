@@ -1,12 +1,30 @@
-import { Box, HStack, Spacer, Stack, useDisclosure, useToast } from '@chakra-ui/react';
+import {
+  AlertDialog,
+  AlertDialogBody,
+  AlertDialogContent,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogOverlay,
+  Badge,
+  Box,
+  Button,
+  HStack,
+  Spacer,
+  Stack,
+  useDisclosure,
+  useToast,
+} from '@chakra-ui/react';
 import { DraggableProvided, DraggableStateSnapshot } from '@hello-pangea/dnd';
+import { useRef } from 'react';
 import { AiOutlineCopy, AiOutlineDelete } from 'react-icons/ai';
+import { TbTemplate, TbTemplateOff } from 'react-icons/tb';
 import { useNavigate } from 'react-router';
 import { DeleteDialog } from '~/components/shared/DeleteDialog.tsx';
 import { DragHandle } from '~/components/shared/DragHandle.tsx';
 import { PLIconButton } from '~/components/shared/PLIconButton.tsx';
 import { useDatabase } from '~/providers/DatabaseContext.ts';
 import { usePackingList } from '~/providers/PackingListContext.ts';
+import { useTemplate } from '~/providers/TemplateContext.ts';
 import { useUndo } from '~/providers/UndoContext.ts';
 import { writeDb } from '~/services/database.ts';
 import { findUniqueName, rankOnTop } from '~/services/utils.ts';
@@ -27,14 +45,19 @@ export function PackingListCard({
   draggableSnapshot: DraggableStateSnapshot;
 }) {
   const deleteDialog = useDisclosure();
+  const replaceTemplateDialog = useDisclosure();
+  const replaceTemplateCancelRef = useRef<HTMLButtonElement>(null);
   const navigate = useNavigate();
   const { packingLists, groupedPackItems } = useDatabase();
   const { setPackingListId } = usePackingList();
   const { addUndoAction } = useUndo();
+  const { templateList } = useTemplate();
   const toast = useToast();
 
-  function onListClick() {
-    setPackingListId(packingList.id);
+  const isTemplate = packingList.isTemplate === true;
+
+  async function onListClick() {
+    await setPackingListId(packingList.id);
     navigate('/');
   }
 
@@ -61,7 +84,7 @@ export function PackingListCard({
     setPackingListId(selectedPackingList.id);
   }
 
-  async function confirmDelete() {
+  async function confirmDelete(_shouldSync: boolean) {
     const deletedPackingList = { ...packingList };
     const deletedPackItems = [...packItems];
 
@@ -90,6 +113,36 @@ export function PackingListCard({
       duration: 9000,
       isClosable: true,
     });
+  }
+
+  async function toggleTemplate() {
+    if (isTemplate) {
+      await writeDb.updatePackingList({ ...packingList, isTemplate: false });
+      toast({
+        title: 'Template removed',
+        description: `"${packingList.name}" is no longer a template`,
+        status: 'info',
+        duration: 3000,
+      });
+    } else if (templateList) {
+      replaceTemplateDialog.onOpen();
+    } else {
+      await setAsTemplate();
+    }
+  }
+
+  async function setAsTemplate() {
+    if (templateList) {
+      await writeDb.updatePackingList({ ...templateList, isTemplate: false });
+    }
+    await writeDb.updatePackingList({ ...packingList, isTemplate: true });
+    toast({
+      title: 'Template set',
+      description: `"${packingList.name}" is now the template`,
+      status: 'success',
+      duration: 3000,
+    });
+    replaceTemplateDialog.onClose();
   }
 
   async function onCopy() {
@@ -142,8 +195,19 @@ export function PackingListCard({
                 overflow="hidden"
               >
                 {packingList.name}
+                {isTemplate && (
+                  <Badge ml={2} colorScheme="purple" fontSize="xs">
+                    Template
+                  </Badge>
+                )}
               </Box>
               <Spacer />
+              <PLIconButton
+                onClick={toggleTemplate}
+                icon={isTemplate ? <TbTemplateOff /> : <TbTemplate />}
+                aria-label={isTemplate ? 'Remove template' : 'Set as template'}
+                size="sm"
+              />
               <PLIconButton onClick={onDelete} icon={<AiOutlineDelete />} aria-label="Delete packing list" size="sm" />
               <PLIconButton onClick={onCopy} icon={<AiOutlineCopy />} aria-label="Copy packing list" size="sm" />
             </HStack>
@@ -162,6 +226,37 @@ export function PackingListCard({
         onClose={deleteDialog.onClose}
         isOpen={deleteDialog.isOpen}
       />
+      <AlertDialog
+        isOpen={replaceTemplateDialog.isOpen}
+        leastDestructiveRef={replaceTemplateCancelRef}
+        onClose={replaceTemplateDialog.onClose}
+      >
+        <AlertDialogOverlay>
+          <AlertDialogContent>
+            <AlertDialogHeader fontSize="lg" fontWeight="bold">
+              Replace Template
+            </AlertDialogHeader>
+            <AlertDialogBody>
+              Confirm that you want to use "{packingList.name}" as template list instead of "{templateList?.name}".
+            </AlertDialogBody>
+            <AlertDialogFooter>
+              <Button ref={replaceTemplateCancelRef} onClick={replaceTemplateDialog.onClose}>
+                Cancel
+              </Button>
+              <Button
+                colorScheme="blue"
+                onClick={() => {
+                  setAsTemplate();
+                  replaceTemplateDialog.onClose();
+                }}
+                ml={3}
+              >
+                Confirm
+              </Button>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialogOverlay>
+      </AlertDialog>
     </Stack>
   );
 }

@@ -7,7 +7,9 @@ import { DragHandle } from '~/components/shared/DragHandle.tsx';
 import { PLInput } from '~/components/shared/PLInput.tsx';
 import { useDatabase } from '~/providers/DatabaseContext.ts';
 import { useNewPackItemRowId } from '~/providers/NewPackItemRowIdContext.ts';
+import { usePackingList } from '~/providers/PackingListContext.ts';
 import { useSelectMode } from '~/providers/SelectModeContext.ts';
+import { useTemplate } from '~/providers/TemplateContext.ts';
 import { writeDb } from '~/services/database.ts';
 import { getPackItemGroup, UNCATEGORIZED } from '~/services/utils.ts';
 import { NamedEntity } from '~/types/NamedEntity.ts';
@@ -26,9 +28,13 @@ export function PackingListCategory({
   const { images, groupedPackItems } = useDatabase();
   const { newPackItemRowId, setNewPackItemRowId } = useNewPackItemRowId();
   const { isSelectMode } = useSelectMode();
+  const { packingList } = usePackingList();
+  const { isTemplateList } = useTemplate();
   const [checked, setChecked] = useState(false);
   const [isIndeterminate, setIsIndeterminate] = useState(false);
   const [packItemsInCat, setPackItemsInCat] = useState<PackItem[]>([]);
+
+  const isCurrentListTemplate = isTemplateList(packingList.id);
 
   const categoryImage = useMemo(() => {
     if (category.id) {
@@ -71,7 +77,14 @@ export function PackingListCategory({
     <>
       <Flex gap="1" alignItems="center" borderTopRadius="2xl" pt="1" sx={sx} px="2" h="32px">
         {category.id && <DragHandle dragHandleProps={dragHandleProps} disabled={isSelectMode} />}
-        {!isSelectMode && <Checkbox isChecked={checked} isIndeterminate={isIndeterminate} onChange={toggleItem} />}
+        {!isSelectMode && (
+          <Checkbox
+            isChecked={checked}
+            isIndeterminate={isIndeterminate}
+            onChange={toggleItem}
+            isDisabled={isCurrentListTemplate}
+          />
+        )}
         {categoryImage && <Image borderRadius="full" boxSize="30px" src={categoryImage} mr="2" />}
         <PLInput bold={true} value={category.name} onUpdate={onChangeCategory} disabled={category === UNCATEGORIZED} />
         {!isSelectMode && <CategoryMenu packItemsInCat={packItemsInCat} category={category} />}

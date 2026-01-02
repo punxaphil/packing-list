@@ -2,7 +2,15 @@ import { Checkbox } from '@chakra-ui/react';
 import { allChecked, allUnChecked } from '~/services/utils.ts';
 import { PackItem } from '~/types/PackItem.ts';
 
-export function MultiCheckbox({ packItem, onUpdate }: { packItem: PackItem; onUpdate: (item: PackItem) => void }) {
+export function MultiCheckbox({
+  packItem,
+  onUpdate,
+  disabled,
+}: {
+  packItem: PackItem;
+  onUpdate: (item: PackItem) => void;
+  disabled?: boolean;
+}) {
   function checkAll(checked: boolean) {
     packItem.checked = checked;
     const members = packItem.members;
@@ -17,6 +25,7 @@ export function MultiCheckbox({ packItem, onUpdate }: { packItem: PackItem; onUp
       isIndeterminate={!allChecked(packItem) && !allUnChecked(packItem)}
       isChecked={packItem.checked}
       onChange={() => checkAll(!allChecked(packItem))}
+      isDisabled={disabled}
     />
   );
 }
