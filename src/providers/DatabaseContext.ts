@@ -17,6 +17,8 @@ interface ContextType {
   categoriesInPackingList: NamedEntity[];
   membersInPackingList: NamedEntity[];
   isLoadingPackItems: boolean;
+  addLocalPackItem: (name: string, categoryId: string, afterItemId?: string) => string;
+  savePendingItems: () => Promise<void>;
   filter: {
     showTheseCategories: string[];
     showTheseMembers: string[];

@@ -8,7 +8,7 @@ import {
 } from '~/components/pages/PackingList/Filter.tsx';
 import { createColumns, flattenGroupedPackItems } from '~/components/pages/PackingList/packingListUtils.ts';
 import { TextProgress } from '~/components/shared/TextProgress.tsx';
-import { readDb } from '~/services/database.ts';
+import { readDb, writeDb } from '~/services/database.ts';
 import { groupByCategories, sortAll } from '~/services/utils.ts';
 import { ColumnList } from '~/types/Column.ts';
 import { GroupedPackItem } from '~/types/GroupedPackItem.ts';
@@ -32,6 +32,7 @@ export function DatabaseProvider({ children }: { children: ReactNode }) {
   const [packItemsListId, setPackItemsListId] = useState<string>();
   const [images, setImages] = useState<Image[]>();
   const [packingLists, setPackingLists] = useState<NamedEntity[]>();
+  const [pendingItems, setPendingItems] = useState<PackItem[]>([]);
   const { packingList } = usePackingList();
 
   const [currentFilterState, setCurrentFilterState] = useState<FilterState | null>(getInitialFilterState);
@@ -205,6 +206,69 @@ export function DatabaseProvider({ children }: { children: ReactNode }) {
     members && categories && packItems && images && packingLists && packingList && packItemsMatchCurrentList;
   const isLoadingPackItems = !packItemsMatchCurrentList;
 
+  function generateId(): string {
+    if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+      return crypto.randomUUID();
+    }
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+      const r = (Math.random() * 16) | 0;
+      const v = c === 'x' ? r : (r & 0x3) | 0x8;
+      return v.toString(16);
+    });
+  }
+
+  function calculateRankAfterItem(items: PackItem[], afterItemId: string): number {
+    const afterItem = items.find((p) => p.id === afterItemId);
+    if (!afterItem) {
+      return items.length > 0 ? Math.max(...items.map((p) => p.rank)) + 1 : 1;
+    }
+    const itemsBelow = items.filter((p) => p.rank < afterItem.rank).sort((a, b) => b.rank - a.rank);
+    const nextItemBelow = itemsBelow[0];
+    if (nextItemBelow) {
+      return (afterItem.rank + nextItemBelow.rank) / 2;
+    }
+    return afterItem.rank - 1;
+  }
+
+  function addLocalPackItem(name: string, categoryId: string, afterItemId?: string): string {
+    if (!packItems || !packingList) {
+      return '';
+    }
+    const currentItems = [...packItems];
+    const newRank = afterItemId
+      ? calculateRankAfterItem(currentItems, afterItemId)
+      : currentItems.length > 0
+        ? Math.max(...currentItems.map((p) => p.rank)) + 1
+        : 1;
+
+    const newId = generateId();
+    const newItem: PackItem = {
+      id: newId,
+      name,
+      category: categoryId,
+      members: [],
+      rank: newRank,
+      packingList: packingList.id,
+      checked: false,
+    };
+    setPackItems([...currentItems, newItem]);
+    setPendingItems((prev) => [...prev, newItem]);
+    return newId;
+  }
+
+  async function savePendingItems() {
+    if (pendingItems.length === 0) {
+      return;
+    }
+    const itemsToSave = [...pendingItems];
+    setPendingItems([]);
+    const batch = writeDb.initBatch();
+    for (const item of itemsToSave) {
+      writeDb.addPackItemBatch(batch, item.name, item.members, item.category, item.rank, item.packingList);
+    }
+    await batch.commit();
+  }
+
   if (isFullyInitialized) {
     const membersCopy = [...members];
     const categoriesCopy = [...categories];
@@ -240,6 +304,8 @@ export function DatabaseProvider({ children }: { children: ReactNode }) {
         categoriesInPackingList,
         membersInPackingList,
         isLoadingPackItems,
+        addLocalPackItem,
+        savePendingItems,
         filter: currentFilterState,
         setFilter: updateAndPersistFilters,
       }}

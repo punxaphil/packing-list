@@ -55,6 +55,8 @@ const mockDatabaseContext = {
   categoriesInPackingList: [],
   membersInPackingList: [],
   isLoadingPackItems: false,
+  addLocalPackItem: vi.fn(),
+  savePendingItems: vi.fn(),
   filter: null,
   setFilter: vi.fn(),
 };

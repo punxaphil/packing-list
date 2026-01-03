@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "tsc": "tsc -b --watch",
-    "build": "npm run lint && tsc -b && vite build",
+    "prebuild": "npm run lint && tsc -b",
+    "build": "npm run prebuild && vite build",
     "preview": "vite preview",
     "test": "vitest run",
     "lint": "biome check src",

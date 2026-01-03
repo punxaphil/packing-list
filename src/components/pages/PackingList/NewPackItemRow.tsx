@@ -1,14 +1,12 @@
-import { Input, useDisclosure } from '@chakra-ui/react';
+import { Input } from '@chakra-ui/react';
 import { ChangeEvent, KeyboardEvent, useEffect, useRef, useState } from 'react';
-import { AddSyncDialog } from '~/components/shared/AddSyncDialog.tsx';
 import { useDatabase } from '~/providers/DatabaseContext.ts';
 import { useNewPackItemRowId } from '~/providers/NewPackItemRowIdContext.ts';
-import { usePackingList } from '~/providers/PackingListContext.ts';
-import { useTemplate } from '~/providers/TemplateContext.ts';
-import { writeDb } from '~/services/database.ts';
-import { handleEnter, rankOnTop } from '~/services/utils.ts';
+import { handleEnter } from '~/services/utils.ts';
 import { PackItem } from '~/types/PackItem.ts';
 import { PackItemRowWrapper } from './PackItemRowWrapper.tsx';
+
+const isEnterPressed = { current: false };
 
 export function NewPackItemRow({
   categoryId,
@@ -20,12 +18,8 @@ export function NewPackItemRow({
   packItemToPlaceNewItemAfter?: PackItem;
 }) {
   const [newRowText, setNewRowText] = useState('');
-  const { packingList } = usePackingList();
   const { setNewPackItemRowId } = useNewPackItemRowId();
-  const { packItems, packingLists } = useDatabase();
-  const { shouldShowSyncDialogForAdd, getSyncDecision, templateList, templateItems, isTemplateList } = useTemplate();
-  const syncDialog = useDisclosure();
-  const [pendingItemName, setPendingItemName] = useState<string | null>(null);
+  const { addLocalPackItem, savePendingItems } = useDatabase();
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -34,85 +28,26 @@ export function NewPackItemRow({
     }
   }, []);
 
-  async function onChange(e: ChangeEvent<HTMLInputElement>) {
+  function onChange(e: ChangeEvent<HTMLInputElement>) {
     setNewRowText(e.target.value);
-  }
-
-  async function addToTemplate(itemName: string) {
-    if (!templateList) {
-      return;
-    }
-    const rank = rankOnTop(templateItems);
-    const batch = writeDb.initBatch();
-    writeDb.addPackItemBatch(batch, itemName, [], categoryId, rank, templateList.id);
-    await batch.commit();
-  }
-
-  async function addToAllOtherLists(itemName: string) {
-    const batch = writeDb.initBatch();
-    for (const list of packingLists) {
-      if (list.id !== packingList.id) {
-        const rank = rankOnTop(packItems.filter((p) => p.packingList === list.id));
-        writeDb.addPackItemBatch(batch, itemName, [], categoryId, rank, list.id);
-      }
-    }
-    await batch.commit();
   }
 
   async function save() {
     if (newRowText) {
-      let rank: number;
-      const batch = writeDb.initBatch();
-      if (packItemToPlaceNewItemAfter) {
-        rank = packItemToPlaceNewItemAfter.rank;
-        for (const packItem of packItems) {
-          if (packItem.rank < rank) {
-            packItem.rank = packItem.rank - 1;
-            writeDb.updatePackItemBatch(packItem, batch);
-          }
-        }
-        rank = rank - 1;
-      } else {
-        rank = rankOnTop(packItems);
-      }
-      const newId = writeDb.addPackItemBatch(batch, newRowText, [], categoryId, rank, packingList.id);
+      const newId = addLocalPackItem(newRowText, categoryId, packItemToPlaceNewItemAfter?.id);
       setNewPackItemRowId(newId);
-      await batch.commit();
-
-      const itemName = newRowText;
-      const decision = getSyncDecision('add');
-      if (decision !== null) {
-        if (decision) {
-          if (isTemplateList(packingList.id)) {
-            await addToAllOtherLists(itemName);
-          } else {
-            await addToTemplate(itemName);
-          }
-        }
-        return;
-      }
-
-      if (shouldShowSyncDialogForAdd()) {
-        setPendingItemName(itemName);
-        syncDialog.onOpen();
-      }
+      setNewRowText('');
     }
-  }
-
-  async function handleSyncConfirm(shouldSync: boolean) {
-    if (shouldSync && pendingItemName) {
-      if (isTemplateList(packingList.id)) {
-        await addToAllOtherLists(pendingItemName);
-      } else {
-        await addToTemplate(pendingItemName);
-      }
-    }
-    setPendingItemName(null);
   }
 
   function onKeyDown(e: KeyboardEvent<HTMLInputElement>) {
     handleEnter(e, async () => {
+      isEnterPressed.current = true;
       await save();
+      // Clear flag after blur has had a chance to see it
+      setTimeout(() => {
+        isEnterPressed.current = false;
+      }, 100);
     });
     if (e.key === 'Escape') {
       onHide();
@@ -120,8 +55,14 @@ export function NewPackItemRow({
   }
 
   function onBlur() {
-    if (newRowText) {
-      save().catch(console.error);
+    const wasEnterPressed = isEnterPressed.current;
+    isEnterPressed.current = false;
+
+    if (!wasEnterPressed) {
+      if (newRowText) {
+        save().catch(console.error);
+      }
+      savePendingItems();
     }
     onHide();
   }
@@ -138,13 +79,6 @@ export function NewPackItemRow({
         mt="1"
         enterKeyHint="done"
         inputMode="text"
-      />
-      <AddSyncDialog
-        isOpen={syncDialog.isOpen}
-        onClose={syncDialog.onClose}
-        isTemplateChange={isTemplateList(packingList.id)}
-        itemName={pendingItemName ?? ''}
-        onConfirm={handleSyncConfirm}
       />
     </PackItemRowWrapper>
   );
