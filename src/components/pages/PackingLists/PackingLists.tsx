@@ -5,6 +5,7 @@ import {
   CardBody,
   Flex,
   SimpleGrid,
+  Stack,
   Switch,
   Text,
   Tooltip,
@@ -47,24 +48,33 @@ export function PackingLists() {
 
   const archivedCount = useMemo(() => displayPackingLists.filter((pl) => pl.archived).length, [displayPackingLists]);
 
-  const filteredPackingListsWithItems = useMemo(() => {
-    const filtered = packingListsWithItems.filter(({ packingList }) => showArchived || !packingList.archived);
+  const pinnedListsWithItems = useMemo(() => {
+    return packingListsWithItems.filter(({ packingList }) => packingList.pinned && !packingList.archived);
+  }, [packingListsWithItems]);
+
+  const regularListsWithItems = useMemo(() => {
+    const filtered = packingListsWithItems.filter(({ packingList }) => !packingList.pinned && !packingList.archived);
     return filtered.sort((a, b) => {
-      if (a.packingList.isTemplate) {
+      if (a.packingList.isTemplate && !b.packingList.isTemplate) {
         return -1;
       }
-      if (b.packingList.isTemplate) {
+      if (!a.packingList.isTemplate && b.packingList.isTemplate) {
         return 1;
-      }
-      if (a.packingList.archived && !b.packingList.archived) {
-        return 1;
-      }
-      if (!a.packingList.archived && b.packingList.archived) {
-        return -1;
       }
       return 0;
     });
+  }, [packingListsWithItems]);
+
+  const archivedListsWithItems = useMemo(() => {
+    if (!showArchived) {
+      return [];
+    }
+    return packingListsWithItems.filter(({ packingList }) => packingList.archived && !packingList.pinned);
   }, [packingListsWithItems, showArchived]);
+
+  const allListsForDrag = useMemo(() => {
+    return [...pinnedListsWithItems, ...regularListsWithItems, ...archivedListsWithItems];
+  }, [pinnedListsWithItems, regularListsWithItems, archivedListsWithItems]);
 
   useEffect(() => {
     (async () => {
@@ -195,28 +205,67 @@ export function PackingLists() {
             <DragDropContext onDragEnd={handleDragEnd}>
               <Droppable droppableId="droppable">
                 {(provided) => (
-                  <SimpleGrid
-                    columns={{ base: 1, md: 2, lg: 3 }}
-                    spacing={4}
-                    {...provided.droppableProps}
-                    ref={provided.innerRef}
-                  >
-                    {filteredPackingListsWithItems.map(({ packingList, packItems }, index) => (
-                      <Draggable key={packingList.id} draggableId={packingList.id} index={index}>
-                        {(draggableProvided, snapshot) => (
-                          <PackingListCard
-                            key={packingList.id}
-                            packingList={packingList}
-                            isCurrentList={packingList.id === currentList.id}
-                            packItems={packItems}
-                            draggableProvided={draggableProvided}
-                            draggableSnapshot={snapshot}
-                          />
-                        )}
-                      </Draggable>
-                    ))}
+                  <Stack spacing={4} {...provided.droppableProps} ref={provided.innerRef}>
+                    {pinnedListsWithItems.length > 0 && (
+                      <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={4}>
+                        {pinnedListsWithItems.map(({ packingList, packItems }) => {
+                          const index = allListsForDrag.findIndex((item) => item.packingList.id === packingList.id);
+                          return (
+                            <Draggable key={packingList.id} draggableId={packingList.id} index={index}>
+                              {(draggableProvided, snapshot) => (
+                                <PackingListCard
+                                  packingList={packingList}
+                                  isCurrentList={packingList.id === currentList.id}
+                                  packItems={packItems}
+                                  draggableProvided={draggableProvided}
+                                  draggableSnapshot={snapshot}
+                                />
+                              )}
+                            </Draggable>
+                          );
+                        })}
+                      </SimpleGrid>
+                    )}
+                    <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={4}>
+                      {regularListsWithItems.map(({ packingList, packItems }) => {
+                        const index = allListsForDrag.findIndex((item) => item.packingList.id === packingList.id);
+                        return (
+                          <Draggable key={packingList.id} draggableId={packingList.id} index={index}>
+                            {(draggableProvided, snapshot) => (
+                              <PackingListCard
+                                packingList={packingList}
+                                isCurrentList={packingList.id === currentList.id}
+                                packItems={packItems}
+                                draggableProvided={draggableProvided}
+                                draggableSnapshot={snapshot}
+                              />
+                            )}
+                          </Draggable>
+                        );
+                      })}
+                    </SimpleGrid>
+                    {archivedListsWithItems.length > 0 && (
+                      <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={4}>
+                        {archivedListsWithItems.map(({ packingList, packItems }) => {
+                          const index = allListsForDrag.findIndex((item) => item.packingList.id === packingList.id);
+                          return (
+                            <Draggable key={packingList.id} draggableId={packingList.id} index={index}>
+                              {(draggableProvided, snapshot) => (
+                                <PackingListCard
+                                  packingList={packingList}
+                                  isCurrentList={packingList.id === currentList.id}
+                                  packItems={packItems}
+                                  draggableProvided={draggableProvided}
+                                  draggableSnapshot={snapshot}
+                                />
+                              )}
+                            </Draggable>
+                          );
+                        })}
+                      </SimpleGrid>
+                    )}
                     {provided.placeholder}
-                  </SimpleGrid>
+                  </Stack>
                 )}
               </Droppable>
             </DragDropContext>

@@ -6,4 +6,5 @@ export interface NamedEntity {
   color?: string;
   isTemplate?: boolean;
   archived?: boolean;
+  pinned?: boolean;
 }

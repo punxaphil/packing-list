@@ -17,7 +17,7 @@ import {
 import { DraggableProvided, DraggableStateSnapshot } from '@hello-pangea/dnd';
 import { useRef } from 'react';
 import { AiOutlineCopy, AiOutlineDelete } from 'react-icons/ai';
-import { TbArchive, TbArchiveOff, TbTemplate, TbTemplateOff } from 'react-icons/tb';
+import { TbArchive, TbArchiveOff, TbPin, TbPinnedOff, TbTemplate, TbTemplateOff } from 'react-icons/tb';
 import { useNavigate } from 'react-router';
 import { DeleteDialog } from '~/components/shared/DeleteDialog.tsx';
 import { DragHandle } from '~/components/shared/DragHandle.tsx';
@@ -56,6 +56,7 @@ export function PackingListCard({
 
   const isTemplate = packingList.isTemplate === true;
   const isArchived = packingList.archived === true;
+  const isPinned = packingList.pinned === true;
 
   async function onListClick() {
     if (isArchived) {
@@ -166,6 +167,19 @@ export function PackingListCard({
     });
   }
 
+  async function togglePin() {
+    const newPinned = !isPinned;
+    await writeDb.updatePackingList({ ...packingList, pinned: newPinned });
+    toast({
+      title: newPinned ? 'List pinned' : 'List unpinned',
+      description: newPinned
+        ? `"${packingList.name}" is now pinned to top`
+        : `"${packingList.name}" is no longer pinned`,
+      status: 'success',
+      duration: 3000,
+    });
+  }
+
   async function onCopy() {
     if (!groupedPackItems) {
       throw new Error('Grouped pack items not loaded');
@@ -229,6 +243,15 @@ export function PackingListCard({
                 )}
               </Box>
               <Spacer />
+              {!isArchived && (
+                <PLIconButton
+                  onClick={togglePin}
+                  icon={isPinned ? <TbPinnedOff /> : <TbPin />}
+                  aria-label={isPinned ? 'Unpin packing list' : 'Pin packing list'}
+                  size="sm"
+                  color={isPinned ? 'blue.500' : undefined}
+                />
+              )}
               {!isArchived && !isTemplate && (
                 <PLIconButton
                   onClick={toggleArchive}
@@ -251,6 +274,7 @@ export function PackingListCard({
                   icon={isTemplate ? <TbTemplateOff /> : <TbTemplate />}
                   aria-label={isTemplate ? 'Remove template' : 'Set as template'}
                   size="sm"
+                  color={isTemplate ? 'purple.500' : undefined}
                 />
               )}
               <PLIconButton onClick={onDelete} icon={<AiOutlineDelete />} aria-label="Delete packing list" size="sm" />

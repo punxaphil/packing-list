@@ -10,7 +10,10 @@ This is a React project using TypeScript, Chakra UI, Firebase, and Biome for lin
 - Make sure to fix any TypeScript errors or warnings.
 - Follow Chakra UI best practices for UI components.
 - Adhere to Firebase/Firestore data modeling and security rules.
-- Ensure code is formatted and linted with Biome. Do not use biome-ignore comments; fix the underlying issue instead.
+- Ensure code is formatted and linted with Biome. Check biome.json for settings and write code that conforms to them. Do not use biome-ignore comments; fix the underlying issue instead.
+
+## Other Guidelines
+
 - Write unit tests for new functionality, especially for utility functions and complex logic.
 - Keep components small and focused on a single responsibility.
 - Use the provided providers for state management where applicable (e.g., DatabaseProvider, ErrorProvider).
