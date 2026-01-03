@@ -54,7 +54,7 @@ export function Header() {
         </HStack>
       </Flex>
       <Stack direction="row" spacing={2} align="center" pt="3" justifyContent="center">
-        <NavButton name="Home" path="/" />
+        <NavButton name="Items" path="/" />
         <NavButton name="Lists" path="packing-lists" />
         <NavButton name="Members" path="members" />
         <NavButton name="Categories" path="categories" />
