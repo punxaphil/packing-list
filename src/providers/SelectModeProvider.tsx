@@ -1,14 +1,18 @@
 import { useToast } from '@chakra-ui/react';
-import { ReactNode, useCallback, useState } from 'react';
+import { ReactNode, useCallback, useRef, useState } from 'react';
 import { writeDb } from '~/services/database.ts';
 import { PackItem } from '~/types/PackItem.ts';
 import { useDatabase } from './DatabaseContext.ts';
 import { SelectModeContext } from './SelectModeContext.ts';
 import { useUndo } from './UndoContext.ts';
 
+const SPINNER_DELAY_MS = 150;
+
 export function SelectModeProvider({ children }: { children: ReactNode }) {
   const [isSelectMode, setSelectMode] = useState(false);
+  const [isTransitioning, setIsTransitioning] = useState(false);
   const [selectedItems, setSelectedItems] = useState<PackItem[]>([]);
+  const spinnerTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { packItems } = useDatabase();
   const { addUndoAction } = useUndo();
   const toast = useToast();
@@ -35,10 +39,19 @@ export function SelectModeProvider({ children }: { children: ReactNode }) {
   );
 
   const handleSetSelectMode = (value: boolean) => {
-    setSelectMode(value);
-    if (!value) {
-      clearSelection();
-    }
+    spinnerTimeoutRef.current = setTimeout(() => {
+      setIsTransitioning(true);
+    }, SPINNER_DELAY_MS);
+    setTimeout(() => {
+      setSelectMode(value);
+      if (!value) {
+        clearSelection();
+      }
+      if (spinnerTimeoutRef.current) {
+        clearTimeout(spinnerTimeoutRef.current);
+      }
+      setIsTransitioning(false);
+    }, 0);
   };
 
   const moveSelectedItemsToTop = useCallback(async () => {
@@ -211,6 +224,7 @@ export function SelectModeProvider({ children }: { children: ReactNode }) {
     <SelectModeContext.Provider
       value={{
         isSelectMode,
+        isTransitioning,
         setSelectMode: handleSetSelectMode,
         selectedItems,
         toggleItemSelection,

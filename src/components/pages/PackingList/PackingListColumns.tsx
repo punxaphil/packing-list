@@ -3,17 +3,27 @@ import { DragDropContext, DragUpdate } from '@hello-pangea/dnd';
 import { useMemo } from 'react';
 import { useDatabase } from '~/providers/DatabaseContext.ts';
 import { NewPackItemRowIdProvider } from '~/providers/NewPackItemRowIdProvider.tsx';
+import { useSelectMode } from '~/providers/SelectModeContext.ts';
 import { useUndo } from '~/providers/UndoContext.ts';
 import { writeDb } from '~/services/database.ts';
 import { UNCATEGORIZED } from '~/services/utils.ts';
 import { PackingListRow } from '~/types/Column.ts';
 import { PackingListColumn } from './PackingListColumn.tsx';
-import { reorder } from './packingListUtils.ts';
+import { createColumns, reorder } from './packingListUtils.ts';
 
 export function PackingListColumns({ filteredMembers }: { filteredMembers: string[] }) {
   const { columns: initialColumns, nbrOfColumns } = useDatabase();
   const { addUndoAction } = useUndo();
-  const columns = useMemo(() => initialColumns, [initialColumns]);
+  const { isSelectMode } = useSelectMode();
+
+  const allRows = useMemo(() => initialColumns.flatMap((col) => col.rows), [initialColumns]);
+
+  const columns = useMemo(() => {
+    if (filteredMembers.length === 0 && !isSelectMode) {
+      return initialColumns;
+    }
+    return createColumns(allRows, nbrOfColumns, filteredMembers, isSelectMode);
+  }, [initialColumns, allRows, filteredMembers, nbrOfColumns, isSelectMode]);
 
   function captureOriginalOrder(rows: PackingListRow[]) {
     return rows

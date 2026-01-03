@@ -148,9 +148,22 @@ export function DatabaseProvider({ children }: { children: ReactNode }) {
     return members.filter((m) => packItems.some((p) => p.members.some((t) => t.id === m.id)));
   }
 
+  const [isFilterTransitioning, setIsFilterTransitioning] = useState(false);
+  const filterSpinnerTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const SPINNER_DELAY_MS = 150;
+
   function updateAndPersistFilters(newFilters: FilterState) {
-    setCurrentFilterState(newFilters);
-    persistFiltersToLocalStorage(newFilters);
+    filterSpinnerTimeoutRef.current = setTimeout(() => {
+      setIsFilterTransitioning(true);
+    }, SPINNER_DELAY_MS);
+    setTimeout(() => {
+      setCurrentFilterState(newFilters);
+      persistFiltersToLocalStorage(newFilters);
+      if (filterSpinnerTimeoutRef.current) {
+        clearTimeout(filterSpinnerTimeoutRef.current);
+      }
+      setIsFilterTransitioning(false);
+    }, 0);
   }
 
   useEffect(() => {
@@ -304,6 +317,7 @@ export function DatabaseProvider({ children }: { children: ReactNode }) {
         categoriesInPackingList,
         membersInPackingList,
         isLoadingPackItems,
+        isFilterTransitioning,
         addLocalPackItem,
         savePendingItems,
         filter: currentFilterState,

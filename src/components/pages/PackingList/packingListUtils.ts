@@ -7,6 +7,23 @@ import { NamedEntity } from '~/types/NamedEntity.ts';
 
 const COLUMN_THRESHOLD = 15;
 
+function getRowSize(row: PackingListRow, filteredMembers: string[], isSelectMode: boolean): number {
+  if (row.category) {
+    return 1;
+  }
+  if (row.packItem) {
+    if (isSelectMode) {
+      return 1;
+    }
+    if (filteredMembers.length === 0) {
+      return 1 + row.packItem.members.length;
+    }
+    const visibleMembers = row.packItem.members.filter((m) => filteredMembers.includes(m.id));
+    return 1 + visibleMembers.length;
+  }
+  return 0;
+}
+
 export function flattenGroupedPackItems(grouped: GroupedPackItem[]) {
   const flattened: PackingListRow[] = [];
   for (const { category, packItems } of grouped) {
@@ -40,22 +57,33 @@ export function reorder(
   return [allRows, newColumns];
 }
 
-export function createColumns(rows: PackingListRow[], nbrOfColumns: number): ColumnList[] {
+export function createColumns(
+  rows: PackingListRow[],
+  nbrOfColumns: number,
+  filteredMembers: string[] = [],
+  isSelectMode = false
+): ColumnList[] {
   let columns: PackingListRow[][] = [];
   if (nbrOfColumns > 1) {
-    const arraySize = rows.map((item) => item.getSize()).reduce((a, b) => a + b, 0);
+    let arraySize = 0;
+    const sizes: number[] = new Array(rows.length);
+    for (let i = 0; i < rows.length; i++) {
+      const size = getRowSize(rows[i], filteredMembers, isSelectMode);
+      sizes[i] = size;
+      arraySize += size;
+    }
     const numColumns: number =
       arraySize > 2 * COLUMN_THRESHOLD && nbrOfColumns === 3 ? 3 : arraySize > COLUMN_THRESHOLD ? 2 : 1;
     const chunkSize = Math.max(COLUMN_THRESHOLD, Math.ceil(arraySize / numColumns));
     let addedSize = 0;
 
-    for (const entity of rows) {
-      addedSize += entity.getSize();
+    for (let i = 0; i < rows.length; i++) {
+      addedSize += sizes[i];
       const arrayToAddTo = Math.ceil(addedSize / chunkSize) - 1;
       if (!columns[arrayToAddTo]) {
         columns[arrayToAddTo] = [];
       }
-      columns[arrayToAddTo].push(entity);
+      columns[arrayToAddTo].push(rows[i]);
     }
   } else {
     columns = [rows];

@@ -3,6 +3,7 @@ import { PackItem } from '~/types/PackItem.ts';
 
 interface SelectModeContextType {
   isSelectMode: boolean;
+  isTransitioning: boolean;
   setSelectMode: (value: boolean) => void;
   selectedItems: PackItem[];
   toggleItemSelection: (packItem: PackItem) => void;
