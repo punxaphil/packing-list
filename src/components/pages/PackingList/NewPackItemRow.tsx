@@ -21,11 +21,16 @@ export function NewPackItemRow({
   const { setNewPackItemRowId } = useNewPackItemRowId();
   const { addLocalPackItem, savePendingItems } = useDatabase();
   const inputRef = useRef<HTMLInputElement>(null);
+  const isReadyForBlur = useRef(false);
 
   useEffect(() => {
-    if (inputRef.current) {
-      inputRef.current.focus();
-    }
+    const timer = setTimeout(() => {
+      if (inputRef.current) {
+        inputRef.current.focus();
+      }
+      isReadyForBlur.current = true;
+    }, 50);
+    return () => clearTimeout(timer);
   }, []);
 
   function onChange(e: ChangeEvent<HTMLInputElement>) {
@@ -44,17 +49,20 @@ export function NewPackItemRow({
     handleEnter(e, async () => {
       isEnterPressed.current = true;
       await save();
-      // Clear flag after blur has had a chance to see it
       setTimeout(() => {
         isEnterPressed.current = false;
       }, 100);
     });
     if (e.key === 'Escape') {
+      savePendingItems();
       onHide();
     }
   }
 
   function onBlur() {
+    if (!isReadyForBlur.current) {
+      return;
+    }
     const wasEnterPressed = isEnterPressed.current;
     isEnterPressed.current = false;
 
@@ -62,8 +70,8 @@ export function NewPackItemRow({
       if (newRowText) {
         save().catch(console.error);
       }
-      savePendingItems();
     }
+    savePendingItems();
     onHide();
   }
 

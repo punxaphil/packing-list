@@ -24,7 +24,7 @@ This is a React project using TypeScript, Chakra UI, Firebase, and Biome for lin
   - effects
   - helper functions
   - render
-- after making changes, run `npm run lint && tsc -b` to check for errors (dev server handles the build)
+- after making changes, run `npm run prebuild` to check for errors (dev server handles the build)
 
 ## Do not
 
