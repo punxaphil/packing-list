@@ -1,7 +1,5 @@
-import { Badge, Flex, HStack, IconButton, Input, Spacer, Stack } from '@chakra-ui/react';
+import { Badge, Flex, HStack, Input, Spacer, Stack } from '@chakra-ui/react';
 import { useMemo, useState } from 'react';
-import { GoArrowSwitch } from 'react-icons/go';
-import { useNavigate } from 'react-router';
 import { ProfileAvatar } from '~/components/auth/ProfileAvatar.tsx';
 import { usePackingList } from '~/providers/PackingListContext.ts';
 import { useTemplate } from '~/providers/TemplateContext.ts';
@@ -12,7 +10,6 @@ export function Header() {
   const { packingList } = usePackingList();
   const { isTemplateList } = useTemplate();
   const [packingListName, setPackingListName] = useState('');
-  const navigate = useNavigate();
   const isCurrentListTemplate = isTemplateList(packingList.id);
 
   useMemo(() => {
@@ -50,13 +47,6 @@ export function Header() {
             </Badge>
           )}
         </HStack>
-        <IconButton
-          aria-label="Go to lists"
-          icon={<GoArrowSwitch />}
-          variant="ghost"
-          onClick={() => navigate('/packing-lists')}
-          size="sm"
-        />
         <Spacer />
 
         <HStack w="50px" justifyContent="flex-end">
