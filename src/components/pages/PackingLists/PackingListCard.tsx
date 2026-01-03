@@ -17,7 +17,7 @@ import {
 import { DraggableProvided, DraggableStateSnapshot } from '@hello-pangea/dnd';
 import { useRef } from 'react';
 import { AiOutlineCopy, AiOutlineDelete } from 'react-icons/ai';
-import { TbTemplate, TbTemplateOff } from 'react-icons/tb';
+import { TbArchive, TbArchiveOff, TbTemplate, TbTemplateOff } from 'react-icons/tb';
 import { useNavigate } from 'react-router';
 import { DeleteDialog } from '~/components/shared/DeleteDialog.tsx';
 import { DragHandle } from '~/components/shared/DragHandle.tsx';
@@ -55,8 +55,18 @@ export function PackingListCard({
   const toast = useToast();
 
   const isTemplate = packingList.isTemplate === true;
+  const isArchived = packingList.archived === true;
 
   async function onListClick() {
+    if (isArchived) {
+      toast({
+        title: 'Archived list',
+        description: 'Restore the list to edit it',
+        status: 'info',
+        duration: 3000,
+      });
+      return;
+    }
     await setPackingListId(packingList.id);
     navigate('/');
   }
@@ -145,6 +155,17 @@ export function PackingListCard({
     replaceTemplateDialog.onClose();
   }
 
+  async function toggleArchive() {
+    const newArchived = !isArchived;
+    await writeDb.updatePackingList({ ...packingList, archived: newArchived });
+    toast({
+      title: newArchived ? 'List archived' : 'List restored',
+      description: newArchived ? `"${packingList.name}" has been archived` : `"${packingList.name}" has been restored`,
+      status: 'success',
+      duration: 3000,
+    });
+  }
+
   async function onCopy() {
     if (!groupedPackItems) {
       throw new Error('Grouped pack items not loaded');
@@ -178,7 +199,8 @@ export function PackingListCard({
       style={{
         ...draggableProvided.draggableProps.style,
       }}
-      bg={draggableSnapshot.isDragging ? 'gray.100' : ''}
+      bg={draggableSnapshot.isDragging ? 'gray.100' : isArchived ? 'gray.50' : ''}
+      opacity={isArchived ? 0.7 : 1}
       width="100%"
     >
       <Box cursor="pointer" px={2}>
@@ -200,16 +222,41 @@ export function PackingListCard({
                     Template
                   </Badge>
                 )}
+                {isArchived && (
+                  <Badge ml={2} colorScheme="gray" fontSize="xs">
+                    Archived
+                  </Badge>
+                )}
               </Box>
               <Spacer />
-              <PLIconButton
-                onClick={toggleTemplate}
-                icon={isTemplate ? <TbTemplateOff /> : <TbTemplate />}
-                aria-label={isTemplate ? 'Remove template' : 'Set as template'}
-                size="sm"
-              />
+              {!isArchived && !isTemplate && (
+                <PLIconButton
+                  onClick={toggleArchive}
+                  icon={<TbArchive />}
+                  aria-label="Archive packing list"
+                  size="sm"
+                />
+              )}
+              {isArchived && (
+                <PLIconButton
+                  onClick={toggleArchive}
+                  icon={<TbArchiveOff />}
+                  aria-label="Restore packing list"
+                  size="sm"
+                />
+              )}
+              {!isArchived && (
+                <PLIconButton
+                  onClick={toggleTemplate}
+                  icon={isTemplate ? <TbTemplateOff /> : <TbTemplate />}
+                  aria-label={isTemplate ? 'Remove template' : 'Set as template'}
+                  size="sm"
+                />
+              )}
               <PLIconButton onClick={onDelete} icon={<AiOutlineDelete />} aria-label="Delete packing list" size="sm" />
-              <PLIconButton onClick={onCopy} icon={<AiOutlineCopy />} aria-label="Copy packing list" size="sm" />
+              {!isArchived && (
+                <PLIconButton onClick={onCopy} icon={<AiOutlineCopy />} aria-label="Copy packing list" size="sm" />
+              )}
             </HStack>
             <Box overflow="hidden" whiteSpace="nowrap" textOverflow="ellipsis" onClick={onListClick}>
               {!packItems.length

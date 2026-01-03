@@ -1,6 +1,18 @@
-import { Box, Button, Card, CardBody, Flex, SimpleGrid, Tooltip, useDisclosure, useToast } from '@chakra-ui/react';
+import {
+  Box,
+  Button,
+  Card,
+  CardBody,
+  Flex,
+  SimpleGrid,
+  Switch,
+  Text,
+  Tooltip,
+  useDisclosure,
+  useToast,
+} from '@chakra-ui/react';
 import { DragDropContext, Draggable, Droppable, DropResult } from '@hello-pangea/dnd';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { MdUndo } from 'react-icons/md';
 import { CreateFromTemplateDialog } from '~/components/pages/PackingLists/CreateFromTemplateDialog.tsx';
 import { PackingListCard } from '~/components/pages/PackingLists/PackingListCard.tsx';
@@ -31,6 +43,28 @@ export function PackingLists() {
   const createFromTemplateDialog = useDisclosure();
   const [initialized, setInitialized] = useState(false);
   const [isDraggingOrSaving, setIsDraggingOrSaving] = useState(false);
+  const [showArchived, setShowArchived] = useState(false);
+
+  const archivedCount = useMemo(() => displayPackingLists.filter((pl) => pl.archived).length, [displayPackingLists]);
+
+  const filteredPackingListsWithItems = useMemo(() => {
+    const filtered = packingListsWithItems.filter(({ packingList }) => showArchived || !packingList.archived);
+    return filtered.sort((a, b) => {
+      if (a.packingList.isTemplate) {
+        return -1;
+      }
+      if (b.packingList.isTemplate) {
+        return 1;
+      }
+      if (a.packingList.archived && !b.packingList.archived) {
+        return 1;
+      }
+      if (!a.packingList.archived && b.packingList.archived) {
+        return -1;
+      }
+      return 0;
+    });
+  }, [packingListsWithItems, showArchived]);
 
   useEffect(() => {
     (async () => {
@@ -121,27 +155,42 @@ export function PackingLists() {
       <Flex m="5" minWidth={300} justifyContent="center">
         <Card maxWidth={1200} width="100%">
           <CardBody>
-            <Flex gap={2} my={2} alignItems="center" justifyContent="center">
-              <Button onClick={handleNewList}>Create new Packing List</Button>
-              <Tooltip
-                label={
-                  canUndo('packing-lists')
-                    ? `Undo: ${getUndoDescription('packing-lists')} (${
-                        undoHistory.length
-                      } action${undoHistory.length === 1 ? '' : 's'} available)`
-                    : 'No actions to undo'
-                }
-                placement="bottom"
-              >
-                <Box>
-                  <PLIconButton
-                    aria-label="Undo last action"
-                    icon={<MdUndo />}
-                    onClick={() => performUndo('packing-lists')}
-                    isDisabled={!canUndo('packing-lists')}
+            <Flex gap={2} my={2} alignItems="center" justifyContent="center" wrap="wrap">
+              <Flex gap={2} alignItems="center">
+                <Button onClick={handleNewList}>Create new Packing List</Button>
+                <Tooltip
+                  label={
+                    canUndo('packing-lists')
+                      ? `Undo: ${getUndoDescription('packing-lists')} (${undoHistory.length} action${
+                          undoHistory.length === 1 ? '' : 's'
+                        } available)`
+                      : 'No actions to undo'
+                  }
+                  placement="bottom"
+                >
+                  <Box>
+                    <PLIconButton
+                      aria-label="Undo last action"
+                      icon={<MdUndo />}
+                      onClick={() => performUndo('packing-lists')}
+                      isDisabled={!canUndo('packing-lists')}
+                    />
+                  </Box>
+                </Tooltip>
+              </Flex>
+              {archivedCount > 0 && (
+                <Flex alignItems="center" gap={2}>
+                  <Switch
+                    id="show-archived"
+                    isChecked={showArchived}
+                    onChange={(e) => setShowArchived(e.target.checked)}
+                    size="sm"
                   />
-                </Box>
-              </Tooltip>
+                  <Text fontSize="sm" whiteSpace="nowrap">
+                    Show archived ({archivedCount})
+                  </Text>
+                </Flex>
+              )}
             </Flex>
             <DragDropContext onDragEnd={handleDragEnd}>
               <Droppable droppableId="droppable">
@@ -152,7 +201,7 @@ export function PackingLists() {
                     {...provided.droppableProps}
                     ref={provided.innerRef}
                   >
-                    {packingListsWithItems.map(({ packingList, packItems }, index) => (
+                    {filteredPackingListsWithItems.map(({ packingList, packItems }, index) => (
                       <Draggable key={packingList.id} draggableId={packingList.id} index={index}>
                         {(draggableProvided, snapshot) => (
                           <PackingListCard

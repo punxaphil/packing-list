@@ -5,4 +5,5 @@ export interface NamedEntity {
   rank: number;
   color?: string;
   isTemplate?: boolean;
+  archived?: boolean;
 }
