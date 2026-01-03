@@ -32,7 +32,7 @@ export function ConnectMembersToPackItemModal({
   const toast = useToast();
   const [localMembers, setLocalMembers] = useState<MemberPackItem[]>([]);
   const [matchingItems, setMatchingItems] = useState<PackItem[]>([]);
-  const [shouldSync, setShouldSync] = useState(true);
+  const [shouldSync, setShouldSync] = useState(false);
   const [rememberDecision, setRememberDecision] = useState(false);
 
   const loadMatchingItems = useCallback(async () => {
@@ -244,8 +244,9 @@ export function ConnectMembersToPackItemModal({
           <Checkbox isChecked={shouldSync} onChange={(e) => setShouldSync(e.target.checked)}>
             Update members in {isTemplateList(packItem.packingList) ? 'other lists' : 'template'}
           </Checkbox>
+          <br />
           <Checkbox
-            mt={1}
+            mt={2}
             size="sm"
             color="gray.500"
             isChecked={rememberDecision}

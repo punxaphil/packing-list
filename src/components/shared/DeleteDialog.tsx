@@ -31,7 +31,7 @@ export function DeleteDialog({
   syncOptions?: SyncOptions;
 }) {
   const cancelRef = useRef<HTMLButtonElement>(null) as RefObject<HTMLButtonElement>;
-  const [shouldSync, setShouldSync] = useState(true);
+  const [shouldSync, setShouldSync] = useState(false);
   const [rememberDecision, setRememberDecision] = useState(false);
 
   async function onDelete() {

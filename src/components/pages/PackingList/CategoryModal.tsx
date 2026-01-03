@@ -31,7 +31,7 @@ export function CategoryModal({ isOpen, onClose, packItem }: CategoryModalProps)
   const toast = useToast();
   const [newCategoryName, setNewCategoryName] = useState('');
   const [matchingItems, setMatchingItems] = useState<PackItem[]>([]);
-  const [shouldSync, setShouldSync] = useState(true);
+  const [shouldSync, setShouldSync] = useState(false);
   const [rememberDecision, setRememberDecision] = useState(false);
 
   const isSingleItemMode = !!packItem;
@@ -278,7 +278,9 @@ export function CategoryModal({ isOpen, onClose, packItem }: CategoryModalProps)
             <Checkbox isChecked={shouldSync} onChange={(e) => setShouldSync(e.target.checked)}>
               Update category in {packItem && isTemplateList(packItem.packingList) ? 'other lists' : 'template'}
             </Checkbox>
+            <br />
             <Checkbox
+              mt={2}
               size="sm"
               color="gray.500"
               isChecked={rememberDecision}

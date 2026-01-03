@@ -21,7 +21,7 @@ interface AddSyncDialogProps {
 
 export function AddSyncDialog({ isOpen, onClose, onConfirm, isTemplateChange, itemName }: AddSyncDialogProps) {
   const cancelRef = useRef<HTMLButtonElement>(null) as RefObject<HTMLButtonElement>;
-  const [shouldSync, setShouldSync] = useState(true);
+  const [shouldSync, setShouldSync] = useState(false);
   const [rememberDecision, setRememberDecision] = useState(false);
   const { setSyncDecision } = useTemplate();
 
