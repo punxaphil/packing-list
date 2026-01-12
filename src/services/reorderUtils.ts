@@ -13,9 +13,10 @@ export async function reorderAndSave(
   }
   // Use the generic reorderArray function from utils.ts
   const reordered = reorderArray(namedEntities, dropResult.source.index, dropResult.destination.index);
-  reordered.forEach((entity, index) => {
-    entity.rank = reordered.length - index;
-  });
-  callback(reordered);
-  await saveToDb(reordered);
+  const updated = reordered.map((entity, index) => ({
+    ...entity,
+    rank: reordered.length - index,
+  }));
+  callback(updated);
+  await saveToDb(updated);
 }

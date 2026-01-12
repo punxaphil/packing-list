@@ -362,7 +362,8 @@ async function updateInBatch<K extends DocumentData>(userColl: string, data: Wit
   const batch = writeBatch(firestore);
   const coll = collection(firestore, USERS_KEY, getUserId(), userColl);
   for (const d of data) {
-    batch.update(doc(coll, d.id), d);
+    const { id, ...fields } = d as { id: string } & DocumentData;
+    batch.update(doc(coll, id), fields);
   }
   await batch.commit();
 }

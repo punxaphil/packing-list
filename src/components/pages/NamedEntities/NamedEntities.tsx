@@ -1,6 +1,6 @@
 import { Box, Button, Card, CardBody, Flex, Input, Spacer, useDisclosure } from '@chakra-ui/react';
 import { DragDropContext, Draggable, Droppable, DropResult } from '@hello-pangea/dnd';
-import { ChangeEvent, KeyboardEvent, useMemo, useState } from 'react';
+import { ChangeEvent, KeyboardEvent, useEffect, useRef, useState } from 'react';
 import { ErrorModal } from '~/components/shared/ErrorModal.tsx';
 import { handleArrayError } from '~/components/shared/HandleArrayError.tsx';
 import { useDatabase } from '~/providers/DatabaseContext.ts';
@@ -24,7 +24,14 @@ export function NamedEntities({
   type: string;
 }) {
   const [reordered, setReordered] = useState(namedEntities);
-  useMemo(() => setReordered(namedEntities), [namedEntities]);
+  const isSavingRef = useRef(false);
+
+  useEffect(() => {
+    if (!isSavingRef.current) {
+      setReordered(namedEntities);
+    }
+  }, [namedEntities]);
+
   const [newName, setNewName] = useState<string>('');
   const { setError } = useError();
   const packingLists = useDatabase().packingLists;
@@ -60,8 +67,12 @@ export function NamedEntities({
     }
   }
 
-  function onDragEnd(result: DropResult) {
-    return reorderAndSave(result, dbUpdate, reordered, setReordered);
+  async function onDragEnd(result: DropResult) {
+    isSavingRef.current = true;
+    await reorderAndSave(result, dbUpdate, reordered, setReordered);
+    setTimeout(() => {
+      isSavingRef.current = false;
+    }, 500);
   }
 
   return (

@@ -282,6 +282,9 @@ export function DatabaseProvider({ children }: { children: ReactNode }) {
     await batch.commit();
   }
 
+  let sortedCategories = categories ?? [];
+  let sortedMembers = members ?? [];
+
   if (isFullyInitialized) {
     const membersCopy = [...members];
     const categoriesCopy = [...categories];
@@ -289,6 +292,8 @@ export function DatabaseProvider({ children }: { children: ReactNode }) {
     const packingListsCopy = [...packingLists];
 
     sortAll(membersCopy, categoriesCopy, packItemsCopy, packingListsCopy);
+    sortedCategories = categoriesCopy;
+    sortedMembers = membersCopy;
     const filtered = applyAllFilters(packItemsCopy, currentFilterState);
     groupedPackItems = groupByCategories(filtered, categoriesCopy);
     const flattened = flattenGroupedPackItems(groupedPackItems);
@@ -306,8 +311,8 @@ export function DatabaseProvider({ children }: { children: ReactNode }) {
   return (
     <DatabaseContext.Provider
       value={{
-        members,
-        categories,
+        members: sortedMembers,
+        categories: sortedCategories,
         packItems: packItems ?? [],
         images,
         packingLists,
