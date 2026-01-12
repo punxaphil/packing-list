@@ -16,6 +16,7 @@ interface ContextType {
   nbrOfColumns: 1 | 2 | 3;
   categoriesInPackingList: NamedEntity[];
   membersInPackingList: NamedEntity[];
+  hasUncategorizedItems: boolean;
   isLoadingPackItems: boolean;
   isFilterTransitioning: boolean;
   addLocalPackItem: (name: string, categoryId: string, afterItemId?: string) => string;

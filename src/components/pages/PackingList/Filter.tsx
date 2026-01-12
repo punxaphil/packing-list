@@ -46,8 +46,8 @@ export function Filter({
   onFilter: (filterCategories: string[], filterMembers: string[], filterPackItemState: string[]) => void;
 }) {
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const { categoriesInPackingList, membersInPackingList } = useDatabase();
-  const categories = [UNCATEGORIZED, ...categoriesInPackingList];
+  const { categoriesInPackingList, membersInPackingList, hasUncategorizedItems } = useDatabase();
+  const categories = hasUncategorizedItems ? [UNCATEGORIZED, ...categoriesInPackingList] : categoriesInPackingList;
   const members = [{ id: WITHOUT_MEMBERS_ID, name: 'Without members', rank: 0 }, ...membersInPackingList];
 
   const [filteredCategories, setFilteredCategories] = useState<string[]>(() =>

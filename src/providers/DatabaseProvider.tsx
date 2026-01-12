@@ -284,6 +284,7 @@ export function DatabaseProvider({ children }: { children: ReactNode }) {
 
   let sortedCategories = categories ?? [];
   let sortedMembers = members ?? [];
+  let hasUncategorizedItems = false;
 
   if (isFullyInitialized) {
     const membersCopy = [...members];
@@ -300,6 +301,7 @@ export function DatabaseProvider({ children }: { children: ReactNode }) {
     columns = createColumns(flattened, nbrOfColumns);
     categoriesInPackingList = getCategoriesInPackingList(categoriesCopy, packItemsCopy);
     membersInPackingList = getMembersInPackingList(membersCopy, packItemsCopy);
+    hasUncategorizedItems = packItemsCopy.some((p) => !p.category);
   }
 
   const baseDataLoaded = members && categories && images && packingLists && packingList;
@@ -321,6 +323,7 @@ export function DatabaseProvider({ children }: { children: ReactNode }) {
         nbrOfColumns,
         categoriesInPackingList,
         membersInPackingList,
+        hasUncategorizedItems,
         isLoadingPackItems,
         isFilterTransitioning,
         addLocalPackItem,
