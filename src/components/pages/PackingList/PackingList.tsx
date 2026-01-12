@@ -1,5 +1,5 @@
 import { Box, Card, CardBody, Flex, Link, Spinner, Text, useBreakpointValue } from '@chakra-ui/react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { PackItemsTextMode } from '~/components/pages/PackingList/PackItemsTextMode.tsx';
 import { PackingListColumns } from '~/components/pages/PackingList/PackingListColumns.tsx';
 import { PackingListControls } from '~/components/pages/PackingList/PackingListControls.tsx';
@@ -21,10 +21,42 @@ function PackingListContent({
   textMode: boolean;
   setTextMode: (value: boolean) => void;
 }) {
-  const { packItems, groupedPackItems, isLoadingPackItems, isFilterTransitioning } = useDatabase();
+  const {
+    packItems,
+    groupedPackItems,
+    isLoadingPackItems,
+    isFilterTransitioning,
+    filter,
+    setFilter,
+    categoriesInPackingList,
+    membersInPackingList,
+  } = useDatabase();
   const { isTransitioning } = useSelectMode();
   const { packingList } = usePackingList();
   const width = useBreakpointValue({ base: 320, sm: 400, md: 650, lg: 970 });
+
+  useEffect(() => {
+    if (groupedPackItems.length === 0 && packItems.length > 0 && filter) {
+      const categoryIds = new Set(categoriesInPackingList.map((c) => c.id));
+      const memberIds = new Set(membersInPackingList.map((m) => m.id));
+
+      const visibleCategoryFilters = filter.showTheseCategories.filter((id) => categoryIds.has(id) || id === '');
+      const visibleMemberFilters = filter.showTheseMembers.filter((id) => memberIds.has(id));
+      const hasVisibleFilters =
+        visibleCategoryFilters.length > 0 || visibleMemberFilters.length > 0 || filter.showTheseStates.length > 0;
+
+      if (!hasVisibleFilters) {
+        setFilter({
+          showTheseCategories: [],
+          showTheseMembers: [],
+          showTheseStates: [],
+        });
+        localStorage.removeItem('filteredCategories');
+        localStorage.removeItem('filteredMembers');
+        localStorage.removeItem('filteredPackItemState');
+      }
+    }
+  }, [groupedPackItems, packItems, filter, categoriesInPackingList, membersInPackingList, setFilter]);
 
   async function addFirstPackItem() {
     await writeDb.addPackItem('Toothbrush', [], '', packingList.id, 0);
