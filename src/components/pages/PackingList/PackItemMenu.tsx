@@ -1,6 +1,7 @@
 import { MenuItem } from '@chakra-ui/icons';
 import { useDisclosure, useToast } from '@chakra-ui/react';
 import { AiOutlineCopy, AiOutlineDelete, AiOutlineUsergroupAdd } from 'react-icons/ai';
+import { MdGroupAdd } from 'react-icons/md';
 import { TbStatusChange } from 'react-icons/tb';
 import { DeleteDialog } from '~/components/shared/DeleteDialog.tsx';
 import { useDatabase } from '~/providers/DatabaseContext.ts';
@@ -14,7 +15,7 @@ import { ContextMenu } from './ContextMenu.tsx';
 import { CopyToOtherListModal } from './CopyToOtherListModal.tsx';
 
 export function PackItemMenu({ packItem }: { packItem: PackItem }) {
-  const { packingLists, packItems } = useDatabase();
+  const { packingLists, packItems, members } = useDatabase();
   const { packingList } = usePackingList();
   const { addUndoAction } = useUndo();
   const copyDisclosure = useDisclosure();
@@ -43,6 +44,17 @@ export function PackItemMenu({ packItem }: { packItem: PackItem }) {
     });
   }
 
+  async function connectToAllMembers() {
+    const allMemberIds = members.map((m) => ({ id: m.id, checked: false }));
+    await writeDb.updatePackItem({ ...packItem, members: allMemberIds });
+    toast({
+      title: `Connected ${packItem.name} to all members`,
+      status: 'success',
+      duration: 2000,
+      isClosable: true,
+    });
+  }
+
   return (
     <ContextMenu title="Pack item actions">
       <MenuItem key="add" onClick={moveDisclosure.onOpen} icon={<TbStatusChange />}>
@@ -51,6 +63,11 @@ export function PackItemMenu({ packItem }: { packItem: PackItem }) {
       <MenuItem key="copy" onClick={membersDisclosure.onOpen} icon={<AiOutlineUsergroupAdd />}>
         Add/remove members to pack item
       </MenuItem>
+      {members.length > 0 && (
+        <MenuItem key="allMembers" onClick={connectToAllMembers} icon={<MdGroupAdd />}>
+          Connect to all members
+        </MenuItem>
+      )}
       {packingLists.length > 1 && (
         <MenuItem key="delete" onClick={copyDisclosure.onOpen} icon={<AiOutlineCopy />}>
           Copy to other list
