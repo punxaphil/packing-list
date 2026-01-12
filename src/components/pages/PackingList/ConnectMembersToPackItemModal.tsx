@@ -4,6 +4,7 @@ import { BaseModal } from '~/components/shared/BaseModal.tsx';
 import { useDatabase } from '~/providers/DatabaseContext.ts';
 import { useVersion } from '~/providers/VersionContext.ts';
 import { writeDb } from '~/services/database.ts';
+import { allChecked } from '~/services/utils.ts';
 import { COLUMN_COLORS } from '~/types/Column.ts';
 import { MemberPackItem } from '~/types/MemberPackItem.ts';
 import { NamedEntity } from '~/types/NamedEntity.ts';
@@ -128,6 +129,7 @@ export function ConnectMembersToPackItemModal({
 
     scheduleVersionSave('Before changing members');
     packItem.members = [...localMembers];
+    packItem.checked = allChecked(packItem);
     await writeDb.updatePackItem(packItem);
     showSuccessToast();
 

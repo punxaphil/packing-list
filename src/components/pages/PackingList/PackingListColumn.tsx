@@ -79,6 +79,7 @@ export function PackingListColumn({
               )}
               {row.packItem && (
                 <PackItemRow
+                  key={`${row.packItem.id}-${row.packItem.members.length}`}
                   packItem={row.packItem}
                   filteredMembers={filteredMembers}
                   dragHandleProps={draggableProvided.dragHandleProps}

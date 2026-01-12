@@ -25,6 +25,10 @@ export function PLInput({
   const [overflowActive, setOverflowActive] = useState(false);
   const textRef = useRef<HTMLInputElement>(null);
 
+  useEffect(() => {
+    setText(value);
+  }, [value]);
+
   async function onChange(e: ChangeEvent<HTMLInputElement>) {
     setText(e.target.value);
   }

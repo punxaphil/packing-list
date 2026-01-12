@@ -46,7 +46,16 @@ export function PackItemRow({
 
   const memberRows = useMemo(() => {
     return getMemberRows(packItem.members, filteredMembers, members, filter?.showTheseStates || []);
-  }, [packItem.members, filteredMembers, members, filter?.showTheseStates, packItem]);
+  }, [packItem.members, packItem.members.length, filteredMembers, members, filter?.showTheseStates]);
+
+  const displayName = useMemo(() => {
+    if (memberRows.length === 1) {
+      return `${packItem.name} (${memberRows[0].member.name})`;
+    }
+    return packItem.name;
+  }, [memberRows, packItem.name]);
+
+  const hasSingleMember = memberRows.length === 1;
 
   async function toggleItem() {
     packItem.checked = !packItem.checked;
@@ -93,7 +102,7 @@ export function PackItemRow({
 
           <Flex alignItems="center" grow="1" overflow="hidden">
             <PLInput
-              value={packItem.name}
+              value={displayName}
               onUpdate={onChangeText}
               strike={packItem.checked && !isCurrentListTemplate}
               onEnter={() => setNewPackItemRowId(packItem.id)}
@@ -104,6 +113,7 @@ export function PackItemRow({
         </Flex>
 
         {!isSelectMode &&
+          !hasSingleMember &&
           memberRows.map(({ memberItem, member }) => (
             <MemberPackItemRow
               memberItem={memberItem}
