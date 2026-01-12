@@ -1,12 +1,10 @@
 import { MenuItem } from '@chakra-ui/icons';
 import { useDisclosure, useToast } from '@chakra-ui/react';
-import { useEffect, useState } from 'react';
 import { AiOutlineCopy, AiOutlineDelete, AiOutlineUsergroupAdd } from 'react-icons/ai';
 import { TbStatusChange } from 'react-icons/tb';
 import { DeleteDialog } from '~/components/shared/DeleteDialog.tsx';
 import { useDatabase } from '~/providers/DatabaseContext.ts';
 import { usePackingList } from '~/providers/PackingListContext.ts';
-import { useTemplate } from '~/providers/TemplateContext.ts';
 import { useUndo } from '~/providers/UndoContext.ts';
 import { writeDb } from '~/services/database.ts';
 import { PackItem } from '~/types/PackItem.ts';
@@ -19,42 +17,13 @@ export function PackItemMenu({ packItem }: { packItem: PackItem }) {
   const { packingLists, packItems } = useDatabase();
   const { packingList } = usePackingList();
   const { addUndoAction } = useUndo();
-  const { getSyncDecision, setSyncDecision, getMatchingItemsForSync, isTemplateList, refreshTemplateItems } =
-    useTemplate();
   const copyDisclosure = useDisclosure();
   const deleteDisclosure = useDisclosure();
   const moveDisclosure = useDisclosure();
   const membersDisclosure = useDisclosure();
   const toast = useToast();
-  const [hasMatchingItems, setHasMatchingItems] = useState(false);
 
-  useEffect(() => {
-    async function checkMatchingItems() {
-      const matchingItems = await getMatchingItemsForSync(packItem);
-      setHasMatchingItems(matchingItems.length > 0);
-    }
-    checkMatchingItems();
-  }, [packItem, getMatchingItemsForSync]);
-
-  async function syncDelete() {
-    const matchingItems = await getMatchingItemsForSync(packItem);
-    if (matchingItems.length > 0) {
-      const batch = writeDb.initBatch();
-      for (const item of matchingItems) {
-        writeDb.deletePackItemBatch(item.id, batch);
-      }
-      await batch.commit();
-      if (isTemplateList(packItem.packingList)) {
-        await refreshTemplateItems();
-      }
-    }
-  }
-
-  function handleSyncDecisionMade(shouldSync: boolean, remember: boolean) {
-    setSyncDecision('delete', shouldSync, remember);
-  }
-
-  async function onConfirmDelete(shouldSync: boolean) {
+  async function onConfirmDelete() {
     await writeDb.saveVersion(packingList.id, packItems, `Before deleting ${packItem.name}`);
 
     const deletedItem = { ...packItem };
@@ -72,16 +41,7 @@ export function PackItemMenu({ packItem }: { packItem: PackItem }) {
       duration: 3000,
       isClosable: true,
     });
-
-    const savedDecision = getSyncDecision('delete');
-    const shouldActuallySync = savedDecision !== null ? savedDecision : shouldSync;
-
-    if (shouldActuallySync) {
-      await syncDelete();
-    }
   }
-
-  const showSyncInDialog = hasMatchingItems && getSyncDecision('delete') === null;
 
   return (
     <ContextMenu title="Pack item actions">
@@ -105,15 +65,6 @@ export function PackItemMenu({ packItem }: { packItem: PackItem }) {
         onConfirm={onConfirmDelete}
         onClose={deleteDisclosure.onClose}
         isOpen={deleteDisclosure.isOpen}
-        syncOptions={
-          showSyncInDialog
-            ? {
-                showSync: true,
-                isTemplateChange: isTemplateList(packItem.packingList),
-                onSyncDecisionMade: handleSyncDecisionMade,
-              }
-            : undefined
-        }
       />
       <CategoryModal isOpen={moveDisclosure.isOpen} onClose={moveDisclosure.onClose} packItem={packItem} />
       <ConnectMembersToPackItemModal

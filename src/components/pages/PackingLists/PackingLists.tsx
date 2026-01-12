@@ -39,7 +39,7 @@ export function PackingLists() {
   const { setError } = useError();
   const toast = useToast();
   const { canUndo, performUndo, getUndoDescription, getFilteredHistory } = useUndo();
-  const { templateList, templateItems } = useTemplate();
+  const { templateList } = useTemplate();
   const undoHistory = getFilteredHistory('packing-lists');
   const createFromTemplateDialog = useDisclosure();
   const [initialized, setInitialized] = useState(false);
@@ -124,7 +124,8 @@ export function PackingLists() {
   async function createListFromTemplate(useTemplate: boolean) {
     const name = findUniqueName('My packing list', displayPackingLists);
     const rank = rankOnTop(displayPackingLists);
-    if (useTemplate) {
+    if (useTemplate && templateList) {
+      const templateItems = await writeDb.getPackItemsForPackingList(templateList.id);
       const batch = writeDb.initBatch();
       const packingListId = writeDb.addPackingListBatch(name, batch, rank);
       for (const item of templateItems) {

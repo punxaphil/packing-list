@@ -2,6 +2,8 @@ import { Input, Tooltip } from '@chakra-ui/react';
 import { type ChangeEvent, type KeyboardEvent, type RefObject, useCallback, useEffect, useRef, useState } from 'react';
 import { handleEnter } from '~/services/utils.ts';
 
+const enterPressedRef = { current: false };
+
 export function PLInput({
   value,
   onUpdate,
@@ -29,12 +31,23 @@ export function PLInput({
 
   function onKeyDown(e: KeyboardEvent<HTMLInputElement>) {
     handleEnter(e, () => {
-      onUpdate(text);
+      enterPressedRef.current = true;
+      onUpdate(text.trim());
       if (focusOnEnterRef?.current) {
         focusOnEnterRef.current.focus();
       }
       onEnter?.();
+      setTimeout(() => {
+        enterPressedRef.current = false;
+      }, 0);
     });
+  }
+
+  function handleBlur() {
+    if (enterPressedRef.current) {
+      return;
+    }
+    onUpdate(text.trim());
   }
 
   const isOverflowActive = useCallback((event: HTMLInputElement) => {
@@ -61,7 +74,7 @@ export function PLInput({
         value={text}
         onChange={onChange}
         onKeyDown={onKeyDown}
-        onBlur={() => onUpdate(text)}
+        onBlur={handleBlur}
         variant="unstyled"
         height="32px"
         ref={textRef}

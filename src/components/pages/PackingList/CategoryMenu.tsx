@@ -30,7 +30,7 @@ export function CategoryMenu({ packItemsInCat, category }: { packItemsInCat: Pac
     copyDisclosure.onOpen();
   }
 
-  async function onConfirmDelete(_shouldSync: boolean) {
+  async function onConfirmDelete() {
     const itemsToDelete = packItemsInCat.filter((packItem) => packItem.category === category.id);
     const deletedItems = [...itemsToDelete];
 

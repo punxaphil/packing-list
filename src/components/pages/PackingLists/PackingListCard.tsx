@@ -95,7 +95,7 @@ export function PackingListCard({
     setPackingListId(selectedPackingList.id);
   }
 
-  async function confirmDelete(_shouldSync: boolean) {
+  async function confirmDelete() {
     const deletedPackingList = { ...packingList };
     const deletedPackItems = [...packItems];
 

@@ -39,3 +39,4 @@ This is a React project using TypeScript, Chakra UI, Firebase, and Biome for lin
 - Don't cd into root directory, you are already there
 - Don't run the application, just write the code
 - Don't ignore promises, always await them
+- Don't remove and the add the same file again, instead edit existing file
