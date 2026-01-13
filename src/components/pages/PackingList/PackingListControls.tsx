@@ -122,13 +122,10 @@ export function PackingListControls({
   return (
     <Box mb={2} position="sticky" top={0} zIndex={10} bg={stickyBg} boxShadow="sm" py={2}>
       {isSelectMode ? (
-        <Flex
-          direction={{ base: 'column', md: 'row' }}
-          justifyContent="space-between"
-          alignItems={{ base: 'stretch', md: 'center' }}
-          my={1}
-          gap={2}
-        >
+        <>
+          <Flex mb={2}>
+            <Filter onFilter={onFilter} />
+          </Flex>
           <Flex
             wrap="wrap"
             gap={2}
@@ -190,7 +187,7 @@ export function PackingListControls({
               {showButtonText ? 'Exit select mode' : 'Exit'}
             </Button>
           </Flex>
-        </Flex>
+        </>
       ) : (
         <>
           <Flex direction="row" justifyContent="space-between" alignItems="center" mb={1} wrap="wrap" gap={2}>
