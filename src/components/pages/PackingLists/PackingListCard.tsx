@@ -285,7 +285,9 @@ export function PackingListCard({
             <Box overflow="hidden" whiteSpace="nowrap" textOverflow="ellipsis" onClick={onListClick}>
               {!packItems.length
                 ? 'No items'
-                : `${packItems.length} items (${packItems.filter((item) => item.checked).length} packed)`}
+                : isTemplate
+                  ? `${packItems.length} items`
+                  : `${packItems.length} items (${packItems.filter((item) => item.checked).length} packed)`}
             </Box>
           </Stack>
         </HStack>

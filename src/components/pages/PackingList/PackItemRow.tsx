@@ -1,8 +1,7 @@
-import { Box, Checkbox, Flex, Icon, Text } from '@chakra-ui/react';
+import { Box, Checkbox, Flex, Text } from '@chakra-ui/react';
 import type { SystemStyleObject } from '@chakra-ui/styled-system';
 import { DraggableProvidedDragHandleProps } from '@hello-pangea/dnd';
 import { useMemo } from 'react';
-import { HiUsers } from 'react-icons/hi';
 import { PackItemMenu } from '~/components/pages/PackingList/PackItemMenu.tsx';
 import { DragHandle } from '~/components/shared/DragHandle.tsx';
 import { MultiCheckbox } from '~/components/shared/MultiCheckbox.tsx';
@@ -49,14 +48,27 @@ export function PackItemRow({
     return getMemberRows(packItem.members, filteredMembers, members, filter?.showTheseStates || []);
   }, [packItem.members, packItem.members.length, filteredMembers, members, filter?.showTheseStates]);
 
+  const allMemberNames = useMemo(() => {
+    return packItem.members
+      .map((m) => members.find((mem) => mem.id === m.id)?.name)
+      .filter((name): name is string => !!name);
+  }, [packItem.members, members]);
+
   const hasSingleMember = memberRows.length === 1;
+  const templateHasSingleMember = packItem.members.length === 1;
 
   const memberSuffix = useMemo(() => {
+    if (isCurrentListTemplate) {
+      if (templateHasSingleMember && allMemberNames.length === 1) {
+        return `(${allMemberNames[0]})`;
+      }
+      return '';
+    }
     if (hasSingleMember) {
       return `(${memberRows[0].member.name})`;
     }
     return '';
-  }, [hasSingleMember, memberRows]);
+  }, [isCurrentListTemplate, templateHasSingleMember, allMemberNames, hasSingleMember, memberRows]);
 
   async function toggleItem() {
     packItem.checked = !packItem.checked;
@@ -114,16 +126,22 @@ export function PackItemRow({
               focusOnEnterRef={inputRef}
             />
             {memberSuffix && (
-              <Text flexShrink={0} color="gray.500" ml={1}>
+              <Text flexShrink={0} fontSize="xs" color="gray.500" fontStyle="italic" ml={1}>
                 {memberSuffix}
               </Text>
             )}
-            {isSelectMode && packItem.members.length > 1 && <Icon as={HiUsers} color="gray.500" boxSize={4} ml={1} />}
           </Flex>
           {!isSelectMode && <PackItemMenu packItem={packItem} />}
         </Flex>
 
+        {(isSelectMode || isCurrentListTemplate) && !templateHasSingleMember && allMemberNames.length > 0 && (
+          <Text fontSize="xs" color="gray.500" fontStyle="italic" textAlign="right">
+            ({allMemberNames.join(', ')})
+          </Text>
+        )}
+
         {!isSelectMode &&
+          !isCurrentListTemplate &&
           !hasSingleMember &&
           memberRows.map(({ memberItem, member }) => (
             <MemberPackItemRow
