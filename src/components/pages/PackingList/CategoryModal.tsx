@@ -1,5 +1,5 @@
-import { Button, Divider, Flex, Input, Text, useToast, VStack } from '@chakra-ui/react';
-import { useState } from 'react';
+import { Button, Divider, Flex, HStack, Input, Switch, Text, useToast, VStack } from '@chakra-ui/react';
+import { useMemo, useState } from 'react';
 import { BaseModal } from '~/components/shared/BaseModal.tsx';
 import { CategoryButton } from '~/components/shared/CategoryButton.tsx';
 import { useDatabase } from '~/providers/DatabaseContext.ts';
@@ -8,6 +8,13 @@ import { useUndo } from '~/providers/UndoContext.ts';
 import { writeDb } from '~/services/database.ts';
 import { NamedEntity } from '~/types/NamedEntity.ts';
 import { PackItem } from '~/types/PackItem.ts';
+
+const CATEGORY_SORT_KEY = 'categorySortByAlpha';
+
+function getSavedSortPreference(): boolean {
+  const saved = localStorage.getItem(CATEGORY_SORT_KEY);
+  return saved === null ? true : saved === 'true';
+}
 
 interface CategoryModalProps {
   isOpen: boolean;
@@ -21,6 +28,7 @@ export function CategoryModal({ isOpen, onClose, packItem }: CategoryModalProps)
   const { addUndoAction } = useUndo();
   const toast = useToast();
   const [newCategoryName, setNewCategoryName] = useState('');
+  const [sortByAlpha, setSortByAlpha] = useState(getSavedSortPreference);
 
   const isSingleItemMode = !!packItem;
   const itemsToMove = isSingleItemMode && packItem ? [packItem] : selectedItems;
@@ -29,6 +37,12 @@ export function CategoryModal({ isOpen, onClose, packItem }: CategoryModalProps)
     !isSingleItemMode && itemsToMove.length > 0 && itemsToMove.every((item) => !item.category);
 
   const showRemoveCategoryOption = isSingleItemMode ? packItem && !!packItem.category : !allItemsUncategorized;
+
+  function toggleSortOrder() {
+    const newValue = !sortByAlpha;
+    setSortByAlpha(newValue);
+    localStorage.setItem(CATEGORY_SORT_KEY, String(newValue));
+  }
 
   function getBottomRank(categoryId: string): number {
     const itemsInCategory = packItems.filter((item) => item.category === categoryId);
@@ -143,8 +157,13 @@ export function CategoryModal({ isOpen, onClose, packItem }: CategoryModalProps)
     onClose();
   }
 
-  const availableCategories =
-    isSingleItemMode && packItem ? categories.filter((c) => c.id !== packItem.category) : categories;
+  const availableCategories = useMemo(() => {
+    const filtered = isSingleItemMode && packItem ? categories.filter((c) => c.id !== packItem.category) : categories;
+    if (sortByAlpha) {
+      return [...filtered].sort((a, b) => a.name.localeCompare(b.name));
+    }
+    return filtered;
+  }, [categories, isSingleItemMode, packItem, sortByAlpha]);
 
   return (
     <BaseModal isOpen={isOpen} onClose={onClose} title="Category">
@@ -159,16 +178,24 @@ export function CategoryModal({ isOpen, onClose, packItem }: CategoryModalProps)
           </>
         )}
 
-        <Text fontSize="sm" fontWeight="medium">
-          Available Categories:
-        </Text>
+        <HStack justify="space-between">
+          <Text fontSize="sm" fontWeight="medium">
+            Available Categories:
+          </Text>
+          <HStack>
+            <Text fontSize="xs" color="gray.500">
+              {sortByAlpha ? 'A-Z' : 'Rank'}
+            </Text>
+            <Switch size="sm" isChecked={sortByAlpha} onChange={toggleSortOrder} />
+          </HStack>
+        </HStack>
 
         <Flex wrap="wrap" justify="center">
           {availableCategories.map((category, index) => (
             <CategoryButton
               key={category.id}
               category={category}
-              index={index}
+              index={sortByAlpha ? index : categories.indexOf(category)}
               onClick={(c) => handleCategoryChange(c)}
             />
           ))}
