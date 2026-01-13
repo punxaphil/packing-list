@@ -13,8 +13,8 @@ import {
 } from 'react-icons/ai';
 import { IoMdRadioButtonOn } from 'react-icons/io';
 import { MdOutlineRemoveDone, MdUndo } from 'react-icons/md';
-import { BulkMemberModal } from '~/components/pages/PackingList/BulkMemberModal.tsx';
 import { CategoryModal } from '~/components/pages/PackingList/CategoryModal.tsx';
+import { ConnectMembersToPackItemModal } from '~/components/pages/PackingList/ConnectMembersToPackItemModal.tsx';
 import { DeleteItemsModal } from '~/components/pages/PackingList/DeleteItemsModal.tsx';
 import { DeleteSelectedItemsModal } from '~/components/pages/PackingList/DeleteSelectedItemsModal.tsx';
 import { Filter } from '~/components/pages/PackingList/Filter.tsx';
@@ -269,7 +269,7 @@ export function PackingListControls({
 
       <VersionHistoryModal isOpen={versionHistoryDisclosure.isOpen} onClose={versionHistoryDisclosure.onClose} />
 
-      <BulkMemberModal isOpen={membersDisclosure.isOpen} onClose={membersDisclosure.onClose} />
+      <ConnectMembersToPackItemModal isOpen={membersDisclosure.isOpen} onClose={membersDisclosure.onClose} />
     </Box>
   );
 }
