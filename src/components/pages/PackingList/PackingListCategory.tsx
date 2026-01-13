@@ -5,6 +5,7 @@ import { useMemo, useState } from 'react';
 import { CategoryMenu } from '~/components/pages/PackingList/CategoryMenu.tsx';
 import { DragHandle } from '~/components/shared/DragHandle.tsx';
 import { PLInput } from '~/components/shared/PLInput.tsx';
+import { RadioCheckbox } from '~/components/shared/RadioCheckbox.tsx';
 import { useDatabase } from '~/providers/DatabaseContext.ts';
 import { useNewPackItemRowId } from '~/providers/NewPackItemRowIdContext.ts';
 import { usePackingList } from '~/providers/PackingListContext.ts';
@@ -28,7 +29,7 @@ export function PackingListCategory({
 }) {
   const { images, groupedPackItems } = useDatabase();
   const { newPackItemRowId, setNewPackItemRowId } = useNewPackItemRowId();
-  const { isSelectMode } = useSelectMode();
+  const { isSelectMode, selectAllInCategory, deselectAllInCategory, selectedItems } = useSelectMode();
   const { packingList } = usePackingList();
   const { isTemplateList } = useTemplate();
   const { scheduleVersionSave } = useVersion();
@@ -37,6 +38,19 @@ export function PackingListCategory({
   const [packItemsInCat, setPackItemsInCat] = useState<PackItem[]>([]);
 
   const isCurrentListTemplate = isTemplateList(packingList.id);
+
+  const categoryId = category.id || '';
+
+  const allCategoryItemsSelected = useMemo(() => {
+    if (packItemsInCat.length === 0) {
+      return false;
+    }
+    return packItemsInCat.every((item) => selectedItems.some((s) => s.id === item.id));
+  }, [packItemsInCat, selectedItems]);
+
+  const someCategoryItemsSelected = useMemo(() => {
+    return packItemsInCat.some((item) => selectedItems.some((s) => s.id === item.id));
+  }, [packItemsInCat, selectedItems]);
 
   const categoryImage = useMemo(() => {
     if (category.id) {
@@ -76,11 +90,26 @@ export function PackingListCategory({
     setChecked(newState);
   }
 
+  function toggleCategorySelection() {
+    if (allCategoryItemsSelected) {
+      deselectAllInCategory(categoryId);
+    } else {
+      selectAllInCategory(categoryId);
+    }
+  }
+
   return (
     <>
       <Flex gap="1" alignItems="center" borderTopRadius="2xl" pt="1" sx={sx} px="2" h="32px">
         {category.id && <DragHandle dragHandleProps={dragHandleProps} disabled={isSelectMode} />}
-        {!isSelectMode && (
+        {isSelectMode ? (
+          <RadioCheckbox
+            isChecked={allCategoryItemsSelected}
+            isIndeterminate={!allCategoryItemsSelected && someCategoryItemsSelected}
+            onChange={toggleCategorySelection}
+            colorScheme="blue"
+          />
+        ) : (
           <Checkbox
             isChecked={checked}
             isIndeterminate={isIndeterminate}

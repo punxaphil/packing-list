@@ -1,5 +1,5 @@
 import { useToast } from '@chakra-ui/react';
-import { ReactNode, useCallback, useRef, useState } from 'react';
+import { ReactNode, useCallback, useMemo, useRef, useState } from 'react';
 import { writeDb } from '~/services/database.ts';
 import { PackItem } from '~/types/PackItem.ts';
 import { useDatabase } from './DatabaseContext.ts';
@@ -12,23 +12,61 @@ export function SelectModeProvider({ children }: { children: ReactNode }) {
   const [isSelectMode, setSelectMode] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [selectedItems, setSelectedItems] = useState<PackItem[]>([]);
+  const [lastSelectedItem, setLastSelectedItem] = useState<PackItem | null>(null);
   const spinnerTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const { packItems } = useDatabase();
+  const { packItems, groupedPackItems } = useDatabase();
   const { addUndoAction } = useUndo();
   const toast = useToast();
 
-  const toggleItemSelection = useCallback((packItem: PackItem) => {
-    setSelectedItems((currentSelectedItems) => {
-      const isAlreadySelected = currentSelectedItems.some((item) => item.id === packItem.id);
-      if (isAlreadySelected) {
-        return currentSelectedItems.filter((item) => item.id !== packItem.id);
+  const visualOrderItems = useMemo(() => {
+    const items: PackItem[] = [];
+    for (const group of groupedPackItems) {
+      for (const item of group.packItems) {
+        items.push(item);
       }
-      return [...currentSelectedItems, packItem];
-    });
-  }, []);
+    }
+    return items;
+  }, [groupedPackItems]);
+
+  const toggleItemSelection = useCallback(
+    (packItem: PackItem, shiftKey = false) => {
+      if (shiftKey && lastSelectedItem) {
+        const lastIndex = visualOrderItems.findIndex((item) => item.id === lastSelectedItem.id);
+        const currentIndex = visualOrderItems.findIndex((item) => item.id === packItem.id);
+
+        if (lastIndex !== -1 && currentIndex !== -1) {
+          const startIndex = Math.min(lastIndex, currentIndex);
+          const endIndex = Math.max(lastIndex, currentIndex);
+          const itemsInRange = visualOrderItems.slice(startIndex, endIndex + 1);
+
+          setSelectedItems((currentSelectedItems) => {
+            const newSelection = [...currentSelectedItems];
+            for (const item of itemsInRange) {
+              if (!newSelection.some((s) => s.id === item.id)) {
+                newSelection.push(item);
+              }
+            }
+            return newSelection;
+          });
+          setLastSelectedItem(packItem);
+          return;
+        }
+      }
+      setSelectedItems((currentSelectedItems) => {
+        const isAlreadySelected = currentSelectedItems.some((item) => item.id === packItem.id);
+        if (isAlreadySelected) {
+          return currentSelectedItems.filter((item) => item.id !== packItem.id);
+        }
+        return [...currentSelectedItems, packItem];
+      });
+      setLastSelectedItem(packItem);
+    },
+    [lastSelectedItem, visualOrderItems]
+  );
 
   const clearSelection = useCallback(() => {
     setSelectedItems([]);
+    setLastSelectedItem(null);
   }, []);
 
   const isItemSelected = useCallback(
@@ -37,6 +75,28 @@ export function SelectModeProvider({ children }: { children: ReactNode }) {
     },
     [selectedItems]
   );
+
+  const selectAllInCategory = useCallback(
+    (categoryId: string) => {
+      const itemsInCategory = packItems.filter((item) => (item.category || '') === categoryId);
+      setSelectedItems((currentSelectedItems) => {
+        const newSelection = [...currentSelectedItems];
+        for (const item of itemsInCategory) {
+          if (!newSelection.some((s) => s.id === item.id)) {
+            newSelection.push(item);
+          }
+        }
+        return newSelection;
+      });
+    },
+    [packItems]
+  );
+
+  const deselectAllInCategory = useCallback((categoryId: string) => {
+    setSelectedItems((currentSelectedItems) => {
+      return currentSelectedItems.filter((item) => (item.category || '') !== categoryId);
+    });
+  }, []);
 
   const handleSetSelectMode = (value: boolean) => {
     spinnerTimeoutRef.current = setTimeout(() => {
@@ -232,6 +292,9 @@ export function SelectModeProvider({ children }: { children: ReactNode }) {
         isItemSelected,
         moveSelectedItemsToTop,
         moveSelectedItemsToBottom,
+        selectAllInCategory,
+        deselectAllInCategory,
+        lastSelectedItem,
       }}
     >
       {children}

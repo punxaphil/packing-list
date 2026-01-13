@@ -9,9 +9,11 @@ import {
   AiOutlineFullscreenExit,
   AiOutlineHistory,
   AiOutlineTags,
+  AiOutlineUsergroupAdd,
 } from 'react-icons/ai';
 import { IoMdRadioButtonOn } from 'react-icons/io';
 import { MdOutlineRemoveDone, MdUndo } from 'react-icons/md';
+import { BulkMemberModal } from '~/components/pages/PackingList/BulkMemberModal.tsx';
 import { CategoryModal } from '~/components/pages/PackingList/CategoryModal.tsx';
 import { DeleteItemsModal } from '~/components/pages/PackingList/DeleteItemsModal.tsx';
 import { DeleteSelectedItemsModal } from '~/components/pages/PackingList/DeleteSelectedItemsModal.tsx';
@@ -46,6 +48,7 @@ export function PackingListControls({
   const deleteItemsDisclosure = useDisclosure();
   const deleteCheckedItemsDisclosure = useDisclosure();
   const versionHistoryDisclosure = useDisclosure();
+  const membersDisclosure = useDisclosure();
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   const undoHistory = getFilteredHistory('packing-list');
@@ -142,6 +145,16 @@ export function PackingListControls({
               flexGrow={{ base: 1, sm: 0 }}
             >
               {showButtonText ? 'Category' : ''}
+            </Button>
+            <Button
+              size={buttonSize}
+              colorScheme="green"
+              leftIcon={<AiOutlineUsergroupAdd />}
+              onClick={membersDisclosure.onOpen}
+              isDisabled={selectedItems.length === 0}
+              flexGrow={{ base: 1, sm: 0 }}
+            >
+              {showButtonText ? 'Members' : ''}
             </Button>
             <Button
               size={buttonSize}
@@ -258,6 +271,8 @@ export function PackingListControls({
       />
 
       <VersionHistoryModal isOpen={versionHistoryDisclosure.isOpen} onClose={versionHistoryDisclosure.onClose} />
+
+      <BulkMemberModal isOpen={membersDisclosure.isOpen} onClose={membersDisclosure.onClose} />
     </Box>
   );
 }

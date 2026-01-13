@@ -1,7 +1,8 @@
-import { Box, Checkbox, Flex } from '@chakra-ui/react';
+import { Box, Checkbox, Flex, Icon, Text } from '@chakra-ui/react';
 import type { SystemStyleObject } from '@chakra-ui/styled-system';
 import { DraggableProvidedDragHandleProps } from '@hello-pangea/dnd';
 import { useMemo } from 'react';
+import { HiUsers } from 'react-icons/hi';
 import { PackItemMenu } from '~/components/pages/PackingList/PackItemMenu.tsx';
 import { DragHandle } from '~/components/shared/DragHandle.tsx';
 import { MultiCheckbox } from '~/components/shared/MultiCheckbox.tsx';
@@ -48,14 +49,14 @@ export function PackItemRow({
     return getMemberRows(packItem.members, filteredMembers, members, filter?.showTheseStates || []);
   }, [packItem.members, packItem.members.length, filteredMembers, members, filter?.showTheseStates]);
 
-  const displayName = useMemo(() => {
-    if (memberRows.length === 1) {
-      return `${packItem.name} (${memberRows[0].member.name})`;
-    }
-    return packItem.name;
-  }, [memberRows, packItem.name]);
-
   const hasSingleMember = memberRows.length === 1;
+
+  const memberSuffix = useMemo(() => {
+    if (hasSingleMember) {
+      return `(${memberRows[0].member.name})`;
+    }
+    return '';
+  }, [hasSingleMember, memberRows]);
 
   async function toggleItem() {
     packItem.checked = !packItem.checked;
@@ -77,8 +78,9 @@ export function PackItemRow({
     await onUpdate(packItem);
   }
 
-  function handleSelect() {
-    toggleItemSelection(packItem);
+  function handleSelect(event: React.MouseEvent) {
+    event.preventDefault();
+    toggleItemSelection(packItem, event.shiftKey);
   }
 
   return (
@@ -87,13 +89,16 @@ export function PackItemRow({
       borderBottomRadius={isLastItemInCategory ? '2xl' : ''}
       pb={isLastItemInCategory ? '2' : ''}
       borderTopRadius={isFirstItemInCategory ? '2xl' : ''}
+      userSelect={isSelectMode ? 'none' : 'auto'}
     >
       <PackItemRowWrapper>
         <Flex gap="3" align="center">
           <DragHandle dragHandleProps={dragHandleProps} disabled={isSelectMode} />
 
           {isSelectMode ? (
-            <RadioCheckbox isChecked={isItemSelected(packItem)} onChange={handleSelect} colorScheme="blue" />
+            <Box onClick={handleSelect} cursor="pointer">
+              <RadioCheckbox isChecked={isItemSelected(packItem)} pointerEvents="none" colorScheme="blue" />
+            </Box>
           ) : packItem.members.length > 1 ? (
             <MultiCheckbox packItem={packItem} onUpdate={onUpdate} disabled={isCurrentListTemplate} />
           ) : (
@@ -102,12 +107,18 @@ export function PackItemRow({
 
           <Flex alignItems="center" grow="1" overflow="hidden">
             <PLInput
-              value={displayName}
+              value={packItem.name}
               onUpdate={onChangeText}
               strike={packItem.checked && !isCurrentListTemplate}
               onEnter={() => setNewPackItemRowId(packItem.id)}
               focusOnEnterRef={inputRef}
             />
+            {memberSuffix && (
+              <Text flexShrink={0} color="gray.500" ml={1}>
+                {memberSuffix}
+              </Text>
+            )}
+            {isSelectMode && packItem.members.length > 1 && <Icon as={HiUsers} color="gray.500" boxSize={4} ml={1} />}
           </Flex>
           {!isSelectMode && <PackItemMenu packItem={packItem} />}
         </Flex>

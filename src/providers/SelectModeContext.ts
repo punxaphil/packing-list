@@ -6,11 +6,14 @@ interface SelectModeContextType {
   isTransitioning: boolean;
   setSelectMode: (value: boolean) => void;
   selectedItems: PackItem[];
-  toggleItemSelection: (packItem: PackItem) => void;
+  toggleItemSelection: (packItem: PackItem, shiftKey?: boolean) => void;
   clearSelection: () => void;
   isItemSelected: (packItem: PackItem) => boolean;
   moveSelectedItemsToTop: () => Promise<void>;
   moveSelectedItemsToBottom: () => Promise<void>;
+  selectAllInCategory: (categoryId: string) => void;
+  deselectAllInCategory: (categoryId: string) => void;
+  lastSelectedItem: PackItem | null;
 }
 
 export const SelectModeContext = createContext<SelectModeContextType | undefined>(undefined);
