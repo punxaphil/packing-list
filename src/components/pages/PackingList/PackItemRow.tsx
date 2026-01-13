@@ -112,7 +112,12 @@ export function PackItemRow({
               <RadioCheckbox isChecked={isItemSelected(packItem)} pointerEvents="none" colorScheme="blue" />
             </Box>
           ) : packItem.members.length > 1 ? (
-            <MultiCheckbox packItem={packItem} onUpdate={onUpdate} disabled={isCurrentListTemplate} />
+            <MultiCheckbox
+              packItem={packItem}
+              onUpdate={onUpdate}
+              disabled={isCurrentListTemplate}
+              filteredMemberIds={filteredMembers}
+            />
           ) : (
             <Checkbox isChecked={packItem.checked} onChange={toggleItem} isDisabled={isCurrentListTemplate} />
           )}

@@ -1,30 +1,40 @@
 import { Checkbox } from '@chakra-ui/react';
-import { allChecked, allUnChecked } from '~/services/utils.ts';
+import { allChecked } from '~/services/utils.ts';
 import { PackItem } from '~/types/PackItem.ts';
 
 export function MultiCheckbox({
   packItem,
   onUpdate,
   disabled,
+  filteredMemberIds,
 }: {
   packItem: PackItem;
   onUpdate: (item: PackItem) => void;
   disabled?: boolean;
+  filteredMemberIds?: string[];
 }) {
-  function checkAll(checked: boolean) {
-    packItem.checked = checked;
-    const members = packItem.members;
-    for (const t of members) {
-      t.checked = checked;
+  const hasFilter = filteredMemberIds && filteredMemberIds.length > 0;
+  const membersToToggle = hasFilter
+    ? packItem.members.filter((m) => filteredMemberIds.includes(m.id))
+    : packItem.members;
+
+  const allFilteredChecked = membersToToggle.every((m) => m.checked);
+  const allFilteredUnchecked = membersToToggle.every((m) => !m.checked);
+
+  function toggleFilteredMembers() {
+    const newCheckedState = !allFilteredChecked;
+    for (const member of membersToToggle) {
+      member.checked = newCheckedState;
     }
+    packItem.checked = allChecked(packItem);
     onUpdate(packItem);
   }
 
   return (
     <Checkbox
-      isIndeterminate={!allChecked(packItem) && !allUnChecked(packItem)}
-      isChecked={packItem.checked}
-      onChange={() => checkAll(!allChecked(packItem))}
+      isIndeterminate={!allFilteredChecked && !allFilteredUnchecked}
+      isChecked={allFilteredChecked}
+      onChange={toggleFilteredMembers}
       isDisabled={disabled}
     />
   );

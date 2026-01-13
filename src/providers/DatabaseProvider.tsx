@@ -106,15 +106,31 @@ export function DatabaseProvider({ children }: { children: ReactNode }) {
     });
   }
 
-  function filterByStates(packItems: PackItem[], states: string[]): PackItem[] {
+  function filterByStates(packItems: PackItem[], states: string[], memberIds: string[]): PackItem[] {
     if (!states.length) {
       return packItems;
     }
-    return packItems.filter(
-      (item) =>
+
+    const hasMemberFilter = memberIds.length > 0;
+    const nonEmptyMemberIds = memberIds.filter((id) => id !== WITHOUT_MEMBERS_ID);
+
+    return packItems.filter((item) => {
+      if (hasMemberFilter && nonEmptyMemberIds.length > 0 && item.members.length > 0) {
+        const filteredMembers = item.members.filter((m) => nonEmptyMemberIds.includes(m.id));
+        if (filteredMembers.length > 0) {
+          const allFilteredChecked = filteredMembers.every((m) => m.checked);
+          const anyFilteredUnchecked = filteredMembers.some((m) => !m.checked);
+          return (
+            (states.includes(CHECKED_FILTER_STATE) && allFilteredChecked) ||
+            (states.includes(UNCHECKED_FILTER_STATE) && anyFilteredUnchecked)
+          );
+        }
+      }
+      return (
         (states.includes(CHECKED_FILTER_STATE) && item.checked) ||
         (states.includes(UNCHECKED_FILTER_STATE) && !item.checked)
-    );
+      );
+    });
   }
 
   function filterBySearchText(packItems: PackItem[], searchText: string): PackItem[] {
@@ -134,7 +150,7 @@ export function DatabaseProvider({ children }: { children: ReactNode }) {
 
     let filtered = filterByCategories(packItems, showTheseCategories);
     filtered = filterByMembers(filtered, showTheseMembers);
-    filtered = filterByStates(filtered, showTheseStates);
+    filtered = filterByStates(filtered, showTheseStates, showTheseMembers);
     filtered = filterBySearchText(filtered, searchText || '');
 
     return filtered;
