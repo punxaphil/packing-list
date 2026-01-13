@@ -1,5 +1,5 @@
 import { Button, Flex, Text, useToast, VStack } from '@chakra-ui/react';
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { BaseModal } from '~/components/shared/BaseModal.tsx';
 import { useDatabase } from '~/providers/DatabaseContext.ts';
 import { useSelectMode } from '~/providers/SelectModeContext.ts';
@@ -13,8 +13,15 @@ interface BulkMemberModalProps {
 
 export function BulkMemberModal({ isOpen, onClose }: BulkMemberModalProps) {
   const { members } = useDatabase();
-  const { selectedItems, clearSelection } = useSelectMode();
+  const { selectedItems } = useSelectMode();
   const toast = useToast();
+  const [pendingChanges, setPendingChanges] = useState<Record<string, boolean>>({});
+
+  useEffect(() => {
+    if (isOpen) {
+      setPendingChanges({});
+    }
+  }, [isOpen]);
 
   const memberStats = useMemo(() => {
     const stats: Record<string, { all: boolean; none: boolean; count: number }> = {};
@@ -29,26 +36,52 @@ export function BulkMemberModal({ isOpen, onClose }: BulkMemberModalProps) {
     return stats;
   }, [members, selectedItems]);
 
-  async function handleMemberClick(memberId: string) {
-    if (selectedItems.length === 0) {
+  function getEffectiveState(memberId: string) {
+    if (memberId in pendingChanges) {
+      return pendingChanges[memberId] ? 'all' : 'none';
+    }
+    const stats = memberStats[memberId];
+    if (stats?.all) {
+      return 'all';
+    }
+    if (stats?.none) {
+      return 'none';
+    }
+    return 'some';
+  }
+
+  function handleMemberClick(memberId: string) {
+    const currentState = getEffectiveState(memberId);
+    const newState = currentState !== 'all';
+    setPendingChanges((prev) => ({ ...prev, [memberId]: newState }));
+  }
+
+  async function handleDone() {
+    if (selectedItems.length === 0 || Object.keys(pendingChanges).length === 0) {
+      onClose();
       return;
     }
-
-    const stats = memberStats[memberId];
-    const shouldAdd = !stats?.all;
 
     const batch = writeDb.initBatch();
     let updatedCount = 0;
 
     for (const item of selectedItems) {
-      const hasMember = item.members.some((m) => m.id === memberId);
+      let membersChanged = false;
+      let updatedMembers = [...item.members];
 
-      if (shouldAdd && !hasMember) {
-        const updatedMembers = [...item.members, { id: memberId, checked: false }];
-        writeDb.updatePackItemBatch({ ...item, members: updatedMembers }, batch);
-        updatedCount++;
-      } else if (!shouldAdd && hasMember) {
-        const updatedMembers = item.members.filter((m) => m.id !== memberId);
+      for (const [memberId, shouldHave] of Object.entries(pendingChanges)) {
+        const hasMember = updatedMembers.some((m) => m.id === memberId);
+
+        if (shouldHave && !hasMember) {
+          updatedMembers.push({ id: memberId, checked: false });
+          membersChanged = true;
+        } else if (!shouldHave && hasMember) {
+          updatedMembers = updatedMembers.filter((m) => m.id !== memberId);
+          membersChanged = true;
+        }
+      }
+
+      if (membersChanged) {
         writeDb.updatePackItemBatch({ ...item, members: updatedMembers }, batch);
         updatedCount++;
       }
@@ -56,28 +89,24 @@ export function BulkMemberModal({ isOpen, onClose }: BulkMemberModalProps) {
 
     await batch.commit();
 
-    const memberName = members.find((m) => m.id === memberId)?.name || 'member';
-    const actionWord = shouldAdd ? 'Added' : 'Removed';
-    const preposition = shouldAdd ? 'to' : 'from';
-
     toast({
-      title: `${actionWord} ${memberName} ${preposition} ${updatedCount} items`,
+      title: `Updated members on ${updatedCount} items`,
       status: 'success',
     });
 
-    clearSelection();
     onClose();
   }
 
   function getMemberLabel(memberId: string, memberName: string) {
-    const stats = memberStats[memberId];
-    if (!stats || stats.none) {
+    const effectiveState = getEffectiveState(memberId);
+    if (effectiveState === 'none') {
       return memberName;
     }
-    if (stats.all) {
+    if (effectiveState === 'all') {
       return `${memberName} ✓`;
     }
-    return `${memberName} (${stats.count}/${selectedItems.length})`;
+    const stats = memberStats[memberId];
+    return `${memberName} (${stats?.count || 0}/${selectedItems.length})`;
   }
 
   return (
@@ -87,10 +116,10 @@ export function BulkMemberModal({ isOpen, onClose }: BulkMemberModalProps) {
         <Flex wrap="wrap" justify="center" gap={2}>
           {members.map((member, index) => {
             const color = COLUMN_COLORS[index % COLUMN_COLORS.length];
-            const stats = memberStats[member.id];
-            const hasAll = stats?.all;
-            const hasNone = stats?.none;
-            const hasSome = !hasAll && !hasNone;
+            const effectiveState = getEffectiveState(member.id);
+            const hasAll = effectiveState === 'all';
+            const hasNone = effectiveState === 'none';
+            const hasSome = effectiveState === 'some';
             return (
               <Button
                 key={member.id}
@@ -105,6 +134,9 @@ export function BulkMemberModal({ isOpen, onClose }: BulkMemberModalProps) {
             );
           })}
         </Flex>
+        <Button colorScheme="blue" onClick={handleDone} alignSelf="flex-end">
+          Done
+        </Button>
       </VStack>
     </BaseModal>
   );
