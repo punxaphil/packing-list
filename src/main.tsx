@@ -6,6 +6,9 @@ import { StrictMode } from 'react';
 import { BrowserRouter } from 'react-router';
 import { ErrorProvider } from '~/providers/ErrorProvider.tsx';
 import { FullscreenModeProvider } from '~/providers/FullscreenModeProvider.tsx';
+import { setupDynamicFavicon } from '~/services/faviconUtils.ts';
+
+setupDynamicFavicon();
 
 export const THEME_COLOR = 'gray';
 
