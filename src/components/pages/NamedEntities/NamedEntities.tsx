@@ -172,6 +172,7 @@ export function NamedEntities({
                             onItemsMoved={refreshPackItems}
                             isDragDisabled={sortByAlpha}
                             onDragDisabledClick={onDragAlertOpen}
+                            allNames={namedEntities.map((e) => e.name)}
                           />
                         </Box>
                       )}

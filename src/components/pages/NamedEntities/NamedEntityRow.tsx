@@ -9,9 +9,10 @@ import {
   PopoverTrigger,
   Text,
   useDisclosure,
+  useToast,
 } from '@chakra-ui/react';
 import { DraggableProvidedDragHandleProps } from '@hello-pangea/dnd';
-import { ChangeEvent } from 'react';
+import { ChangeEvent, FocusEvent, useState } from 'react';
 import { AiOutlineCloudUpload, AiOutlineDelete, AiOutlineSwap } from 'react-icons/ai';
 import { MoveCategoryItemsModal } from '~/components/pages/NamedEntities/MoveCategoryItemsModal.tsx';
 import { DeleteDialog } from '~/components/shared/DeleteDialog.tsx';
@@ -32,6 +33,7 @@ export function NamedEntityRow({
   onItemsMoved,
   isDragDisabled,
   onDragDisabledClick,
+  allNames,
 }: {
   namedEntity: NamedEntity;
   onUpdate: (namedEntity: NamedEntity) => Promise<void>;
@@ -42,19 +44,40 @@ export function NamedEntityRow({
   onItemsMoved?: () => void;
   isDragDisabled?: boolean;
   onDragDisabledClick?: () => void;
+  allNames: string[];
 }) {
   const { setError } = useError();
+  const toast = useToast();
   const { isOpen: isUploadOpen, onOpen: onUploadOpen, onClose: onUploadClose } = useDisclosure();
   const { isOpen: isMoveOpen, onOpen: onMoveOpen, onClose: onMoveClose } = useDisclosure();
   const { isOpen: isDeleteOpen, onOpen: onDeleteOpen, onClose: onDeleteClose } = useDisclosure();
   const isCategory = type === 'categories';
+  const [localName, setLocalName] = useState(namedEntity.name);
 
-  function changeName(event: ChangeEvent<HTMLInputElement>) {
+  function handleNameChange(event: ChangeEvent<HTMLInputElement>) {
+    setLocalName(event.target.value);
+  }
+
+  function handleNameBlur(event: FocusEvent<HTMLInputElement>) {
+    const newName = event.target.value;
+    const isDuplicate = allNames.some((name) => name === newName && name !== namedEntity.name);
+    if (isDuplicate) {
+      toast({
+        title: 'Name already exists',
+        description: `"${newName}" is already used.`,
+        status: 'warning',
+        duration: 3000,
+        isClosable: true,
+      });
+      setLocalName(namedEntity.name);
+      return;
+    }
+    if (newName === namedEntity.name) {
+      return;
+    }
     (async () => {
-      if (namedEntity.name !== event.target.value) {
-        namedEntity.name = event.target.value;
-        await onUpdate(namedEntity);
-      }
+      namedEntity.name = newName;
+      await onUpdate(namedEntity);
     })().catch(setError);
   }
 
@@ -87,7 +110,7 @@ export function NamedEntityRow({
             </PopoverContent>
           )}
         </Popover>
-        <Input placeholder="name" value={namedEntity.name} onChange={changeName} />
+        <Input placeholder="name" value={localName} onChange={handleNameChange} onBlur={handleNameBlur} />
         {isCategory && (
           <Text fontSize="sm" color="gray.500" minW="30px" textAlign="center">
             {itemCount ?? 0}
