@@ -64,7 +64,7 @@ export function CategoryMenu({ packItemsInCat, category }: { packItemsInCat: Pac
 
   function getSortedItems(items: PackItem[]) {
     return [...items].sort((a, b) =>
-      a.name.localeCompare(b.name, 'sv-SE', {
+      a.name.localeCompare(b.name, navigator.language, {
         numeric: true,
         caseFirst: 'lower',
       })
@@ -144,6 +144,7 @@ export function CategoryMenu({ packItemsInCat, category }: { packItemsInCat: Pac
         onConfirm={onConfirmDelete}
         onClose={deleteDisclosure.onClose}
         isOpen={deleteDisclosure.isOpen}
+        canUndo
       />
       <ColorPicker category={category} isOpen={colorDisclosure.isOpen} onClose={colorDisclosure.onClose} />
     </ContextMenu>

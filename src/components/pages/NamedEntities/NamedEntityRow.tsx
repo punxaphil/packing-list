@@ -7,11 +7,14 @@ import {
   Popover,
   PopoverContent,
   PopoverTrigger,
+  Text,
   useDisclosure,
 } from '@chakra-ui/react';
 import { DraggableProvidedDragHandleProps } from '@hello-pangea/dnd';
 import { ChangeEvent } from 'react';
-import { AiOutlineCloudUpload, AiOutlineDelete } from 'react-icons/ai';
+import { AiOutlineCloudUpload, AiOutlineDelete, AiOutlineSwap } from 'react-icons/ai';
+import { MoveCategoryItemsModal } from '~/components/pages/NamedEntities/MoveCategoryItemsModal.tsx';
+import { DeleteDialog } from '~/components/shared/DeleteDialog.tsx';
 import { DragHandle } from '~/components/shared/DragHandle.tsx';
 import { PLIconButton } from '~/components/shared/PLIconButton.tsx';
 import { UploadModal } from '~/components/shared/UploadModal.tsx';
@@ -25,15 +28,26 @@ export function NamedEntityRow({
   onDelete,
   type,
   dragHandleProps,
+  itemCount,
+  onItemsMoved,
+  isDragDisabled,
+  onDragDisabledClick,
 }: {
   namedEntity: NamedEntity;
   onUpdate: (namedEntity: NamedEntity) => Promise<void>;
   onDelete: (id: string) => Promise<void>;
   type: string;
   dragHandleProps: DraggableProvidedDragHandleProps | null;
+  itemCount?: number;
+  onItemsMoved?: () => void;
+  isDragDisabled?: boolean;
+  onDragDisabledClick?: () => void;
 }) {
   const { setError } = useError();
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const { isOpen: isUploadOpen, onOpen: onUploadOpen, onClose: onUploadClose } = useDisclosure();
+  const { isOpen: isMoveOpen, onOpen: onMoveOpen, onClose: onMoveClose } = useDisclosure();
+  const { isOpen: isDeleteOpen, onOpen: onDeleteOpen, onClose: onDeleteClose } = useDisclosure();
+  const isCategory = type === 'categories';
 
   function changeName(event: ChangeEvent<HTMLInputElement>) {
     (async () => {
@@ -50,16 +64,22 @@ export function NamedEntityRow({
     })().catch(setError);
   }
 
-  const images = useDatabase().images;
+  const { images } = useDatabase();
   const image = images.find((t) => t.type === type && t.typeId === namedEntity.id);
   const imageUrl = image?.url;
   return (
     <Box>
       <Flex gap="3" align="center">
-        <DragHandle dragHandleProps={dragHandleProps} />
+        <DragHandle
+          dragHandleProps={dragHandleProps}
+          disabled={isDragDisabled}
+          onDisabledMouseDown={onDragDisabledClick}
+        />
         <Popover trigger="hover">
           <PopoverTrigger>
-            <Link onClick={onOpen}>{imageUrl ? <Image src={imageUrl} w="30px" /> : <AiOutlineCloudUpload />}</Link>
+            <Link onClick={onUploadOpen}>
+              {imageUrl ? <Image src={imageUrl} w="30px" /> : <AiOutlineCloudUpload />}
+            </Link>
           </PopoverTrigger>
           {imageUrl && (
             <PopoverContent boxShadow="dark-lg" p="6" rounded="md" bg="white" m="3">
@@ -68,10 +88,24 @@ export function NamedEntityRow({
           )}
         </Popover>
         <Input placeholder="name" value={namedEntity.name} onChange={changeName} />
+        {isCategory && (
+          <Text fontSize="sm" color="gray.500" minW="30px" textAlign="center">
+            {itemCount ?? 0}
+          </Text>
+        )}
+        {isCategory && (
+          <PLIconButton
+            borderRadius="full"
+            onClick={onMoveOpen}
+            size="sm"
+            icon={<AiOutlineSwap />}
+            aria-label="Move items to another category"
+          />
+        )}
         <PLIconButton
           borderRadius="full"
-          onClick={handleDelete}
-          size="lg"
+          onClick={isCategory ? onDeleteOpen : handleDelete}
+          size="sm"
           icon={<AiOutlineDelete />}
           aria-label="Delete"
         />
@@ -81,9 +115,25 @@ export function NamedEntityRow({
         name={namedEntity.name}
         typeId={namedEntity.id}
         imageFinder={(t) => t.type === type && t.typeId === namedEntity.id}
-        isOpen={isOpen}
-        onClose={onClose}
+        isOpen={isUploadOpen}
+        onClose={onUploadClose}
       />
+      {isCategory && (
+        <MoveCategoryItemsModal
+          isOpen={isMoveOpen}
+          onClose={onMoveClose}
+          sourceCategory={namedEntity}
+          onItemsMoved={onItemsMoved}
+        />
+      )}
+      {isCategory && (
+        <DeleteDialog
+          text={`category "${namedEntity.name}"`}
+          isOpen={isDeleteOpen}
+          onClose={onDeleteClose}
+          onConfirm={handleDelete}
+        />
+      )}
     </Box>
   );
 }

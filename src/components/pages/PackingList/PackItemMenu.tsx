@@ -82,6 +82,7 @@ export function PackItemMenu({ packItem }: { packItem: PackItem }) {
         onConfirm={onConfirmDelete}
         onClose={deleteDisclosure.onClose}
         isOpen={deleteDisclosure.isOpen}
+        canUndo
       />
       <CategoryModal isOpen={moveDisclosure.isOpen} onClose={moveDisclosure.onClose} packItem={packItem} />
       <ConnectMembersToPackItemModal

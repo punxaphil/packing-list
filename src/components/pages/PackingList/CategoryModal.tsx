@@ -160,7 +160,7 @@ export function CategoryModal({ isOpen, onClose, packItem }: CategoryModalProps)
   const availableCategories = useMemo(() => {
     const filtered = isSingleItemMode && packItem ? categories.filter((c) => c.id !== packItem.category) : categories;
     if (sortByAlpha) {
-      return [...filtered].sort((a, b) => a.name.localeCompare(b.name));
+      return [...filtered].sort((a, b) => a.name.localeCompare(b.name, navigator.language));
     }
     return filtered;
   }, [categories, isSingleItemMode, packItem, sortByAlpha]);

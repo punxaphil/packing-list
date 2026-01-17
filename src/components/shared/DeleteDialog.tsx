@@ -15,11 +15,13 @@ export function DeleteDialog({
   onConfirm,
   onClose,
   isOpen,
+  canUndo = false,
 }: {
   text: string;
   onConfirm: () => void | Promise<void>;
   onClose: () => void;
   isOpen: boolean;
+  canUndo?: boolean;
 }) {
   const cancelRef = useRef<HTMLButtonElement>(null) as RefObject<HTMLButtonElement>;
 
@@ -27,6 +29,10 @@ export function DeleteDialog({
     await onConfirm();
     onClose();
   }
+
+  const message = canUndo
+    ? 'Are you sure? You can use the undo button to reverse this action.'
+    : 'Are you sure? This cannot be undone.';
 
   return (
     <AlertDialog isOpen={isOpen} leastDestructiveRef={cancelRef} onClose={onClose}>
@@ -37,7 +43,7 @@ export function DeleteDialog({
           </AlertDialogHeader>
 
           <AlertDialogBody>
-            <Text>Are you sure? You can use the undo button to reverse this action if needed.</Text>
+            <Text>{message}</Text>
           </AlertDialogBody>
 
           <AlertDialogFooter>
