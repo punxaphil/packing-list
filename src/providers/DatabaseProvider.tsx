@@ -134,7 +134,7 @@ export function DatabaseProvider({ children }: { children: ReactNode }) {
   }
 
   function filterBySearchText(packItems: PackItem[], searchText: string): PackItem[] {
-    if (!searchText || !searchText.trim()) {
+    if (!searchText?.trim()) {
       return packItems;
     }
     const lowerSearchText = searchText.toLowerCase().trim();

@@ -9,7 +9,7 @@ const DEBOUNCE_DELAY_MS = 30000;
 export function VersionProvider({ children }: { children: ReactNode }) {
   const { packItems } = useDatabase();
   const { packingList } = usePackingList();
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const packItemsRef = useRef(packItems);
   const pendingReasonRef = useRef<string | null>(null);
 
