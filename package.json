@@ -20,7 +20,7 @@
     "@emotion/styled": "^11.14.1",
     "@hello-pangea/dnd": "^18.0.1",
     "firebase": "^12.19.0",
-    "framer-motion": "^13.4.0",
+    "framer-motion": "^13.4.4",
     "react": "^19.3.0",
     "react-colorful": "^5.8.1",
     "react-dom": "^19.3.0",
